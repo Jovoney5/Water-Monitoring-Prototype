@@ -64,19 +64,26 @@ def init_db():
     # Insert default users
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
-        # Default admin user (password: admin123)
-        admin_hash = hashlib.sha256('admin123'.encode()).hexdigest()
-        cursor.execute('''
-            INSERT INTO users (username, password_hash, role, full_name)
-            VALUES (?, ?, ?, ?)
-        ''', ('admin', admin_hash, 'admin', 'System Administrator'))
+        # Test users for demo/testing phase
+        test_users = [
+            # Admins (password: admin123)
+            ('admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'System Administrator'),
+            ('admin2', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Senior Administrator'),
 
-        # Default inspector user (password: inspector123)
-        inspector_hash = hashlib.sha256('inspector123'.encode()).hexdigest()
-        cursor.execute('''
+            # Inspectors (password: inspector123)
+            ('inspector', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Water Quality Inspector'),
+            ('inspector1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector A'),
+            ('inspector2', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector B'),
+            ('inspector3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector C'),
+            ('inspector4', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector D'),
+            ('inspector5', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector E'),
+            ('inspector6', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector F'),
+        ]
+
+        cursor.executemany('''
             INSERT INTO users (username, password_hash, role, full_name)
             VALUES (?, ?, ?, ?)
-        ''', ('inspector', inspector_hash, 'inspector', 'Water Quality Inspector'))
+        ''', test_users)
 
     # Insert water supplies from the monthly report photo
     cursor.execute("SELECT COUNT(*) FROM water_supplies")
