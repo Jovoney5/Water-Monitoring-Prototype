@@ -61,6 +61,27 @@ def init_db():
         )
     ''')
 
+    # Inspection submissions table for individual submissions
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS inspection_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            supply_id INTEGER NOT NULL,
+            inspector_id INTEGER NOT NULL,
+            submission_date DATE NOT NULL,
+            visits INTEGER DEFAULT 0,
+            chlorine_total INTEGER DEFAULT 0,
+            chlorine_positive INTEGER DEFAULT 0,
+            chlorine_negative INTEGER DEFAULT 0,
+            bacteriological_positive INTEGER DEFAULT 0,
+            bacteriological_negative INTEGER DEFAULT 0,
+            bacteriological_pending INTEGER DEFAULT 0,
+            remarks TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+            FOREIGN KEY (inspector_id) REFERENCES users (id)
+        )
+    ''')
+
     # Insert default users
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
@@ -553,4 +574,4 @@ def on_leave(data):
 init_db()
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5003, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=5004, allow_unsafe_werkzeug=True)
