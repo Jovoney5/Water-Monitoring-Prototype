@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Reports - Water Quality Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .report-controls {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .controls-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .report-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .report-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-period {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .report-tables {
+            margin-bottom: 2rem;
+        }
+
+        .table-section {
+            margin-bottom: 3rem;
+        }
+
+        .table-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 18px;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            font-size: 12px;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .report-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            font-size: 11px;
+        }
+
+        .supply-name {
+            text-align: left !important;
+            font-weight: 600;
+            padding-left: 8px !important;
+        }
+
+        .agency-nwc { background: #e3f2fd; }
+        .agency-pc { background: #f3e5f5; }
+        .agency-private { background: #e8f5e8; }
+
+        /* Color coding for test results */
+        .positive-result {
+            background: #d4edda !important;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .negative-result {
+            background: #f8d7da !important;
+            color: #721c24;
+            font-weight: 600;
+        }
+
+        .pending-result {
+            background: #fff3cd !important;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .no-data {
+            background: #f8f9fa !important;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .summary-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #eee;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .summary-card h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+
+        .summary-card .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .print-btn {
+            margin-left: 10px;
+        }
+
+        @media print {
+            .header, .report-controls, .nav-link, .btn {
+                display: none !important;
+            }
+
+            .container {
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+
+            .report-section {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .report-table {
+                font-size: 10px;
+            }
+
+            .report-table th,
+            .report-table td {
+                padding: 4px;
+            }
+
+            body {
+                background: white !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Monthly Reports</h1>
+        <div class="user-info">
+            <span>Welcome, Administrator</span>
+            <a href="/admin" class="nav-link">Dashboard</a>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="report-controls">
+            <div class="controls-header">
+                <h2>Generate Monthly Report</h2>
+                <div>
+                    <button class="btn btn-secondary print-btn" onclick="window.print()" style="display: none;" id="print-btn">Print Report</button>
+                </div>
+            </div>
+
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label for="report-month">Month</label>
+                    <select id="report-month">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="report-year">Year</label>
+                    <select id="report-year">
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-section" id="report-content">
+            <div class="loading">
+                <div class="icon">📊</div>
+                <p>Select a month and year to generate a report</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ReportGenerator {
+            constructor() {
+                this.currentReport = null;
+                this.supplies = [];
+                this.monthlyData = [];
+                this.init();
+            }
+
+            init() {
+                this.setDefaultDate();
+            }
+
+            setDefaultDate() {
+                const now = new Date();
+                const currentMonth = now.getMonth() + 1;
+                const currentYear = now.getFullYear();
+
+                document.getElementById('report-month').value = currentMonth;
+                document.getElementById('report-year').value = currentYear;
+            }
+
+            async generateReport() {
+                const month = parseInt(document.getElementById('report-month').value);
+                const year = parseInt(document.getElementById('report-year').value);
+
+                if (!month || !year) {
+                    this.showError('Please select both month and year');
+                    return;
+                }
+
+                try {
+                    this.showLoading();
+
+                    const response = await fetch(`/api/report/${year}/${month}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to generate report');
+                    }
+
+                    const reportData = await response.json();
+                    this.currentReport = {
+                        month,
+                        year,
+                        ...reportData
+                    };
+
+                    this.displayReport();
+                    this.showPrintButton();
+
+                } catch (error) {
+                    console.error('Error generating report:', error);
+                    this.showError('Failed to generate report. Please try again.');
+                }
+            }
+
+            showLoading() {
+                const container = document.getElementById('report-content');
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="icon">⏳</div>
+                        <p>Generating report...</p>
+                    </div>
+                `;
+            }
+
+            showError(message) {
+                const container = document.getElementById('report-content');
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="icon" style="color: #dc3545;">⚠️</div>
+                        <p style="color: #dc3545;">${message}</p>
+                    </div>
+                `;
+            }
+
+            showPrintButton() {
+                const printBtn = document.getElementById('print-btn');
+                if (printBtn) {
+                    printBtn.style.display = 'inline-block';
+                }
+            }
+
+            displayReport() {
+                if (!this.currentReport) return;
+
+                const container = document.getElementById('report-content');
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+
+                const monthName = monthNames[this.currentReport.month - 1];
+                const reportTitle = `Water Quality Monitoring Report - ${monthName} ${this.currentReport.year}`;
+
+                // Group supplies by type
+                const treatedSupplies = this.currentReport.supplies.filter(s => s.type === 'treated');
+                const untreatedSupplies = this.currentReport.supplies.filter(s => s.type === 'untreated');
+
+                // Create data lookup
+                const dataLookup = {};
+                this.currentReport.monthly_data.forEach(data => {
+                    dataLookup[data.supply_id] = data;
+                });
+
+                container.innerHTML = `
+                    <div class="report-header">
+                        <h1 class="report-title">${reportTitle}</h1>
+                        <p class="report-period">Generated on ${this.formatDate(new Date())}</p>
+                    </div>
+
+                    <div class="report-tables">
+                        ${this.generateTreatedSuppliesTable(treatedSupplies, dataLookup)}
+                        ${this.generateUntreatedSuppliesTable(untreatedSupplies, dataLookup)}
+                    </div>
+
+                    ${this.generateSummarySection()}
+                `;
+            }
+
+            generateTreatedSuppliesTable(supplies, dataLookup) {
+                return `
+                    <div class="table-section">
+                        <h3>Treated Supplies</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Water Supply</th>
+                                    <th rowspan="2">Agency</th>
+                                    <th rowspan="2">Visits</th>
+                                    <th colspan="3">Chlorine Residual</th>
+                                    <th colspan="3">Bacteriological</th>
+                                    <th rowspan="2">Remarks</th>
+                                </tr>
+                                <tr>
+                                    <th>Total</th>
+                                    <th>Positive</th>
+                                    <th>Negative</th>
+                                    <th>Positive</th>
+                                    <th>Negative</th>
+                                    <th>Pending</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${supplies.map(supply => {
+                                    const data = dataLookup[supply.id];
+                                    const agencyClass = `agency-${supply.agency.toLowerCase().replace(/\s+/g, '-')}`;
+
+                                    return `
+                                        <tr class="${agencyClass}">
+                                            <td class="supply-name">${supply.name}</td>
+                                            <td>${supply.agency}</td>
+                                            <td class="${this.getVisitsClass(data)}">${data ? data.visits || 0 : 0}</td>
+                                            <td class="${this.getResultClass(data?.chlorine_total)}">${data ? data.chlorine_total || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.chlorine_positive, 'positive')}">${data ? data.chlorine_positive || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.chlorine_negative, 'negative')}">${data ? data.chlorine_negative || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_positive, 'positive')}">${data ? data.bacteriological_positive || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_negative, 'negative')}">${data ? data.bacteriological_negative || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_pending, 'pending')}">${data ? data.bacteriological_pending || '-' : '-'}</td>
+                                            <td class="remarks-cell" style="text-align: left; font-size: 10px;">${this.formatRemarks(data?.remarks)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            generateUntreatedSuppliesTable(supplies, dataLookup) {
+                return `
+                    <div class="table-section">
+                        <h3>Untreated Supplies</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Water Supply</th>
+                                    <th>Agency</th>
+                                    <th>Visits</th>
+                                    <th>Bacteriological Positive</th>
+                                    <th>Bacteriological Negative</th>
+                                    <th>Bacteriological Pending</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${supplies.map(supply => {
+                                    const data = dataLookup[supply.id];
+                                    const agencyClass = `agency-${supply.agency.toLowerCase().replace(/\s+/g, '-')}`;
+
+                                    return `
+                                        <tr class="${agencyClass}">
+                                            <td class="supply-name">${supply.name}</td>
+                                            <td>${supply.agency}</td>
+                                            <td class="${this.getVisitsClass(data)}">${data ? data.visits || 0 : 0}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_positive, 'positive')}">${data ? data.bacteriological_positive || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_negative, 'negative')}">${data ? data.bacteriological_negative || '-' : '-'}</td>
+                                            <td class="${this.getResultClass(data?.bacteriological_pending, 'pending')}">${data ? data.bacteriological_pending || '-' : '-'}</td>
+                                            <td class="remarks-cell" style="text-align: left; font-size: 10px;">${this.formatRemarks(data?.remarks)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            getVisitsClass(data) {
+                if (!data || !data.visits) return 'no-data';
+                return data.visits > 0 ? 'positive-result' : 'no-data';
+            }
+
+            getResultClass(value, type = 'default') {
+                if (!value || value === 0) {
+                    return 'no-data';
+                }
+
+                switch (type) {
+                    case 'positive':
+                        return 'positive-result';
+                    case 'negative':
+                        return 'negative-result';
+                    case 'pending':
+                        return 'pending-result';
+                    default:
+                        return value > 0 ? 'positive-result' : 'no-data';
+                }
+            }
+
+            formatRemarks(remarks) {
+                if (!remarks || !remarks.trim()) {
+                    return '-';
+                }
+
+                // Limit to first 50 characters for the table
+                return remarks.length > 50 ? remarks.substring(0, 47) + '...' : remarks;
+            }
+
+            generateSummarySection() {
+                if (!this.currentReport) return '';
+
+                const totalSupplies = this.currentReport.supplies.length;
+                const dataCount = this.currentReport.monthly_data.length;
+
+                // Calculate totals
+                const totals = this.currentReport.monthly_data.reduce((acc, data) => {
+                    acc.visits += data.visits || 0;
+                    acc.chlorineTotal += data.chlorine_total || 0;
+                    acc.chlorinePositive += data.chlorine_positive || 0;
+                    acc.chlorineNegative += data.chlorine_negative || 0;
+                    acc.bacteriologicalPositive += data.bacteriological_positive || 0;
+                    acc.bacteriologicalNegative += data.bacteriological_negative || 0;
+                    acc.bacteriologicalPending += data.bacteriological_pending || 0;
+                    return acc;
+                }, {
+                    visits: 0,
+                    chlorineTotal: 0,
+                    chlorinePositive: 0,
+                    chlorineNegative: 0,
+                    bacteriologicalPositive: 0,
+                    bacteriologicalNegative: 0,
+                    bacteriologicalPending: 0
+                });
+
+                return `
+                    <div class="summary-section">
+                        <h2>Monthly Summary</h2>
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <h4>Total Supplies</h4>
+                                <div class="number">${totalSupplies}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Supplies with Data</h4>
+                                <div class="number">${dataCount}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total Visits</h4>
+                                <div class="number">${totals.visits}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total Chlorine Tests</h4>
+                                <div class="number">${totals.chlorineTotal}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Chlorine Positive</h4>
+                                <div class="number" style="color: #28a745;">${totals.chlorinePositive}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Chlorine Negative</h4>
+                                <div class="number" style="color: #dc3545;">${totals.chlorineNegative}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Bacterio Positive</h4>
+                                <div class="number" style="color: #28a745;">${totals.bacteriologicalPositive}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Bacterio Negative</h4>
+                                <div class="number" style="color: #dc3545;">${totals.bacteriologicalNegative}</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Bacterio Pending</h4>
+                                <div class="number" style="color: #ffc107;">${totals.bacteriologicalPending}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            formatDate(date) {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        // Global functions
+        function generateReport() {
+            if (window.reportGenerator) {
+                window.reportGenerator.generateReport();
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.reportGenerator = new ReportGenerator();
+        });
+    </script>
+</body>
+</html>

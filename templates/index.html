@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspector Dashboard - Water Quality Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-container h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 20px;
+        }
+
+        .supply-selector {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .selected-supply {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .selected-supply h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-supply p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-with-button input {
+            flex: 1;
+        }
+
+        .increment-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+
+        .increment-btn:hover {
+            background: #218838;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 16px;
+        }
+
+        .test-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .chlorine-total {
+            background: #f8f9fa !important;
+            color: #666 !important;
+            cursor: not-allowed;
+        }
+
+        /* Color coding for test results */
+        .positive-field {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+        }
+
+        .negative-field {
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
+        }
+
+        .pending-field {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .treated-only {
+            opacity: 0.6;
+        }
+
+        .recent-submissions {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .submission-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .submission-time {
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Inspector Dashboard</h1>
+        <div class="user-info">
+            <span id="welcomeText">Welcome, Inspector</span>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>New Water Quality Submission</h2>
+
+            <div id="alert-container"></div>
+
+            <div class="supply-selector">
+                <div class="form-group">
+                    <label for="supply">Select Water Supply</label>
+                    <select id="supply" name="supply_id">
+                        <option value="">Select a water supply...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="submission-form-section" class="hidden">
+                <div class="selected-supply">
+                    <h3 id="selected-supply-name"></h3>
+                    <p id="selected-supply-info"></p>
+                </div>
+
+                <form id="submission-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="visits">Number of Visits</label>
+                            <div class="input-with-button">
+                                <input type="number" id="visits" name="visits" min="1" value="1">
+                                <button type="button" class="increment-btn" onclick="incrementVisits()">+1 Visit</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="submission-date">Submission Date</label>
+                            <input type="date" id="submission-date" name="submission_date" required>
+                        </div>
+                    </div>
+
+                    <div class="test-section" id="chlorine-section">
+                        <h3>Chlorine Residual Tests (Treated Supplies Only)</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="chlorine-total">Total Tests</label>
+                                <input type="number" id="chlorine-total" name="chlorine_total" min="0" value="0" readonly class="chlorine-total">
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-positive">Positive</label>
+                                <input type="number" id="chlorine-positive" name="chlorine_positive" min="0" value="0" class="positive-field">
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-negative">Negative</label>
+                                <input type="number" id="chlorine-negative" name="chlorine_negative" min="0" value="0" class="negative-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
+                        <h3>Bacteriological Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="bacteriological-positive">Positive</label>
+                                <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field">
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-negative">Negative</label>
+                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field">
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-pending">Pending</label>
+                                <input type="number" id="bacteriological-pending" name="bacteriological_pending" min="0" value="0" class="pending-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="remarks">Remarks</label>
+                        <textarea id="remarks" name="remarks" rows="3" placeholder="Enter any additional observations or remarks..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-btn">Submit New Inspection Data</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="recent-submissions">
+            <h2>Your Recent Submissions</h2>
+            <div id="recent-submissions-list">
+                <p>No recent submissions</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class InspectorDashboard {
+            constructor() {
+                this.supplies = [];
+                this.currentSupply = null;
+                this.recentSubmissions = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadSupplies();
+                this.setupEventListeners();
+                await this.loadRecentSubmissions();
+                this.setTodayDate();
+            }
+
+            async loadSupplies() {
+                try {
+                    const response = await fetch('/api/supplies');
+                    if (response.ok) {
+                        this.supplies = await response.json();
+                        this.populateSuppliesDropdown();
+                    } else {
+                        this.showAlert('error', 'Failed to load water supplies');
+                    }
+                } catch (error) {
+                    console.error('Error loading supplies:', error);
+                    this.showAlert('error', 'Error connecting to server');
+                }
+            }
+
+            populateSuppliesDropdown() {
+                const supplySelect = document.getElementById('supply');
+                supplySelect.innerHTML = '<option value="">Select a water supply...</option>';
+
+                // Group supplies by type
+                const treatedSupplies = this.supplies.filter(s => s.type === 'treated');
+                const untreatedSupplies = this.supplies.filter(s => s.type === 'untreated');
+
+                // Add treated supplies group
+                if (treatedSupplies.length > 0) {
+                    const treatedGroup = document.createElement('optgroup');
+                    treatedGroup.label = 'Treated Supplies';
+                    treatedSupplies.forEach(supply => {
+                        const option = document.createElement('option');
+                        option.value = supply.id;
+                        option.textContent = `${supply.name} (${supply.agency})`;
+                        treatedGroup.appendChild(option);
+                    });
+                    supplySelect.appendChild(treatedGroup);
+                }
+
+                // Add untreated supplies group
+                if (untreatedSupplies.length > 0) {
+                    const untreatedGroup = document.createElement('optgroup');
+                    untreatedGroup.label = 'Untreated Supplies';
+                    untreatedSupplies.forEach(supply => {
+                        const option = document.createElement('option');
+                        option.value = supply.id;
+                        option.textContent = `${supply.name} (${supply.agency})`;
+                        untreatedGroup.appendChild(option);
+                    });
+                    supplySelect.appendChild(untreatedGroup);
+                }
+            }
+
+            setupEventListeners() {
+                const form = document.getElementById('submission-form');
+                form.addEventListener('submit', this.handleSubmit.bind(this));
+
+                document.getElementById('supply').addEventListener('change', this.handleSupplySelection.bind(this));
+
+                // Auto-calculate chlorine totals
+                ['chlorine-positive', 'chlorine-negative'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
+                });
+            }
+
+            setTodayDate() {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('submission-date').value = today;
+            }
+
+            handleSupplySelection() {
+                const supplyId = document.getElementById('supply').value;
+                if (!supplyId) {
+                    this.hideForm();
+                    return;
+                }
+
+                const supply = this.supplies.find(s => s.id == supplyId);
+                this.currentSupply = supply;
+
+                // Update form title
+                document.getElementById('selected-supply-name').textContent = supply ? supply.name : '';
+                document.getElementById('selected-supply-info').textContent = supply ? `${supply.agency} • ${supply.type.charAt(0).toUpperCase() + supply.type.slice(1)}` : '';
+
+                // Handle chlorine section for treated vs untreated supplies
+                const chlorineSection = document.getElementById('chlorine-section');
+                if (supply && supply.type === 'untreated') {
+                    chlorineSection.classList.add('treated-only');
+                    // Clear and disable chlorine inputs for untreated supplies
+                    document.getElementById('chlorine-total').value = 0;
+                    document.getElementById('chlorine-positive').value = 0;
+                    document.getElementById('chlorine-negative').value = 0;
+                    document.getElementById('chlorine-positive').disabled = true;
+                    document.getElementById('chlorine-negative').disabled = true;
+                } else {
+                    chlorineSection.classList.remove('treated-only');
+                    document.getElementById('chlorine-positive').disabled = false;
+                    document.getElementById('chlorine-negative').disabled = false;
+                }
+
+                // Show the form
+                document.getElementById('submission-form-section').classList.remove('hidden');
+            }
+
+            hideForm() {
+                document.getElementById('selected-supply-name').textContent = '';
+                document.getElementById('selected-supply-info').textContent = '';
+                document.getElementById('submission-form-section').classList.add('hidden');
+                this.resetForm();
+            }
+
+            resetForm() {
+                // Reset all form values to defaults
+                document.getElementById('visits').value = 1;
+                document.getElementById('chlorine-total').value = 0;
+                document.getElementById('chlorine-positive').value = 0;
+                document.getElementById('chlorine-negative').value = 0;
+                document.getElementById('bacteriological-positive').value = 0;
+                document.getElementById('bacteriological-negative').value = 0;
+                document.getElementById('bacteriological-pending').value = 0;
+                document.getElementById('remarks').value = '';
+
+                // Re-enable all inputs
+                document.querySelectorAll('#submission-form input, #submission-form textarea').forEach(input => {
+                    input.disabled = false;
+                });
+
+                document.getElementById('chlorine-section').classList.remove('treated-only');
+                this.setTodayDate();
+            }
+
+            updateChlorineTotal() {
+                if (this.currentSupply && this.currentSupply.type === 'untreated') {
+                    return; // Don't calculate for untreated supplies
+                }
+
+                const positive = parseInt(document.getElementById('chlorine-positive').value) || 0;
+                const negative = parseInt(document.getElementById('chlorine-negative').value) || 0;
+                const total = positive + negative;
+                document.getElementById('chlorine-total').value = total;
+            }
+
+            async handleSubmit(event) {
+                event.preventDefault();
+
+                const submitBtn = document.getElementById('submit-btn');
+                const originalText = submitBtn.textContent;
+
+                try {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+
+                    const formData = new FormData(event.target);
+                    const supplyId = parseInt(document.getElementById('supply').value);
+
+                    // For untreated supplies, ensure chlorine values are 0
+                    let chlorineTotal = 0;
+                    let chlorinePositive = 0;
+                    let chlorineNegative = 0;
+
+                    if (this.currentSupply && this.currentSupply.type === 'treated') {
+                        chlorineTotal = parseInt(formData.get('chlorine_total')) || 0;
+                        chlorinePositive = parseInt(formData.get('chlorine_positive')) || 0;
+                        chlorineNegative = parseInt(formData.get('chlorine_negative')) || 0;
+                    }
+
+                    const data = {
+                        supply_id: supplyId,
+                        submission_date: formData.get('submission_date'),
+                        visits: parseInt(formData.get('visits')) || 1,
+                        chlorine_total: chlorineTotal,
+                        chlorine_positive: chlorinePositive,
+                        chlorine_negative: chlorineNegative,
+                        bacteriological_positive: parseInt(formData.get('bacteriological_positive')) || 0,
+                        bacteriological_negative: parseInt(formData.get('bacteriological_negative')) || 0,
+                        bacteriological_pending: parseInt(formData.get('bacteriological_pending')) || 0,
+                        remarks: formData.get('remarks') || ''
+                    };
+
+                    if (!data.supply_id) {
+                        this.showAlert('error', 'Please select a water supply');
+                        return;
+                    }
+
+                    const response = await fetch('/api/submit-inspection', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showAlert('success', `New submission for ${this.currentSupply.name} completed successfully!`);
+
+                        // Reset form for next submission
+                        this.resetForm();
+
+                        // Clear supply selection to start fresh
+                        document.getElementById('supply').value = '';
+                        this.hideForm();
+
+                        // Reload recent submissions
+                        await this.loadRecentSubmissions();
+
+                    } else {
+                        const error = await response.json();
+                        this.showAlert('error', error.message || 'Failed to submit inspection data');
+                    }
+
+                } catch (error) {
+                    console.error('Error submitting inspection:', error);
+                    this.showAlert('error', 'Error connecting to server');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            async loadRecentSubmissions() {
+                try {
+                    const response = await fetch('/api/my-submissions');
+                    if (response.ok) {
+                        this.recentSubmissions = await response.json();
+                        this.displayRecentSubmissions();
+                    }
+                } catch (error) {
+                    console.error('Error loading recent submissions:', error);
+                }
+            }
+
+            displayRecentSubmissions() {
+                const container = document.getElementById('recent-submissions-list');
+
+                if (this.recentSubmissions.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No recent submissions found.</p>';
+                    return;
+                }
+
+                container.innerHTML = this.recentSubmissions.slice(0, 5).map(submission => `
+                    <div class="submission-card">
+                        <div class="submission-header">
+                            <strong>${submission.supply_name}</strong>
+                            <span class="submission-time">${this.formatDateTime(submission.created_at)}</span>
+                        </div>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 0.5rem;">
+                            ${submission.agency} • ${submission.type} • ${submission.visits} visit(s)
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; font-size: 12px;">
+                            ${submission.type === 'treated' ? `
+                                <div>Chlorine: ${submission.chlorine_total}</div>
+                                <div style="color: #28a745;">C+: ${submission.chlorine_positive}</div>
+                                <div style="color: #dc3545;">C-: ${submission.chlorine_negative}</div>
+                            ` : ''}
+                            <div style="color: #28a745;">B+: ${submission.bacteriological_positive}</div>
+                            <div style="color: #dc3545;">B-: ${submission.bacteriological_negative}</div>
+                            <div style="color: #ffc107;">B Pending: ${submission.bacteriological_pending}</div>
+                        </div>
+                        ${submission.remarks ? `<p style="margin-top: 0.5rem; font-size: 13px; color: #666;"><strong>Remarks:</strong> ${submission.remarks}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            showAlert(type, message) {
+                const alertContainer = document.getElementById('alert-container');
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+
+                alertContainer.innerHTML = `
+                    <div class="alert ${alertClass}">
+                        ${message}
+                    </div>
+                `;
+
+                // Auto-hide alert after 5 seconds
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+
+                // Scroll to top to show alert
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            formatDateTime(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // Global functions
+        function incrementVisits() {
+            const visitsInput = document.getElementById('visits');
+            const currentVisits = parseInt(visitsInput.value) || 0;
+            visitsInput.value = currentVisits + 1;
+        }
+
+        // Initialize the dashboard when the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new InspectorDashboard();
+        });
+    </script>
+</body>
+</html>

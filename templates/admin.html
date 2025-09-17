@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Water Quality Monitoring</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .real-time-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .supplies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .supply-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .supply-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .supply-card.updated {
+            animation: highlight 2s ease-in-out;
+            border-left-color: #28a745;
+        }
+
+        @keyframes highlight {
+            0% { background: #e7f3ff; }
+            100% { background: #f8f9fa; }
+        }
+
+        .supply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .supply-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .supply-type {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .supply-type.untreated {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .supply-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .supply-data {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem;
+            font-size: 13px;
+        }
+
+        .data-label {
+            color: #666;
+        }
+
+        .data-value {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .total {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .visits {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .last-updated {
+            color: #999;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <div class="user-info">
+            <span class="status-indicator status-online"></span>
+            <span id="welcomeText">Welcome, Administrator</span>
+            <a href="/report" class="nav-link">Reports</a>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Supplies</h3>
+                <div class="number" id="total-supplies">0</div>
+                <div class="label">Monitored</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Updated This Month</h3>
+                <div class="number" id="updated-supplies">0</div>
+                <div class="label">Supplies</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Visits</h3>
+                <div class="number" id="total-visits">0</div>
+                <div class="label">This Month</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>System Status</h3>
+                <div class="number" style="font-size: 1.5rem; color: #28a745;" id="system-status">Online</div>
+                <div class="label">Real-time Updates</div>
+            </div>
+        </div>
+
+        <div class="real-time-section">
+            <div class="section-header">
+                <h2>Real-time Supply Monitoring</h2>
+                <button class="refresh-btn" onclick="loadSupplyData()">Refresh</button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Filter by Type</label>
+                    <select id="type-filter">
+                        <option value="">All Types</option>
+                        <option value="treated">Treated</option>
+                        <option value="untreated">Untreated</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Filter by Agency</label>
+                    <select id="agency-filter">
+                        <option value="">All Agencies</option>
+                        <option value="NWC">NWC</option>
+                        <option value="PC">PC</option>
+                        <option value="Private">Private</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="supplies-grid" id="supplies-list">
+                <div class="empty-state">
+                    <div class="icon">📊</div>
+                    <p>Loading supply data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdminDashboard {
+            constructor() {
+                this.socket = null;
+                this.supplies = [];
+                this.monthlyData = {};
+                this.init();
+            }
+
+            async init() {
+                this.initializeSocketIO();
+                await this.loadSupplies();
+                await this.loadSupplyData();
+                this.setupEventListeners();
+                this.updateStats();
+            }
+
+            initializeSocketIO() {
+                this.socket = io();
+
+                this.socket.on('connect', () => {
+                    console.log('Connected to server');
+                    this.socket.emit('join', { room: 'admin' });
+                    this.updateSystemStatus(true);
+                });
+
+                this.socket.on('disconnect', () => {
+                    console.log('Disconnected from server');
+                    this.updateSystemStatus(false);
+                });
+
+                this.socket.on('supply_updated', (data) => {
+                    console.log('Supply updated:', data);
+                    this.handleSupplyUpdate(data);
+                });
+
+                this.socket.on('new_submission', (data) => {
+                    console.log('New submission received:', data);
+                    this.handleNewSubmission(data);
+                });
+
+                this.socket.on('connect_error', (error) => {
+                    console.error('Socket connection error:', error);
+                    this.updateSystemStatus(false);
+                });
+            }
+
+            updateSystemStatus(isOnline) {
+                const statusIndicator = document.querySelector('.status-indicator');
+                const statusText = document.getElementById('system-status');
+
+                statusIndicator.className = isOnline ? 'status-indicator status-online' : 'status-indicator status-offline';
+                statusText.textContent = isOnline ? 'Online' : 'Offline';
+                statusText.style.color = isOnline ? '#28a745' : '#dc3545';
+            }
+
+            async loadSupplies() {
+                try {
+                    const response = await fetch('/api/supplies');
+                    if (response.ok) {
+                        this.supplies = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Error loading supplies:', error);
+                }
+            }
+
+            async loadSupplyData() {
+                try {
+                    const response = await fetch('/api/monthly-data');
+                    if (response.ok) {
+                        this.monthlyData = await response.json();
+                        this.displaySupplies();
+                        this.updateStats();
+                    }
+                } catch (error) {
+                    console.error('Error loading supply data:', error);
+                    this.showError('Failed to load supply data');
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('type-filter').addEventListener('change', this.applyFilters.bind(this));
+                document.getElementById('agency-filter').addEventListener('change', this.applyFilters.bind(this));
+            }
+
+            applyFilters() {
+                const typeFilter = document.getElementById('type-filter').value;
+                const agencyFilter = document.getElementById('agency-filter').value;
+
+                const cards = document.querySelectorAll('.supply-card');
+                cards.forEach(card => {
+                    const type = card.dataset.type;
+                    const agency = card.dataset.agency;
+
+                    const matchesType = !typeFilter || type === typeFilter;
+                    const matchesAgency = !agencyFilter || agency === agencyFilter;
+
+                    card.style.display = matchesType && matchesAgency ? 'block' : 'none';
+                });
+            }
+
+            handleSupplyUpdate(data) {
+                // Update local data
+                this.monthlyData[data.supply_id] = data;
+
+                // Find and update the card
+                const existingCard = document.querySelector(`[data-supply-id="${data.supply_id}"]`);
+                if (existingCard) {
+                    // Add highlight animation
+                    existingCard.classList.add('updated');
+                    setTimeout(() => {
+                        existingCard.classList.remove('updated');
+                    }, 2000);
+
+                    // Update the card content
+                    this.updateSupplyCard(existingCard, data);
+                } else {
+                    // Card doesn't exist, regenerate the display
+                    this.displaySupplies();
+                }
+
+                this.updateStats();
+                this.showNotification(`${data.supply_name} data updated!`, 'success');
+            }
+
+            handleNewSubmission(submission) {
+                console.log('Processing new submission:', submission);
+
+                // Refresh the cumulative data for the admin dashboard
+                this.loadSupplyData();
+
+                // Show notification for new submission
+                this.showNotification(`New submission by ${submission.inspector_name} for ${submission.supply_name}`, 'success');
+            }
+
+            updateSupplyCard(card, data) {
+                const supply = this.supplies.find(s => s.id === data.supply_id);
+                if (!supply) return;
+
+                card.innerHTML = this.createSupplyCardContent(supply, data);
+            }
+
+            displaySupplies() {
+                const container = document.getElementById('supplies-list');
+
+                if (this.supplies.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📊</div>
+                            <p>No supply data available.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Sort supplies by type (treated first) then by name
+                const sortedSupplies = [...this.supplies].sort((a, b) => {
+                    if (a.type !== b.type) {
+                        return a.type === 'treated' ? -1 : 1;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
+                container.innerHTML = sortedSupplies.map(supply => {
+                    const data = this.monthlyData[supply.id];
+                    return `
+                        <div class="supply-card" data-supply-id="${supply.id}" data-type="${supply.type}" data-agency="${supply.agency}">
+                            ${this.createSupplyCardContent(supply, data)}
+                        </div>
+                    `;
+                }).join('');
+
+                this.applyFilters();
+            }
+
+            createSupplyCardContent(supply, data) {
+                const hasData = data && (data.visits > 0 || data.chlorine_total > 0 || data.bacteriological_positive > 0 || data.bacteriological_negative > 0 || data.bacteriological_pending > 0);
+
+                return `
+                    <div class="supply-header">
+                        <div class="supply-name">${supply.name}</div>
+                        <div class="supply-type ${supply.type}">${supply.type}</div>
+                    </div>
+                    <div class="supply-info">${supply.agency}</div>
+
+                    ${hasData ? `
+                        <div class="supply-data">
+                            <div class="data-item">
+                                <span class="data-label">Visits:</span>
+                                <span class="data-value visits">${data.visits || 0}</span>
+                            </div>
+                            ${supply.type === 'treated' ? `
+                                <div class="data-item">
+                                    <span class="data-label">Chlorine Total:</span>
+                                    <span class="data-value total">${data.chlorine_total || 0}</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Chlorine +:</span>
+                                    <span class="data-value positive">${data.chlorine_positive || 0}</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Chlorine -:</span>
+                                    <span class="data-value negative">${data.chlorine_negative || 0}</span>
+                                </div>
+                            ` : ''}
+                            <div class="data-item">
+                                <span class="data-label">Bacterio +:</span>
+                                <span class="data-value positive">${data.bacteriological_positive || 0}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Bacterio -:</span>
+                                <span class="data-value negative">${data.bacteriological_negative || 0}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Bacterio Pending:</span>
+                                <span class="data-value pending">${data.bacteriological_pending || 0}</span>
+                            </div>
+                        </div>
+                        ${data.remarks ? `
+                            <div class="supply-remarks" style="margin-top: 0.5rem; padding: 0.5rem; background: white; border-radius: 3px; font-size: 12px; color: #666;">
+                                <strong>Remarks:</strong> ${data.remarks}
+                            </div>
+                        ` : ''}
+                        <div class="last-updated">
+                            Last updated: ${this.formatDateTime(data.last_updated)}
+                        </div>
+                    ` : `
+                        <div class="no-data">No data entered this month</div>
+                    `}
+                `;
+            }
+
+            updateStats() {
+                const totalSupplies = this.supplies.length;
+                const updatedSupplies = Object.keys(this.monthlyData).length;
+                const totalVisits = Object.values(this.monthlyData).reduce((sum, data) => sum + (data.visits || 0), 0);
+
+                document.getElementById('total-supplies').textContent = totalSupplies;
+                document.getElementById('updated-supplies').textContent = updatedSupplies;
+                document.getElementById('total-visits').textContent = totalVisits;
+            }
+
+            showError(message) {
+                const container = document.getElementById('supplies-list');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon" style="color: #dc3545;">⚠️</div>
+                        <p style="color: #dc3545;">${message}</p>
+                    </div>
+                `;
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    background: ${type === 'success' ? '#d4edda' : '#f8d7da'};
+                    color: ${type === 'success' ? '#155724' : '#721c24'};
+                    border: 1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};
+                    border-radius: 5px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    z-index: 9999;
+                    font-weight: 600;
+                    transition: opacity 0.3s;
+                `;
+                notification.textContent = message;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            formatDateTime(dateString) {
+                if (!dateString) return 'Never';
+                const date = new Date(dateString);
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // Global function for refresh button
+        async function loadSupplyData() {
+            if (window.adminDashboard) {
+                await window.adminDashboard.loadSupplyData();
+            }
+        }
+
+        // Initialize the dashboard when the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminDashboard = new AdminDashboard();
+        });
+    </script>
+</body>
+</html>
