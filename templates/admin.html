@@ -396,6 +396,12 @@
                 await this.loadSupplyData();
                 this.setupEventListeners();
                 this.updateStats();
+
+                // Auto-refresh every 30 seconds to ensure data is current
+                setInterval(async () => {
+                    await this.loadSupplyData();
+                    this.updateStats();
+                }, 30000);
             }
 
             initializeSocketIO() {
@@ -507,14 +513,20 @@
                 this.showNotification(`${data.supply_name} data updated!`, 'success');
             }
 
-            handleNewSubmission(submission) {
+            async handleNewSubmission(submission) {
                 console.log('Processing new submission:', submission);
 
                 // Refresh the cumulative data for the admin dashboard
-                this.loadSupplyData();
+                await this.loadSupplyData();
+
+                // Update stats after loading new data
+                this.updateStats();
 
                 // Show notification for new submission
                 this.showNotification(`New submission by ${submission.inspector_name} for ${submission.supply_name}`, 'success');
+
+                // Force a visual refresh
+                this.displaySupplies();
             }
 
             updateSupplyCard(card, data) {
