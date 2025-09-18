@@ -169,6 +169,11 @@
             100% { background: #f8f9fa; }
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .supply-header {
             display: flex;
             justify-content: space-between;
@@ -391,11 +396,22 @@
             }
 
             async init() {
+                this.showLoading();
                 this.initializeSocketIO();
-                await this.loadSupplies();
-                await this.loadSupplyData();
+
+                try {
+                    // Load all dashboard data in a single optimized request
+                    await this.loadDashboardData();
+
+                    this.displaySupplies();
+                    this.updateStats();
+                    this.hideLoading();
+                } catch (error) {
+                    console.error('Error initializing dashboard:', error);
+                    this.showError('Failed to load dashboard data');
+                }
+
                 this.setupEventListeners();
-                this.updateStats();
 
                 // Auto-refresh every 30 seconds to ensure data is current
                 setInterval(async () => {
@@ -454,17 +470,31 @@
                 }
             }
 
+            async loadDashboardData() {
+                try {
+                    const response = await fetch('/api/dashboard-data');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.supplies = data.supplies;
+                        this.monthlyData = data.monthly_data;
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                    throw error; // Re-throw so init() can handle it
+                }
+            }
+
             async loadSupplyData() {
                 try {
                     const response = await fetch('/api/monthly-data');
                     if (response.ok) {
                         this.monthlyData = await response.json();
-                        this.displaySupplies();
-                        this.updateStats();
                     }
                 } catch (error) {
                     console.error('Error loading supply data:', error);
-                    this.showError('Failed to load supply data');
+                    throw error; // Re-throw so init() can handle it
                 }
             }
 
@@ -644,6 +674,20 @@
                         <p style="color: #dc3545;">${message}</p>
                     </div>
                 `;
+            }
+
+            showLoading() {
+                const container = document.getElementById('supplies-list');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon" style="animation: spin 1s linear infinite;">⏳</div>
+                        <p>Loading dashboard data...</p>
+                    </div>
+                `;
+            }
+
+            hideLoading() {
+                // Loading state will be replaced by displaySupplies()
             }
 
             showNotification(message, type = 'info') {

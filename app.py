@@ -417,6 +417,56 @@ def get_monthly_data():
 
     return jsonify(result)
 
+@app.route('/api/dashboard-data')
+def get_dashboard_data():
+    """Combined endpoint for admin dashboard - returns both supplies and monthly data"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    now = datetime.now()
+    month = now.month
+    year = now.year
+
+    conn = get_db_connection()
+
+    # Get all supplies
+    supplies = conn.execute('SELECT * FROM water_supplies ORDER BY type, name').fetchall()
+
+    # Get cumulative data from individual submissions for current month
+    monthly_data = conn.execute('''
+        SELECT
+            ws.id as supply_id,
+            ws.name as supply_name,
+            ws.type,
+            ws.agency,
+            COALESCE(SUM(sub.visits), 0) as visits,
+            COALESCE(SUM(sub.chlorine_total), 0) as chlorine_total,
+            COALESCE(SUM(sub.chlorine_positive), 0) as chlorine_positive,
+            COALESCE(SUM(sub.chlorine_negative), 0) as chlorine_negative,
+            COALESCE(SUM(sub.bacteriological_positive), 0) as bacteriological_positive,
+            COALESCE(SUM(sub.bacteriological_negative), 0) as bacteriological_negative,
+            COALESCE(SUM(sub.bacteriological_pending), 0) as bacteriological_pending,
+            MAX(sub.created_at) as last_updated
+        FROM water_supplies ws
+        LEFT JOIN inspection_submissions sub ON ws.id = sub.supply_id
+            AND strftime('%m', sub.submission_date) = ?
+            AND strftime('%Y', sub.submission_date) = ?
+        GROUP BY ws.id, ws.name, ws.type, ws.agency
+        ORDER BY ws.type, ws.agency, ws.name
+    ''', (f"{month:02d}", str(year))).fetchall()
+
+    conn.close()
+
+    # Format monthly data as dict indexed by supply_id
+    monthly_data_dict = {}
+    for data in monthly_data:
+        monthly_data_dict[data['supply_id']] = dict(data)
+
+    return jsonify({
+        'supplies': [dict(supply) for supply in supplies],
+        'monthly_data': monthly_data_dict
+    })
+
 @app.route('/api/submit-inspection', methods=['POST'])
 def submit_inspection():
     if 'user_id' not in session:

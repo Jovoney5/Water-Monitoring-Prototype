@@ -341,8 +341,6 @@
                 <div class="form-group">
                     <label for="report-year">Year</label>
                     <select id="report-year">
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
                     </select>
                 </div>
 
@@ -370,7 +368,23 @@
             }
 
             init() {
+                this.populateYears();
                 this.setDefaultDate();
+            }
+
+            populateYears() {
+                const yearSelect = document.getElementById('report-year');
+                const currentYear = new Date().getFullYear();
+                const startYear = 2020;
+
+                yearSelect.innerHTML = '';
+
+                for (let year = currentYear; year >= startYear; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                }
             }
 
             setDefaultDate() {
