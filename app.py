@@ -586,19 +586,37 @@ def update_supply_data():
 
 @app.route('/api/report/<int:year>/<int:month>')
 def get_monthly_report(year, month):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
     conn = get_db_connection()
 
     # Get all supplies
     supplies = conn.execute('SELECT * FROM water_supplies ORDER BY type, agency, name').fetchall()
 
-    # Get monthly data
+    # Get cumulative data from individual submissions for the specified month/year
     monthly_data = conn.execute('''
-        SELECT msd.*, s.name as supply_name, s.agency, s.type
-        FROM monthly_supply_data msd
-        JOIN water_supplies s ON msd.supply_id = s.id
-        WHERE msd.month = ? AND msd.year = ?
-        ORDER BY s.type, s.agency, s.name
-    ''', (month, year)).fetchall()
+        SELECT
+            ws.id as supply_id,
+            ws.name as supply_name,
+            ws.type,
+            ws.agency,
+            COALESCE(SUM(sub.visits), 0) as visits,
+            COALESCE(SUM(sub.chlorine_total), 0) as chlorine_total,
+            COALESCE(SUM(sub.chlorine_positive), 0) as chlorine_positive,
+            COALESCE(SUM(sub.chlorine_negative), 0) as chlorine_negative,
+            COALESCE(SUM(sub.bacteriological_positive), 0) as bacteriological_positive,
+            COALESCE(SUM(sub.bacteriological_negative), 0) as bacteriological_negative,
+            COALESCE(SUM(sub.bacteriological_pending), 0) as bacteriological_pending,
+            GROUP_CONCAT(sub.remarks, '; ') as remarks,
+            MAX(sub.created_at) as last_updated
+        FROM water_supplies ws
+        LEFT JOIN inspection_submissions sub ON ws.id = sub.supply_id
+            AND strftime('%m', sub.submission_date) = ?
+            AND strftime('%Y', sub.submission_date) = ?
+        GROUP BY ws.id, ws.name, ws.type, ws.agency
+        ORDER BY ws.type, ws.agency, ws.name
+    ''', (f"{month:02d}", str(year))).fetchall()
 
     conn.close()
 
