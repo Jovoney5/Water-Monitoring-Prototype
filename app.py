@@ -642,4 +642,13 @@ def on_leave(data):
 init_db()
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5004, allow_unsafe_werkzeug=True)
+    import os
+    port = int(os.environ.get('PORT', 5004))
+    debug = os.environ.get('FLASK_ENV', 'production') == 'development'
+
+    if debug:
+        # Development mode
+        socketio.run(app, host='0.0.0.0', port=port, debug=True, allow_unsafe_werkzeug=True)
+    else:
+        # Production mode
+        socketio.run(app, host='0.0.0.0', port=port, debug=False)
