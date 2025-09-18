@@ -644,11 +644,11 @@ init_db()
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5004))
-    debug = os.environ.get('FLASK_ENV', 'production') == 'development'
+    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
 
     if debug:
         # Development mode
         socketio.run(app, host='0.0.0.0', port=port, debug=True, allow_unsafe_werkzeug=True)
     else:
-        # Production mode
-        socketio.run(app, host='0.0.0.0', port=port, debug=False)
+        # Production mode - but allow unsafe werkzeug for local testing and Render deployment
+        socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
