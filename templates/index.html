@@ -99,6 +99,14 @@
             border-color: #667eea;
         }
 
+        .form-text {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
         .selected-supply {
             background: #e3f2fd;
             padding: 1rem;
@@ -133,6 +141,23 @@
 
         .input-with-button input {
             flex: 1;
+        }
+
+        .input-with-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .count-input {
+            width: 120px !important;
+            flex: none;
+        }
+
+        .range-dropdown {
+            width: 80px !important;
+            flex: none;
+            min-width: 80px;
         }
 
         .increment-btn {
@@ -190,6 +215,32 @@
         .pending-field {
             background: #fff3cd !important;
             border-color: #ffc107 !important;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .ideal-range {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .urgent-icon {
+            color: #dc3545;
+            font-size: 18px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .organism-dropdown {
+            width: 150px !important;
+            margin-left: 10px;
         }
 
         .submit-btn {
@@ -298,6 +349,16 @@
                 <div class="selected-supply">
                     <h3 id="selected-supply-name"></h3>
                     <p id="selected-supply-info"></p>
+
+                    <div id="sampling-points-section" class="hidden">
+                        <div class="form-group">
+                            <label for="sampling-point">Select Sampling Point</label>
+                            <select id="sampling-point" name="sampling_point_id">
+                                <option value="">Select a sampling point (optional)...</option>
+                            </select>
+                            <small class="form-text">Location: <span id="sampling-point-location"></span></small>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="submission-form">
@@ -325,11 +386,32 @@
                             </div>
                             <div class="form-group">
                                 <label for="chlorine-positive">Positive</label>
-                                <input type="number" id="chlorine-positive" name="chlorine_positive" min="0" value="0" class="positive-field">
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="chlorine-positive" name="chlorine_positive" min="0" value="0" class="positive-field count-input">
+                                    <select id="chlorine-positive-range" name="chlorine_positive_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="<0.2">&lt;0.2</option>
+                                        <option value="0.2">0.2</option>
+                                        <option value=">0.2">&gt;0.2</option>
+                                        <option value="<0.5">&lt;0.5</option>
+                                        <option value="0.5">0.5</option>
+                                        <option value=">0.5">&gt;0.5</option>
+                                    </select>
+                                </div>
+                                <div id="chlorine-positive-warning" class="warning-text" style="display: none;">Low chlorine level - check system</div>
+                                <div id="chlorine-positive-ideal" class="ideal-range" style="display: none;">Ideal range</div>
                             </div>
                             <div class="form-group">
                                 <label for="chlorine-negative">Negative</label>
-                                <input type="number" id="chlorine-negative" name="chlorine_negative" min="0" value="0" class="negative-field">
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="chlorine-negative" name="chlorine_negative" min="0" value="0" class="negative-field count-input">
+                                    <select id="chlorine-negative-range" name="chlorine_negative_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="0">0</option>
+                                    </select>
+                                </div>
+                                <div id="chlorine-negative-warning" class="warning-text" style="display: none;">Low chlorine level - check system</div>
+                                <div id="chlorine-negative-ideal" class="ideal-range" style="display: none;">Ideal range</div>
                             </div>
                         </div>
                     </div>
@@ -339,7 +421,19 @@
                         <div class="test-inputs">
                             <div class="form-group">
                                 <label for="bacteriological-positive">Positive</label>
-                                <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input">
+                                    <span id="urgent-icon" class="urgent-icon" style="display: none;">⚠️</span>
+                                    <select id="isolated-organism" name="isolated_organism" class="organism-dropdown" style="display: none;">
+                                        <option value="">Select organism</option>
+                                        <option value="E. coli">E. coli</option>
+                                        <option value="Coliform">Coliform</option>
+                                        <option value="Enterococcus">Enterococcus</option>
+                                        <option value="Salmonella">Salmonella</option>
+                                        <option value="Shigella">Shigella</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="bacteriological-negative">Negative</label>
@@ -440,12 +534,30 @@
                 const form = document.getElementById('submission-form');
                 form.addEventListener('submit', this.handleSubmit.bind(this));
 
+                // Prevent form submission on Enter key press in any input field
+                form.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' && event.target.tagName !== 'BUTTON' && event.target.type !== 'submit') {
+                        event.preventDefault();
+                        return false;
+                    }
+                });
+
                 document.getElementById('supply').addEventListener('change', this.handleSupplySelection.bind(this));
 
-                // Auto-calculate chlorine totals
+                document.getElementById('sampling-point').addEventListener('change', this.handleSamplingPointSelection.bind(this));
+
+                // Auto-calculate chlorine totals and handle range warnings
                 ['chlorine-positive', 'chlorine-negative'].forEach(id => {
                     document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
                 });
+
+                // Handle chlorine range change events for warnings
+                ['chlorine-positive-range', 'chlorine-negative-range'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', this.handleChlorineRangeChange.bind(this));
+                });
+
+                // Handle bacteriological positive input for urgent warnings
+                document.getElementById('bacteriological-positive').addEventListener('input', this.handleBacteriologicalChange.bind(this));
             }
 
             setTodayDate() {
@@ -475,13 +587,22 @@
                     document.getElementById('chlorine-total').value = 0;
                     document.getElementById('chlorine-positive').value = 0;
                     document.getElementById('chlorine-negative').value = 0;
+                    document.getElementById('chlorine-positive-range').value = '';
+                    document.getElementById('chlorine-negative-range').value = '';
                     document.getElementById('chlorine-positive').disabled = true;
                     document.getElementById('chlorine-negative').disabled = true;
+                    document.getElementById('chlorine-positive-range').disabled = true;
+                    document.getElementById('chlorine-negative-range').disabled = true;
                 } else {
                     chlorineSection.classList.remove('treated-only');
                     document.getElementById('chlorine-positive').disabled = false;
                     document.getElementById('chlorine-negative').disabled = false;
+                    document.getElementById('chlorine-positive-range').disabled = false;
+                    document.getElementById('chlorine-negative-range').disabled = false;
                 }
+
+                // Load sampling points for this supply
+                this.loadSamplingPoints(supplyId);
 
                 // Show the form
                 document.getElementById('submission-form-section').classList.remove('hidden');
@@ -500,18 +621,80 @@
                 document.getElementById('chlorine-total').value = 0;
                 document.getElementById('chlorine-positive').value = 0;
                 document.getElementById('chlorine-negative').value = 0;
+                document.getElementById('chlorine-positive-range').value = '';
+                document.getElementById('chlorine-negative-range').value = '';
                 document.getElementById('bacteriological-positive').value = 0;
                 document.getElementById('bacteriological-negative').value = 0;
                 document.getElementById('bacteriological-pending').value = 0;
                 document.getElementById('remarks').value = '';
 
                 // Re-enable all inputs
-                document.querySelectorAll('#submission-form input, #submission-form textarea').forEach(input => {
+                document.querySelectorAll('#submission-form input, #submission-form textarea, #submission-form select').forEach(input => {
                     input.disabled = false;
                 });
 
                 document.getElementById('chlorine-section').classList.remove('treated-only');
                 this.setTodayDate();
+
+                // Reset sampling points
+                this.hideSamplingPoints();
+            }
+
+            async loadSamplingPoints(supplyId) {
+                try {
+                    const response = await fetch(`/api/sampling-points/${supplyId}`);
+                    if (response.ok) {
+                        const samplingPoints = await response.json();
+                        if (samplingPoints.length > 0) {
+                            this.populateSamplingPointsDropdown(samplingPoints);
+                            this.showSamplingPoints();
+                        } else {
+                            this.hideSamplingPoints();
+                        }
+                    } else {
+                        this.hideSamplingPoints();
+                    }
+                } catch (error) {
+                    console.error('Error loading sampling points:', error);
+                    this.hideSamplingPoints();
+                }
+            }
+
+            populateSamplingPointsDropdown(samplingPoints) {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                samplingPointSelect.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
+
+                samplingPoints.forEach(point => {
+                    const option = document.createElement('option');
+                    option.value = point.id;
+                    option.textContent = point.name;
+                    option.dataset.location = point.location;
+                    option.dataset.description = point.description;
+                    samplingPointSelect.appendChild(option);
+                });
+            }
+
+            showSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.remove('hidden');
+            }
+
+            hideSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.add('hidden');
+                document.getElementById('sampling-point').value = '';
+                document.getElementById('sampling-point-location').textContent = '';
+            }
+
+            handleSamplingPointSelection() {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                const locationSpan = document.getElementById('sampling-point-location');
+
+                if (samplingPointSelect.value) {
+                    const selectedOption = samplingPointSelect.options[samplingPointSelect.selectedIndex];
+                    const location = selectedOption.dataset.location || 'Not specified';
+                    locationSpan.textContent = location;
+                } else {
+                    locationSpan.textContent = '';
+                }
             }
 
             updateChlorineTotal() {
@@ -525,8 +708,141 @@
                 document.getElementById('chlorine-total').value = total;
             }
 
+            handleChlorineRangeChange() {
+                const positiveRange = document.getElementById('chlorine-positive-range').value;
+                const negativeRange = document.getElementById('chlorine-negative-range').value;
+
+                // Handle positive range warnings and ideal indicators
+                const positiveWarning = document.getElementById('chlorine-positive-warning');
+                const positiveIdeal = document.getElementById('chlorine-positive-ideal');
+
+                if (positiveRange) {
+                    const rangeValue = this.parseRangeValue(positiveRange);
+                    if (rangeValue <= 0.4) {
+                        positiveWarning.style.display = 'block';
+                        positiveIdeal.style.display = 'none';
+                    } else if (rangeValue >= 0.5) {
+                        positiveWarning.style.display = 'none';
+                        positiveIdeal.style.display = 'block';
+                    } else {
+                        positiveWarning.style.display = 'none';
+                        positiveIdeal.style.display = 'none';
+                    }
+                } else {
+                    positiveWarning.style.display = 'none';
+                    positiveIdeal.style.display = 'none';
+                }
+
+                // Handle negative range warnings and ideal indicators
+                const negativeWarning = document.getElementById('chlorine-negative-warning');
+                const negativeIdeal = document.getElementById('chlorine-negative-ideal');
+
+                if (negativeRange) {
+                    const rangeValue = this.parseRangeValue(negativeRange);
+                    if (rangeValue <= 0.4) {
+                        negativeWarning.style.display = 'block';
+                        negativeIdeal.style.display = 'none';
+                    } else if (rangeValue >= 0.5) {
+                        negativeWarning.style.display = 'none';
+                        negativeIdeal.style.display = 'block';
+                    } else {
+                        negativeWarning.style.display = 'none';
+                        negativeIdeal.style.display = 'none';
+                    }
+                } else {
+                    negativeWarning.style.display = 'none';
+                    negativeIdeal.style.display = 'none';
+                }
+            }
+
+            parseRangeValue(rangeStr) {
+                // Parse range strings like "<0.2", "0.5", ">0.5" to numeric values
+                if (rangeStr.includes('<')) {
+                    return parseFloat(rangeStr.replace('<', '')) - 0.01; // Slightly below the threshold
+                } else if (rangeStr.includes('>')) {
+                    return parseFloat(rangeStr.replace('>', '')) + 0.01; // Slightly above the threshold
+                } else {
+                    return parseFloat(rangeStr);
+                }
+            }
+
+            handleBacteriologicalChange() {
+                const positiveValue = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const urgentIcon = document.getElementById('urgent-icon');
+                const organismDropdown = document.getElementById('isolated-organism');
+
+                if (positiveValue > 2.9) {
+                    urgentIcon.style.display = 'inline';
+                } else {
+                    urgentIcon.style.display = 'none';
+                }
+
+                if (positiveValue > 0) {
+                    organismDropdown.style.display = 'inline';
+                } else {
+                    organismDropdown.style.display = 'none';
+                    organismDropdown.value = '';
+                }
+            }
+
+            validateForm() {
+                const errors = [];
+
+                // Check if supply is selected
+                const supplyId = document.getElementById('supply').value;
+                if (!supplyId) {
+                    errors.push('Water Supply');
+                }
+
+                // Check submission date
+                const submissionDate = document.getElementById('submission-date').value;
+                if (!submissionDate) {
+                    errors.push('Submission Date');
+                }
+
+                // Check number of visits
+                const visits = parseInt(document.getElementById('visits').value);
+                if (!visits || visits < 1) {
+                    errors.push('Number of Visits (must be at least 1)');
+                }
+
+                // For treated supplies, check if chlorine range values are selected when counts > 0
+                if (this.currentSupply && this.currentSupply.type === 'treated') {
+                    const chlorinePositive = parseInt(document.getElementById('chlorine-positive').value) || 0;
+                    const chlorineNegative = parseInt(document.getElementById('chlorine-negative').value) || 0;
+                    const chlorinePositiveRange = document.getElementById('chlorine-positive-range').value;
+                    const chlorineNegativeRange = document.getElementById('chlorine-negative-range').value;
+
+                    if (chlorinePositive > 0 && !chlorinePositiveRange) {
+                        errors.push('Chlorine Positive Range (required when count > 0)');
+                    }
+
+                    if (chlorineNegative > 0 && !chlorineNegativeRange) {
+                        errors.push('Chlorine Negative Range (required when count > 0)');
+                    }
+                }
+
+                // Check bacteriological fields - at least one should have a value
+                const bacterioPositive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const bacterioNegative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
+                const bacterioPending = parseInt(document.getElementById('bacteriological-pending').value) || 0;
+
+                if (bacterioPositive === 0 && bacterioNegative === 0 && bacterioPending === 0) {
+                    errors.push('At least one Bacteriological test result');
+                }
+
+                return errors;
+            }
+
             async handleSubmit(event) {
                 event.preventDefault();
+
+                // Comprehensive form validation
+                const validationErrors = this.validateForm();
+                if (validationErrors.length > 0) {
+                    this.showAlert('error', 'Please complete all required fields: ' + validationErrors.join(', '));
+                    return;
+                }
 
                 const submitBtn = document.getElementById('submit-btn');
                 const originalText = submitBtn.textContent;
@@ -549,16 +865,22 @@
                         chlorineNegative = parseInt(formData.get('chlorine_negative')) || 0;
                     }
 
+                    const samplingPointId = document.getElementById('sampling-point').value;
+
                     const data = {
                         supply_id: supplyId,
+                        sampling_point_id: samplingPointId ? parseInt(samplingPointId) : null,
                         submission_date: formData.get('submission_date'),
                         visits: parseInt(formData.get('visits')) || 1,
                         chlorine_total: chlorineTotal,
                         chlorine_positive: chlorinePositive,
                         chlorine_negative: chlorineNegative,
+                        chlorine_positive_range: document.getElementById('chlorine-positive-range').value,
+                        chlorine_negative_range: document.getElementById('chlorine-negative-range').value,
                         bacteriological_positive: parseInt(formData.get('bacteriological_positive')) || 0,
                         bacteriological_negative: parseInt(formData.get('bacteriological_negative')) || 0,
                         bacteriological_pending: parseInt(formData.get('bacteriological_pending')) || 0,
+                        isolated_organism: document.getElementById('isolated-organism').value || '',
                         remarks: formData.get('remarks') || ''
                     };
 

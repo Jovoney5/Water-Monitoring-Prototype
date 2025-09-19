@@ -67,18 +67,36 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             supply_id INTEGER NOT NULL,
             inspector_id INTEGER NOT NULL,
+            sampling_point_id INTEGER,
             submission_date DATE NOT NULL,
             visits INTEGER DEFAULT 0,
             chlorine_total INTEGER DEFAULT 0,
             chlorine_positive INTEGER DEFAULT 0,
             chlorine_negative INTEGER DEFAULT 0,
+            chlorine_positive_range TEXT,
+            chlorine_negative_range TEXT,
             bacteriological_positive INTEGER DEFAULT 0,
             bacteriological_negative INTEGER DEFAULT 0,
             bacteriological_pending INTEGER DEFAULT 0,
+            isolated_organism TEXT,
             remarks TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
-            FOREIGN KEY (inspector_id) REFERENCES users (id)
+            FOREIGN KEY (inspector_id) REFERENCES users (id),
+            FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
+        )
+    ''')
+
+    # Sampling points table for water supplies
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sampling_points (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            supply_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            location TEXT,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (supply_id) REFERENCES water_supplies (id)
         )
     ''')
 
@@ -159,6 +177,48 @@ def init_db():
             INSERT INTO water_supplies (name, type, agency, location)
             VALUES (?, ?, ?, ?)
         ''', supplies)
+
+    # Insert sampling points for Roaring River supplies
+    cursor.execute("SELECT COUNT(*) FROM sampling_points")
+    if cursor.fetchone()[0] == 0:
+        # Get the IDs for Roaring River 1 and Roaring River 2
+        roaring_river_1_id = cursor.execute("SELECT id FROM water_supplies WHERE name = 'Roaring River 1'").fetchone()[0]
+        roaring_river_2_id = cursor.execute("SELECT id FROM water_supplies WHERE name = 'Roaring River 2'").fetchone()[0]
+
+        sampling_points = [
+            # Roaring River 1 sampling points
+            (roaring_river_1_id, 'Both Sources', 'roaring river', 'Combined sampling from both sources'),
+            (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
+            (roaring_river_1_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
+            (roaring_river_1_id, 'tap@ RADA Office (new plant)', 'roaring river', 'RADA Office tap from new plant'),
+            (roaring_river_1_id, 'tap@ Baptist Church (new plant)', 'roaring river', 'Baptist Church tap from new plant'),
+            (roaring_river_1_id, 'tap@ Basic School (new plant)', 'roaring river', 'Basic School tap from new plant'),
+            (roaring_river_1_id, 'tap@ Primary School (new plant)', 'roaring river', 'Primary School tap from new plant'),
+            (roaring_river_1_id, 'tap@ Post Office (new plant)', 'roaring river', 'Post Office tap from new plant'),
+            (roaring_river_1_id, 'tap@ Community Center (new plant)', 'roaring river', 'Community Center tap from new plant'),
+            (roaring_river_1_id, 'tap@ Shop (new plant)', 'roaring river', 'Shop tap from new plant'),
+            (roaring_river_1_id, 'tank@ new plant', 'roaring river', 'Storage tank at new plant'),
+            (roaring_river_1_id, 'tank@ old plant', 'roaring river', 'Storage tank at old plant'),
+
+            # Roaring River 2 sampling points
+            (roaring_river_2_id, 'Both Sources', 'roaring river', 'Combined sampling from both sources'),
+            (roaring_river_2_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
+            (roaring_river_2_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
+            (roaring_river_2_id, 'tap@ RADA Office (new plant)', 'roaring river', 'RADA Office tap from new plant'),
+            (roaring_river_2_id, 'tap@ Baptist Church (new plant)', 'roaring river', 'Baptist Church tap from new plant'),
+            (roaring_river_2_id, 'tap@ Basic School (new plant)', 'roaring river', 'Basic School tap from new plant'),
+            (roaring_river_2_id, 'tap@ Primary School (new plant)', 'roaring river', 'Primary School tap from new plant'),
+            (roaring_river_2_id, 'tap@ Post Office (new plant)', 'roaring river', 'Post Office tap from new plant'),
+            (roaring_river_2_id, 'tap@ Community Center (new plant)', 'roaring river', 'Community Center tap from new plant'),
+            (roaring_river_2_id, 'tap@ Shop (new plant)', 'roaring river', 'Shop tap from new plant'),
+            (roaring_river_2_id, 'tank@ new plant', 'roaring river', 'Storage tank at new plant'),
+            (roaring_river_2_id, 'tank@ old plant', 'roaring river', 'Storage tank at old plant'),
+        ]
+
+        cursor.executemany('''
+            INSERT INTO sampling_points (supply_id, name, location, description)
+            VALUES (?, ?, ?, ?)
+        ''', sampling_points)
 
     conn.commit()
     conn.close()
@@ -376,6 +436,19 @@ def get_supplies():
     conn.close()
     return jsonify([dict(supply) for supply in supplies])
 
+@app.route('/api/sampling-points/<int:supply_id>')
+def get_sampling_points(supply_id):
+    conn = get_db_connection()
+    sampling_points = conn.execute('''
+        SELECT sp.*, ws.name as supply_name
+        FROM sampling_points sp
+        JOIN water_supplies ws ON sp.supply_id = ws.id
+        WHERE sp.supply_id = ?
+        ORDER BY sp.name
+    ''', (supply_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(point) for point in sampling_points])
+
 @app.route('/api/monthly-data')
 def get_monthly_data():
     if 'user_id' not in session:
@@ -480,16 +553,17 @@ def submit_inspection():
         # Insert new inspection submission
         cursor.execute('''
             INSERT INTO inspection_submissions
-            (supply_id, inspector_id, submission_date, visits, chlorine_total, chlorine_positive,
-             chlorine_negative, bacteriological_positive, bacteriological_negative,
-             bacteriological_pending, remarks)
-            VALUES (?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?)
+            (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
+             chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
+             bacteriological_negative, bacteriological_pending, isolated_organism, remarks)
+            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            data['supply_id'], session['user_id'], data.get('visits', 0),
-            data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
-            data.get('chlorine_negative', 0), data.get('bacteriological_positive', 0),
+            data['supply_id'], session['user_id'], data.get('sampling_point_id'),
+            data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
+            data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
+            data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
             data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
-            data.get('remarks', '')
+            data.get('isolated_organism', ''), data.get('remarks', '')
         ))
 
         submission_id = cursor.lastrowid
