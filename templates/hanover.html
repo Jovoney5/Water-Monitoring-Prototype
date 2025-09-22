@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanover Inspector Dashboard - Water Quality Monitoring</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --input-bg: white;
+            --input-border: #ddd;
+            --card-bg: #f8f9fa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --supply-selected-bg: #e3f2fd;
+            --positive-color: #28a745;
+            --negative-color: #dc3545;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --container-bg: rgba(30, 30, 30, 0.95);
+            --input-bg: #2d2d2d;
+            --input-border: #555;
+            --card-bg: #252525;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --supply-selected-bg: #1e1e1e;
+            --positive-color: #4ade80;
+            --negative-color: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+
+        .form-container {
+            background: var(--container-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .selected-supply {
+            background: var(--supply-selected-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-with-button { display: flex; gap: 10px; align-items: center; }
+        .input-with-button input { flex: 1; }
+
+        .increment-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .test-section {
+            background: var(--card-bg);
+            border: 1px solid var(--input-border);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .test-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .warning-text { color: var(--negative-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .ideal-range { color: var(--positive-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .high-level { color: #fd7e14; font-weight: bold; font-size: 12px; margin-top: 5px; }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .alert { padding: 12px; border-radius: 5px; margin-bottom: 1rem; font-weight: 600; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .hidden { display: none; }
+        .treated-only { opacity: 0.6; }
+
+        .submission-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 2px solid #444 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hanover Inspector Dashboard</h1>
+        <div>
+            <span id="welcomeText">Welcome, Inspector</span>
+            <button id="darkModeToggle" class="logout-btn">🌙 Dark Mode</button>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>New Water Quality Submission - Hanover Parish</h2>
+            <div id="alert-container"></div>
+
+            <div class="form-group">
+                <label for="supply">Select Water Supply</label>
+                <select id="supply">
+                    <option value="">Select a water supply...</option>
+                </select>
+            </div>
+
+            <div id="submission-form-section" class="hidden">
+                <div class="selected-supply">
+                    <h3 id="selected-supply-name"></h3>
+                    <p id="selected-supply-info"></p>
+                </div>
+
+                <form id="submission-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="visits">Number of Visits</label>
+                            <div class="input-with-button">
+                                <input type="number" id="visits" min="1" value="1">
+                                <button type="button" class="increment-btn" onclick="incrementVisits()">+1 Visit</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="submission-date">Submission Date</label>
+                            <input type="date" id="submission-date" required>
+                        </div>
+                    </div>
+
+                    <div class="test-section" id="chlorine-section">
+                        <h3>Chlorine Residual Tests (mg/L)</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="chlorine-low">Low (&lt;0.2 mg/L)</label>
+                                <input type="number" id="chlorine-low" min="0" value="0">
+                                <div class="warning-text">Action needed - low chlorine level</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-ideal">Ideal (0.2-1.5 mg/L)</label>
+                                <input type="number" id="chlorine-ideal" min="0" value="0">
+                                <div class="ideal-range">Ideal chlorine level</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-high">High (&gt;1.5 mg/L)</label>
+                                <input type="number" id="chlorine-high" min="0" value="0">
+                                <div class="high-level">High level - adjust dosage</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="remarks">Remarks</label>
+                        <textarea id="remarks" rows="3" placeholder="Enter any observations..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Inspection Data</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h2>Recent Submissions</h2>
+            <div id="recent-submissions-list">
+                <p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const HANOVER_SUPPLIES = [
+            // HMC Supplies (34 - All Untreated)
+            {id:1,name:"Claremont Catchment",agency:"HMC",type:"untreated",location:"Claremont",sample_point:"Source"},
+            {id:2,name:"Thompson Hill Catchment",agency:"HMC",type:"untreated",location:"Thompson Hill",sample_point:"Source"},
+            {id:3,name:"Upper Rock Spring",agency:"HMC",type:"untreated",location:"Upper Rock Spring",sample_point:"Source"},
+            {id:4,name:"Success Catchment",agency:"HMC",type:"untreated",location:"Success",sample_point:"Source"},
+            {id:5,name:"Bamboo Spring",agency:"HMC",type:"untreated",location:"Bomboo",sample_point:"Source"},
+            {id:6,name:"Jericho Spring",agency:"HMC",type:"untreated",location:"Jericho",sample_point:"Source"},
+            {id:7,name:"Lethe Spring",agency:"HMC",type:"untreated",location:"Lethe",sample_point:"Source"},
+            {id:8,name:"Welcome Spring",agency:"HMC",type:"untreated",location:"Welcome",sample_point:"Source"},
+            {id:9,name:"Knockalva Catchment",agency:"HMC",type:"untreated",location:"Knocklava",sample_point:"Source"},
+            {id:10,name:"Flamstead Spring",agency:"HMC",type:"untreated",location:"Flamstead",sample_point:"Source"},
+            {id:11,name:"Pierces Village Catchment",agency:"HMC",type:"untreated",location:"Pierces Village",sample_point:"Source"},
+            {id:12,name:"Cold Spring",agency:"HMC",type:"untreated",location:"Cold Spring",sample_point:"Source"},
+            {id:13,name:"Rejion Tank",agency:"HMC",type:"untreated",location:"Rejoin",sample_point:"Source"},
+            {id:14,name:"Rejoin Catchment",agency:"HMC",type:"untreated",location:"Rejoin",sample_point:"Source"},
+            {id:15,name:"Chovey Hole",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
+            {id:16,name:"Content Catchment",agency:"HMC",type:"untreated",location:"Content",sample_point:"Source"},
+            {id:17,name:"St Simon Spring",agency:"HMC",type:"untreated",location:"St. Simon",sample_point:"Source, St. Simon Community Tank"},
+            {id:18,name:"Donalva Spring",agency:"HMC",type:"untreated",location:"Maryland",sample_point:"Source"},
+            {id:19,name:"Sawpit Spring",agency:"HMC",type:"untreated",location:"Cove Road",sample_point:"Source"},
+            {id:20,name:"Patty Hill Spring",agency:"HMC",type:"untreated",location:"Patty Hill",sample_point:"Source"},
+            {id:21,name:"Woodsville Catchment",agency:"HMC",type:"untreated",location:"Woodsville",sample_point:"Source"},
+            {id:22,name:"Dias Tank",agency:"HMC",type:"untreated",location:"Dias",sample_point:"Source"},
+            {id:23,name:"Anderson Spring",agency:"HMC",type:"untreated",location:"Sandy Bay",sample_point:"Source"},
+            {id:24,name:"Bamboo Roadside Overflow",agency:"HMC",type:"untreated",location:"Bamboo",sample_point:"Source"},
+            {id:25,name:"Axe-and-Adze Catchment",agency:"HMC",type:"untreated",location:"Axe-And-Adze",sample_point:"Source"},
+            {id:26,name:"Soja Spring",agency:"HMC",type:"untreated",location:"Retrieve",sample_point:"Source"},
+            {id:27,name:"Castle Hyde Catchment",agency:"HMC",type:"untreated",location:"Castle Hyde",sample_point:"Source"},
+            {id:28,name:"Medley Spring",agency:"HMC",type:"untreated",location:"Medley",sample_point:"Source"},
+            {id:29,name:"Craig Nathan",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
+            {id:30,name:"Jabez Catchment",agency:"HMC",type:"untreated",location:"Retieve",sample_point:"Source"},
+            {id:31,name:"Rockfoot Reservoir",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
+            {id:32,name:"Burntside Spring",agency:"HMC",type:"untreated",location:"Maryland",sample_point:"Source"},
+            {id:33,name:"Old Cold Spring",agency:"HMC",type:"untreated",location:"Cold Spring",sample_point:"Source"},
+            {id:34,name:"Spring",agency:"HMC",type:"untreated",location:"Georgia",sample_point:"Source"},
+
+            // NWC Supplies (5 - All Treated)
+            {id:35,name:"Logwood",agency:"NWC",type:"treated",location:"Logwood",sample_point:"D/T, Logwood H/C, Green Island H/C, Green Island S/P, Cave Valley H/C"},
+            {id:36,name:"New Milns",agency:"NWC",type:"treated",location:"New Milns",sample_point:"D/T, New Milns S/P"},
+            {id:37,name:"Kendal",agency:"NWC",type:"treated",location:"Kendal",sample_point:"D/T, Kendal Cross Road, Jehovah Witness S/P, Friendship S/P, Grange S/P, Neva Shop-Cessnock"},
+            {id:38,name:"Shettlewood",agency:"NWC",type:"treated",location:"Ramble",sample_point:"D/T, Ramble H/C, Chester Castle H/C, Mt. Ward Primary, Knockalva Polythecnic, Miles Town S/P, Colhorn Enterprise, Brayhorn Enterprise, West Haven Chidren's Home, Arawak Restaurant, Border Jerk, Mt. Peto H/C"},
+            {id:39,name:"Great River - St. James",agency:"NWC",type:"treated",location:"St. James",sample_point:"Hopewell H/C, Sandy bay H/C, Kew Bridge, Hanover H/D, First Hill S/P, Noel Holmes Hospital(X3), Copperwood Farms, Dorcey James Property, NWC Lucea Loading Bay, Hugh Garwood Premises, McQuaire/Woodland Relift Station"},
+
+            // Private Supplies (18 - 16 Treated, 2 Untreated)
+            {id:40,name:"Tryall Club",agency:"Private",type:"treated",location:"Sandy Bay",sample_point:"D/T, Tryall Market"},
+            {id:41,name:"Vivid Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Alkaline tap"},
+            {id:42,name:"Aquacity Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Mineral Tap"},
+            {id:43,name:"M&B Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Alkaline Tap"},
+            {id:44,name:"Quenched Water Store",agency:"Private",type:"treated",location:"Lucea",sample_point:"Purified Tap"},
+            {id:45,name:"Epic Blue",agency:"Private",type:"treated",location:"Lucea",sample_point:"Alkaline Tap"},
+            {id:46,name:"Dynasty Water Store",agency:"Private",type:"treated",location:"Orange Bay",sample_point:"Alkaline Tap"},
+            {id:47,name:"Valley Dew",agency:"Private",type:"untreated",location:"Miles Town, Ramble",sample_point:"Purified Tap"},
+            {id:48,name:"Jus Chill",agency:"Private",type:"untreated",location:"Lethe",sample_point:"Closed"},
+            {id:49,name:"Royalton Resorts",agency:"Private",type:"treated",location:"Negril",sample_point:"X7"},
+            {id:50,name:"Sandals Negril",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:51,name:"Couples Negril",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:52,name:"Sunset At The Palms",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:53,name:"Azul Resort",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:54,name:"Round Hill Resort",agency:"Private",type:"treated",location:"John Pringle drive, Hopewell",sample_point:"X3"},
+            {id:55,name:"Hedonism II",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:56,name:"Riu Tropical Bay",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
+            {id:57,name:"Riu Jamiecotel",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"}
+        ];
+
+        class HanoverDashboard {
+            constructor() {
+                this.supplies = HANOVER_SUPPLIES;
+                this.currentSupply = null;
+                this.submissions = JSON.parse(localStorage.getItem('hanover_submissions') || '[]');
+                this.init();
+            }
+
+            init() {
+                this.populateDropdown();
+                this.setupEvents();
+                this.setToday();
+                this.loadSubmissions();
+            }
+
+            populateDropdown() {
+                const select = document.getElementById('supply');
+                const agencies = {
+                    'HMC': 'Hanover Municipal Corporation',
+                    'NWC': 'National Water Commission',
+                    'Private': 'Private'
+                };
+
+                Object.keys(agencies).forEach(code => {
+                    const supplies = this.supplies.filter(s => s.agency === code);
+                    if (supplies.length) {
+                        const group = document.createElement('optgroup');
+                        group.label = agencies[code];
+                        supplies.forEach(s => {
+                            const opt = document.createElement('option');
+                            opt.value = s.id;
+                            opt.textContent = `${s.name} (${s.type})`;
+                            group.appendChild(opt);
+                        });
+                        select.appendChild(group);
+                    }
+                });
+            }
+
+            setupEvents() {
+                document.getElementById('supply').addEventListener('change', () => this.selectSupply());
+                document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
+                document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
+            }
+
+            setToday() {
+                document.getElementById('submission-date').value = new Date().toISOString().split('T')[0];
+            }
+
+            selectSupply() {
+                const supplyValue = document.getElementById('supply').value;
+
+                if (!supplyValue) {
+                    document.getElementById('submission-form-section').classList.add('hidden');
+                    return;
+                }
+
+                const id = parseInt(supplyValue);
+                this.currentSupply = this.supplies.find(s => s.id === id);
+                document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
+                document.getElementById('selected-supply-info').textContent =
+                    `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.location} • ${this.currentSupply.sample_point}`;
+
+                const section = document.getElementById('chlorine-section');
+                if (this.currentSupply.type === 'untreated') {
+                    section.classList.add('treated-only');
+                    document.getElementById('chlorine-low').disabled = true;
+                    document.getElementById('chlorine-ideal').disabled = true;
+                    document.getElementById('chlorine-high').disabled = true;
+                } else {
+                    section.classList.remove('treated-only');
+                    document.getElementById('chlorine-low').disabled = false;
+                    document.getElementById('chlorine-ideal').disabled = false;
+                    document.getElementById('chlorine-high').disabled = false;
+                }
+
+                document.getElementById('submission-form-section').classList.remove('hidden');
+            }
+
+            submit(e) {
+                e.preventDefault();
+
+                const submission = {
+                    id: Date.now(),
+                    supply_name: this.currentSupply.name,
+                    agency: this.currentSupply.agency,
+                    location: this.currentSupply.location,
+                    type: this.currentSupply.type,
+                    sample_point: this.currentSupply.sample_point,
+                    visits: parseInt(document.getElementById('visits').value) || 0,
+                    submission_date: document.getElementById('submission-date').value,
+                    chlorine_low: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-low').value) || 0) : 0,
+                    chlorine_ideal: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-ideal').value) || 0) : 0,
+                    chlorine_high: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-high').value) || 0) : 0,
+                    remarks: document.getElementById('remarks').value || '',
+                    created_at: new Date().toISOString()
+                };
+
+                this.submissions.unshift(submission);
+                localStorage.setItem('hanover_submissions', JSON.stringify(this.submissions));
+
+                this.showAlert('success', `Submission for ${this.currentSupply.name} recorded successfully!`);
+                this.reset();
+                this.loadSubmissions();
+            }
+
+            reset() {
+                document.getElementById('submission-form').reset();
+                document.getElementById('supply').value = '';
+                document.getElementById('submission-form-section').classList.add('hidden');
+                this.setToday();
+            }
+
+            loadSubmissions() {
+                this.displaySubmissions(this.submissions);
+            }
+
+            displaySubmissions(submissions = []) {
+                const container = document.getElementById('recent-submissions-list');
+                if (!submissions.length) {
+                    container.innerHTML = '<p style="text-align:center;color:#666;padding:2rem;">No submissions yet</p>';
+                    return;
+                }
+
+                container.innerHTML = submissions.slice(0, 10).map(s => `
+                    <div class="submission-card">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                            <strong>${s.supply_name}</strong>
+                            <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
+                        </div>
+                        <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
+                            ${s.agency} • ${s.visits} visit(s) • ${s.type} • ${s.location}
+                        </p>
+                        ${s.type === 'treated' ? `
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;">
+                            <div style="color:var(--negative-color);">Low: ${s.chlorine_low}</div>
+                            <div style="color:var(--positive-color);">Ideal: ${s.chlorine_ideal}</div>
+                            <div style="color:#fd7e14;">High: ${s.chlorine_high}</div>
+                        </div>
+                        ` : '<div style="font-style:italic;color:#666;">Untreated supply - no chlorine testing</div>'}
+                        ${s.remarks ? `<p style="margin-top:0.5rem;font-size:13px;color:#666;"><strong>Remarks:</strong> ${s.remarks}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            showAlert(type, msg) {
+                const container = document.getElementById('alert-container');
+                container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            toggleTheme() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', next);
+                document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+                localStorage.setItem('theme', next);
+            }
+        }
+
+        function incrementVisits() {
+            const input = document.getElementById('visits');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+            new HanoverDashboard();
+        });
+    </script>
+</body>
+</html>

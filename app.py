@@ -157,6 +157,14 @@ def init_db():
 
             # Trelawny Admin (password: admin123)
             ('trelawny_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Trelawny Administrator', 'Trelawny'),
+
+            # Hanover Inspectors (password: inspector123)
+            ('hanover1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector A', 'Hanover'),
+            ('hanover2', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector B', 'Hanover'),
+            ('hanover3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector C', 'Hanover'),
+
+            # Hanover Admin (password: admin123)
+            ('hanover_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Hanover Administrator', 'Hanover'),
         ]
 
         cursor.executemany('''
@@ -339,6 +347,8 @@ def index():
 
     if user_parish == 'Trelawny':
         return redirect(url_for('trelawny'))
+    elif user_parish == 'Hanover':
+        return redirect(url_for('hanover'))
     elif user_parish == 'Westmoreland':
         if session['role'] == 'inspector':
             return render_template('index.html')
@@ -372,6 +382,18 @@ def trelawny():
 
     return render_template('trelawny.html')
 
+@app.route('/hanover')
+def hanover():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Only allow Hanover users to access this dashboard
+    user_parish = session.get('parish', 'Westmoreland')
+    if user_parish != 'Hanover':
+        return redirect(url_for('index'))
+
+    return render_template('hanover.html')
+
 @app.route('/report')
 def report():
     if 'user_id' not in session:
@@ -404,7 +426,7 @@ def login():
                 conn.close()
 
             # Allow users from supported parishes
-            supported_parishes = ['Westmoreland', 'Trelawny']
+            supported_parishes = ['Westmoreland', 'Trelawny', 'Hanover']
             if user_parish not in supported_parishes:
                 return jsonify({
                     'success': False,
@@ -894,8 +916,24 @@ def logout():
 # API Routes
 @app.route('/api/supplies')
 def get_supplies():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
     conn = get_db_connection()
-    supplies = conn.execute('SELECT * FROM water_supplies ORDER BY type, name').fetchall()
+
+    # Get the user's parish
+    user = conn.execute('SELECT parish FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'error': 'User not found'}), 404
+
+    user_parish = user['parish']
+
+    # Filter supplies by parish
+    supplies = conn.execute(
+        'SELECT * FROM water_supplies WHERE parish = ? ORDER BY type, name',
+        (user_parish,)
+    ).fetchall()
     conn.close()
     return jsonify([dict(supply) for supply in supplies])
 
