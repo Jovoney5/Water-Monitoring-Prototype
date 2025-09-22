@@ -256,84 +256,33 @@
     </div>
 
     <script>
-        const HANOVER_SUPPLIES = [
-            // HMC Supplies (34 - All Untreated)
-            {id:1,name:"Claremont Catchment",agency:"HMC",type:"untreated",location:"Claremont",sample_point:"Source"},
-            {id:2,name:"Thompson Hill Catchment",agency:"HMC",type:"untreated",location:"Thompson Hill",sample_point:"Source"},
-            {id:3,name:"Upper Rock Spring",agency:"HMC",type:"untreated",location:"Upper Rock Spring",sample_point:"Source"},
-            {id:4,name:"Success Catchment",agency:"HMC",type:"untreated",location:"Success",sample_point:"Source"},
-            {id:5,name:"Bamboo Spring",agency:"HMC",type:"untreated",location:"Bomboo",sample_point:"Source"},
-            {id:6,name:"Jericho Spring",agency:"HMC",type:"untreated",location:"Jericho",sample_point:"Source"},
-            {id:7,name:"Lethe Spring",agency:"HMC",type:"untreated",location:"Lethe",sample_point:"Source"},
-            {id:8,name:"Welcome Spring",agency:"HMC",type:"untreated",location:"Welcome",sample_point:"Source"},
-            {id:9,name:"Knockalva Catchment",agency:"HMC",type:"untreated",location:"Knocklava",sample_point:"Source"},
-            {id:10,name:"Flamstead Spring",agency:"HMC",type:"untreated",location:"Flamstead",sample_point:"Source"},
-            {id:11,name:"Pierces Village Catchment",agency:"HMC",type:"untreated",location:"Pierces Village",sample_point:"Source"},
-            {id:12,name:"Cold Spring",agency:"HMC",type:"untreated",location:"Cold Spring",sample_point:"Source"},
-            {id:13,name:"Rejion Tank",agency:"HMC",type:"untreated",location:"Rejoin",sample_point:"Source"},
-            {id:14,name:"Rejoin Catchment",agency:"HMC",type:"untreated",location:"Rejoin",sample_point:"Source"},
-            {id:15,name:"Chovey Hole",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
-            {id:16,name:"Content Catchment",agency:"HMC",type:"untreated",location:"Content",sample_point:"Source"},
-            {id:17,name:"St Simon Spring",agency:"HMC",type:"untreated",location:"St. Simon",sample_point:"Source, St. Simon Community Tank"},
-            {id:18,name:"Donalva Spring",agency:"HMC",type:"untreated",location:"Maryland",sample_point:"Source"},
-            {id:19,name:"Sawpit Spring",agency:"HMC",type:"untreated",location:"Cove Road",sample_point:"Source"},
-            {id:20,name:"Patty Hill Spring",agency:"HMC",type:"untreated",location:"Patty Hill",sample_point:"Source"},
-            {id:21,name:"Woodsville Catchment",agency:"HMC",type:"untreated",location:"Woodsville",sample_point:"Source"},
-            {id:22,name:"Dias Tank",agency:"HMC",type:"untreated",location:"Dias",sample_point:"Source"},
-            {id:23,name:"Anderson Spring",agency:"HMC",type:"untreated",location:"Sandy Bay",sample_point:"Source"},
-            {id:24,name:"Bamboo Roadside Overflow",agency:"HMC",type:"untreated",location:"Bamboo",sample_point:"Source"},
-            {id:25,name:"Axe-and-Adze Catchment",agency:"HMC",type:"untreated",location:"Axe-And-Adze",sample_point:"Source"},
-            {id:26,name:"Soja Spring",agency:"HMC",type:"untreated",location:"Retrieve",sample_point:"Source"},
-            {id:27,name:"Castle Hyde Catchment",agency:"HMC",type:"untreated",location:"Castle Hyde",sample_point:"Source"},
-            {id:28,name:"Medley Spring",agency:"HMC",type:"untreated",location:"Medley",sample_point:"Source"},
-            {id:29,name:"Craig Nathan",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
-            {id:30,name:"Jabez Catchment",agency:"HMC",type:"untreated",location:"Retieve",sample_point:"Source"},
-            {id:31,name:"Rockfoot Reservoir",agency:"HMC",type:"untreated",location:"Askenish",sample_point:"Source"},
-            {id:32,name:"Burntside Spring",agency:"HMC",type:"untreated",location:"Maryland",sample_point:"Source"},
-            {id:33,name:"Old Cold Spring",agency:"HMC",type:"untreated",location:"Cold Spring",sample_point:"Source"},
-            {id:34,name:"Spring",agency:"HMC",type:"untreated",location:"Georgia",sample_point:"Source"},
-
-            // NWC Supplies (5 - All Treated)
-            {id:35,name:"Logwood",agency:"NWC",type:"treated",location:"Logwood",sample_point:"D/T, Logwood H/C, Green Island H/C, Green Island S/P, Cave Valley H/C"},
-            {id:36,name:"New Milns",agency:"NWC",type:"treated",location:"New Milns",sample_point:"D/T, New Milns S/P"},
-            {id:37,name:"Kendal",agency:"NWC",type:"treated",location:"Kendal",sample_point:"D/T, Kendal Cross Road, Jehovah Witness S/P, Friendship S/P, Grange S/P, Neva Shop-Cessnock"},
-            {id:38,name:"Shettlewood",agency:"NWC",type:"treated",location:"Ramble",sample_point:"D/T, Ramble H/C, Chester Castle H/C, Mt. Ward Primary, Knockalva Polythecnic, Miles Town S/P, Colhorn Enterprise, Brayhorn Enterprise, West Haven Chidren's Home, Arawak Restaurant, Border Jerk, Mt. Peto H/C"},
-            {id:39,name:"Great River - St. James",agency:"NWC",type:"treated",location:"St. James",sample_point:"Hopewell H/C, Sandy bay H/C, Kew Bridge, Hanover H/D, First Hill S/P, Noel Holmes Hospital(X3), Copperwood Farms, Dorcey James Property, NWC Lucea Loading Bay, Hugh Garwood Premises, McQuaire/Woodland Relift Station"},
-
-            // Private Supplies (18 - 16 Treated, 2 Untreated)
-            {id:40,name:"Tryall Club",agency:"Private",type:"treated",location:"Sandy Bay",sample_point:"D/T, Tryall Market"},
-            {id:41,name:"Vivid Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Alkaline tap"},
-            {id:42,name:"Aquacity Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Mineral Tap"},
-            {id:43,name:"M&B Water Store",agency:"Private",type:"treated",location:"Hopewell",sample_point:"Alkaline Tap"},
-            {id:44,name:"Quenched Water Store",agency:"Private",type:"treated",location:"Lucea",sample_point:"Purified Tap"},
-            {id:45,name:"Epic Blue",agency:"Private",type:"treated",location:"Lucea",sample_point:"Alkaline Tap"},
-            {id:46,name:"Dynasty Water Store",agency:"Private",type:"treated",location:"Orange Bay",sample_point:"Alkaline Tap"},
-            {id:47,name:"Valley Dew",agency:"Private",type:"untreated",location:"Miles Town, Ramble",sample_point:"Purified Tap"},
-            {id:48,name:"Jus Chill",agency:"Private",type:"untreated",location:"Lethe",sample_point:"Closed"},
-            {id:49,name:"Royalton Resorts",agency:"Private",type:"treated",location:"Negril",sample_point:"X7"},
-            {id:50,name:"Sandals Negril",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:51,name:"Couples Negril",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:52,name:"Sunset At The Palms",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:53,name:"Azul Resort",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:54,name:"Round Hill Resort",agency:"Private",type:"treated",location:"John Pringle drive, Hopewell",sample_point:"X3"},
-            {id:55,name:"Hedonism II",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:56,name:"Riu Tropical Bay",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"},
-            {id:57,name:"Riu Jamiecotel",agency:"Private",type:"treated",location:"Negril",sample_point:"X3"}
-        ];
-
         class HanoverDashboard {
             constructor() {
-                this.supplies = HANOVER_SUPPLIES;
+                this.supplies = [];
                 this.currentSupply = null;
                 this.submissions = JSON.parse(localStorage.getItem('hanover_submissions') || '[]');
                 this.init();
             }
 
-            init() {
+            async init() {
+                await this.loadSupplies();
                 this.populateDropdown();
                 this.setupEvents();
                 this.setToday();
                 this.loadSubmissions();
+            }
+
+            async loadSupplies() {
+                try {
+                    const response = await fetch('/api/supplies');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    this.supplies = await response.json();
+                } catch (error) {
+                    console.error('Failed to load supplies:', error);
+                    this.showAlert('error', 'Failed to load water supplies. Please refresh the page.');
+                }
             }
 
             populateDropdown() {
@@ -382,7 +331,7 @@
                 this.currentSupply = this.supplies.find(s => s.id === id);
                 document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
                 document.getElementById('selected-supply-info').textContent =
-                    `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.location} • ${this.currentSupply.sample_point}`;
+                    `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.location}`;
 
                 const section = document.getElementById('chlorine-section');
                 if (this.currentSupply.type === 'untreated') {
@@ -409,7 +358,6 @@
                     agency: this.currentSupply.agency,
                     location: this.currentSupply.location,
                     type: this.currentSupply.type,
-                    sample_point: this.currentSupply.sample_point,
                     visits: parseInt(document.getElementById('visits').value) || 0,
                     submission_date: document.getElementById('submission-date').value,
                     chlorine_low: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-low').value) || 0) : 0,
