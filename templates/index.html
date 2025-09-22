@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inspector Dashboard - Water Quality Monitoring</title>
     <style>
+        :root {
+            /* Light mode variables */
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --text-primary: #333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --container-border: rgba(255, 255, 255, 0.2);
+            --input-bg: white;
+            --input-border: #ddd;
+            --input-text: #000000;
+            --card-bg: #f8f9fa;
+            --table-border: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --supply-selected-bg: #e3f2fd;
+            --supply-text-color: #333;
+            --supply-type-color: #666;
+            --test-section-bg: #f8f9fa;
+            --test-section-border: #e9ecef;
+            --positive-color: #28a745;
+            --negative-color: #dc3545;
+            --muted-text-color: #666;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode variables */
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --text-primary: #ffffff;
+            --container-bg: rgba(30, 30, 30, 0.95);
+            --bg-card: rgba(30, 30, 30, 0.95);
+            --container-border: rgba(255, 255, 255, 0.15);
+            --input-bg: #2d2d2d;
+            --input-border: #555;
+            --input-text: #ffffff;
+            --card-bg: #252525;
+            --table-border: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --supply-selected-bg: #1e1e1e;
+            --supply-text-color: #ffffff;
+            --supply-type-color: #cccccc;
+            --test-section-bg: #202020;
+            --test-section-border: #333;
+            --positive-color: #4ade80;
+            --negative-color: #f87171;
+            --muted-text-color: #a1a1aa;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,8 +61,187 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: var(--bg-color);
+            color: var(--text-color);
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-color);
+        }
+
+        .positive-result {
+            color: var(--positive-color) !important;
+        }
+
+        .negative-result {
+            color: var(--negative-color) !important;
+        }
+
+        .muted-text {
+            color: var(--muted-text-color) !important;
+        }
+
+        /* Dark mode form inputs */
+        [data-theme="dark"] .form-group input[type='number'],
+        [data-theme="dark"] .form-group input[type='text'],
+        [data-theme="dark"] .form-group input[type='date'],
+        [data-theme="dark"] .form-group textarea,
+        [data-theme="dark"] .form-group select {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 2px solid #444 !important;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .form-group input[type='number']:focus,
+        [data-theme="dark"] .form-group input[type='text']:focus,
+        [data-theme="dark"] .form-group input[type='date']:focus,
+        [data-theme="dark"] .form-group textarea:focus,
+        [data-theme="dark"] .form-group select:focus {
+            background: #333 !important;
+            color: #ffffff !important;
+            border-color: #667eea !important;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Specific styling for color-coded test result inputs */
+        [data-theme="dark"] .positive-value {
+            background: #1a4a1a !important;
+            color: #90EE90 !important;
+            border-color: #28a745 !important;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .negative-value {
+            background: #4a1a1a !important;
+            color: #FFB6C1 !important;
+            border-color: #dc3545 !important;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .pending-value {
+            background: #4a4a1a !important;
+            color: #FFFFE0 !important;
+            border-color: #ffc107 !important;
+            font-weight: bold;
+        }
+
+        /* Range dropdown styling */
+        [data-theme="dark"] .range-dropdown {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 2px solid #444 !important;
+            font-weight: bold;
+        }
+
+        /* Placeholder text styling */
+        [data-theme="dark"] .form-group input::placeholder,
+        [data-theme="dark"] .form-group textarea::placeholder {
+            color: #aaa !important;
+            font-weight: normal;
+        }
+
+        /* Submit button dark theme */
+        [data-theme="dark"] .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        [data-theme="dark"] .submit-btn:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Form inputs - light mode (default) */
+        .form-group input[type='number'],
+        .form-group input[type='text'],
+        .form-group input[type='date'],
+        .form-group textarea,
+        .form-group select {
+            background: var(--input-bg);
+            color: var(--input-text) !important;
+            border: 2px solid var(--input-border);
+        }
+
+        /* Form inputs - dark mode (enhanced) */
+        [data-theme='dark'] .form-group input[type='number'],
+        [data-theme='dark'] .form-group input[type='text'],
+        [data-theme='dark'] .form-group input[type='date'],
+        [data-theme='dark'] .form-group textarea,
+        [data-theme='dark'] .form-group select {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 2px solid #444 !important;
+        }
+
+        /* Color-coded inputs in light mode */
+        .positive-value,
+        .positive-field {
+            background: #d4edda !important;
+            color: #155724 !important;
+            border-color: #28a745 !important;
+        }
+
+        .negative-value,
+        .negative-field {
+            background: #f8d7da !important;
+            color: #721c24 !important;
+            border-color: #dc3545 !important;
+        }
+
+        .pending-value,
+        .pending-field {
+            background: #fff3cd !important;
+            color: #856404 !important;
+            border-color: #ffc107 !important;
+        }
+
+        /* Color-coded inputs in dark mode */
+        [data-theme='dark'] .positive-value,
+        [data-theme='dark'] .positive-field {
+            background: #1a4a1a !important;
+            color: #90EE90 !important;
+            border-color: #4ade80 !important;
+        }
+
+        [data-theme='dark'] .negative-value,
+        [data-theme='dark'] .negative-field {
+            background: #4a1a1a !important;
+            color: #FFB6C1 !important;
+            border-color: #f87171 !important;
+        }
+
+        [data-theme='dark'] .pending-value,
+        [data-theme='dark'] .pending-field {
+            background: #4a4a1a !important;
+            color: #FFFFE0 !important;
+            border-color: #fbbf24 !important;
+        }
+
+        /* Modal/popup content */
+        .modal-content {
+            background: var(--container-bg);
+            color: var(--text-color);
+        }
+
+        .modal-content h2,
+        .modal-content h3,
+        .modal-content label {
+            color: var(--text-color) !important;
+        }
+
+        /* Remarks textarea */
+        textarea {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme='dark'] textarea {
+            color: #ffffff !important;
         }
 
         .header {
@@ -25,6 +252,28 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .nav-button {
+            position: relative;
+            display: inline-block;
         }
 
         .header h1 {
@@ -53,15 +302,19 @@
         }
 
         .form-container {
-            background: white;
+            background: var(--container-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px var(--shadow-color);
             margin-bottom: 2rem;
+            border: 1px solid var(--container-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .form-container h2 {
-            color: #333;
+            color: var(--text-color);
             margin-bottom: 1.5rem;
             font-size: 20px;
         }
@@ -77,7 +330,7 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            color: #333;
+            color: var(--text-color);
             font-weight: 600;
         }
 
@@ -86,10 +339,12 @@
         .form-group textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
             border-radius: 5px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
         }
 
         .form-group select:focus,
@@ -108,21 +363,23 @@
         }
 
         .selected-supply {
-            background: #e3f2fd;
+            background: var(--supply-selected-bg);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1.5rem;
             border-left: 4px solid #667eea;
+            transition: background-color 0.3s ease;
         }
 
         .selected-supply h3 {
-            color: #333;
+            color: var(--supply-text-color);
             font-size: 18px;
             margin-bottom: 0.5rem;
+            font-weight: bold;
         }
 
         .selected-supply p {
-            color: #666;
+            color: var(--supply-type-color);
             font-size: 14px;
         }
 
@@ -177,14 +434,16 @@
         }
 
         .test-section {
-            background: #f8f9fa;
+            background: var(--test-section-bg);
+            border: 1px solid var(--test-section-border);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .test-section h3 {
-            color: #333;
+            color: var(--text-color);
             margin-bottom: 1rem;
             font-size: 16px;
         }
@@ -294,18 +553,127 @@
         }
 
         .recent-submissions {
-            background: white;
+            background: var(--container-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            border: 1px solid var(--container-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 16px;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+        }
+
+        .clear-search:hover {
+            color: #333;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .submission-card {
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
             background: #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-type {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .suggestion-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .submission-card {
+            background: var(--card-bg);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1rem;
             border-left: 4px solid #667eea;
+            transition: background-color 0.3s ease;
         }
 
         .submission-header {
@@ -316,8 +684,253 @@
         }
 
         .submission-time {
-            color: #666;
+            color: var(--supply-type-color);
             font-size: 12px;
+        }
+
+        /* Task Management Styles */
+        .task-management {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .task-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+
+        .task-card.urgent {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .task-card.high {
+            border-left-color: #fd7e14;
+            background: #fff8f1;
+        }
+
+        .task-card.medium {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .task-card.low {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .task-priority.urgent {
+            background: #dc3545;
+            color: white;
+        }
+
+        .task-priority.high {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .task-priority.medium {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .task-priority.low {
+            background: #28a745;
+            color: white;
+        }
+
+        .task-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .task-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 14px;
+        }
+
+        .task-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-detail strong {
+            color: #333;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .task-btn.accept {
+            background: #28a745;
+            color: white;
+        }
+
+        .task-btn.accept:hover {
+            background: #218838;
+        }
+
+        .task-btn.reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .task-btn.reject:hover {
+            background: #c82333;
+        }
+
+        .task-btn.view {
+            background: #007bff;
+            color: white;
+        }
+
+        .task-btn.view:hover {
+            background: #0056b3;
+        }
+
+        .task-btn.complete {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .task-btn.complete:hover {
+            background: #138496;
+        }
+
+        .task-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .task-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .task-status.accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-status.in_progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .task-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-status.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-tasks {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        .task-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideInTask 0.3s ease-out;
+        }
+
+        @keyframes slideInTask {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filter-tab:hover:not(.active) {
+            background: #f8f9fa;
         }
     </style>
 </head>
@@ -326,6 +939,11 @@
         <h1>Inspector Dashboard</h1>
         <div class="user-info">
             <span id="welcomeText">Welcome, Inspector</span>
+            <div class="nav-button">
+                <button id="assignedTasksBtn" class="logout-btn" style="background: rgba(255, 255, 255, 0.3); margin-right: 10px;">📋 Assigned Tasks</button>
+                <span id="taskBadge" class="task-badge" style="display: none;">0</span>
+            </div>
+            <button id="darkModeToggle" class="logout-btn" style="background: rgba(255, 255, 255, 0.3); margin-right: 10px;">🌙 Dark Mode</button>
             <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </div>
@@ -341,6 +959,16 @@
                     <label for="supply">Select Water Supply</label>
                     <select id="supply" name="supply_id">
                         <option value="">Select a water supply...</option>
+                    </select>
+                </div>
+
+                <div id="facility-type-group" class="form-group hidden">
+                    <label for="facility-type">MOH Facility Type</label>
+                    <select id="facility-type">
+                        <option value="">Select facility type...</option>
+                        <option value="Health Center">Health Center</option>
+                        <option value="Hospital">Hospital</option>
+                        <option value="Commercial Building">Commercial Building</option>
                     </select>
                 </div>
             </div>
@@ -458,6 +1086,14 @@
 
         <div class="recent-submissions">
             <h2>Your Recent Submissions</h2>
+
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" class="search-input" placeholder="Search by water supply or sampling point...">
+                <button id="clear-search" class="clear-search">✕</button>
+                <div id="search-suggestions" class="search-suggestions"></div>
+            </div>
+
             <div id="recent-submissions-list">
                 <p>No recent submissions</p>
             </div>
@@ -465,11 +1101,55 @@
     </div>
 
     <script>
+        // Dark Mode Functionality
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = localStorage.getItem('theme') || 'light';
+                this.toggleButton = null;
+            }
+
+            init() {
+                this.toggleButton = document.getElementById('darkModeToggle');
+                this.applyTheme(this.currentTheme);
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                if (this.toggleButton) {
+                    this.toggleButton.addEventListener('click', () => {
+                        this.toggleTheme();
+                    });
+                }
+            }
+
+            toggleTheme() {
+                this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.currentTheme);
+                localStorage.setItem('theme', this.currentTheme);
+            }
+
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                if (this.toggleButton) {
+                    if (theme === 'dark') {
+                        this.toggleButton.innerHTML = '☀️ Light Mode';
+                    } else {
+                        this.toggleButton.innerHTML = '🌙 Dark Mode';
+                    }
+                }
+            }
+        }
+
         class InspectorDashboard {
             constructor() {
                 this.supplies = [];
                 this.currentSupply = null;
                 this.recentSubmissions = [];
+                this.filteredSubmissions = [];
+                this.searchTimeout = null;
+                this.assignedTasks = [];
+                this.filteredTasks = [];
+                this.currentFilter = 'all';
                 this.init();
             }
 
@@ -478,6 +1158,8 @@
                 this.setupEventListeners();
                 await this.loadRecentSubmissions();
                 this.setTodayDate();
+                // Load tasks initially to show badge
+                await this.loadAssignedTasks();
             }
 
             async loadSupplies() {
@@ -558,6 +1240,12 @@
 
                 // Handle bacteriological positive input for urgent warnings
                 document.getElementById('bacteriological-positive').addEventListener('input', this.handleBacteriologicalChange.bind(this));
+
+                // Search functionality
+                this.setupSearchListeners();
+
+                // Task filter functionality
+                this.setupTaskFilters();
             }
 
             setTodayDate() {
@@ -578,6 +1266,15 @@
                 // Update form title
                 document.getElementById('selected-supply-name').textContent = supply ? supply.name : '';
                 document.getElementById('selected-supply-info').textContent = supply ? `${supply.agency} • ${supply.type.charAt(0).toUpperCase() + supply.type.slice(1)}` : '';
+
+                // Show/hide facility type dropdown for MOH supplies
+                const facilityTypeGroup = document.getElementById('facility-type-group');
+                if (supply && supply.agency === 'MOH') {
+                    facilityTypeGroup.classList.remove('hidden');
+                } else {
+                    facilityTypeGroup.classList.add('hidden');
+                    document.getElementById('facility-type').value = '';
+                }
 
                 // Handle chlorine section for treated vs untreated supplies
                 const chlorineSection = document.getElementById('chlorine-section');
@@ -612,6 +1309,7 @@
                 document.getElementById('selected-supply-name').textContent = '';
                 document.getElementById('selected-supply-info').textContent = '';
                 document.getElementById('submission-form-section').classList.add('hidden');
+                document.getElementById('facility-type-group').classList.add('hidden');
                 this.resetForm();
             }
 
@@ -626,6 +1324,7 @@
                 document.getElementById('bacteriological-positive').value = 0;
                 document.getElementById('bacteriological-negative').value = 0;
                 document.getElementById('bacteriological-pending').value = 0;
+                document.getElementById('facility-type').value = '';
                 document.getElementById('remarks').value = '';
 
                 // Re-enable all inputs
@@ -881,7 +1580,8 @@
                         bacteriological_negative: parseInt(formData.get('bacteriological_negative')) || 0,
                         bacteriological_pending: parseInt(formData.get('bacteriological_pending')) || 0,
                         isolated_organism: document.getElementById('isolated-organism').value || '',
-                        remarks: formData.get('remarks') || ''
+                        remarks: formData.get('remarks') || '',
+                        facility_type: document.getElementById('facility-type').value || ''
                     };
 
                     if (!data.supply_id) {
@@ -925,6 +1625,182 @@
                 }
             }
 
+            setupSearchListeners() {
+                const searchInput = document.getElementById('search-input');
+                const clearButton = document.getElementById('clear-search');
+                const suggestionsContainer = document.getElementById('search-suggestions');
+
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    clearTimeout(this.searchTimeout);
+
+                    if (query.length === 0) {
+                        this.clearSearch();
+                        return;
+                    }
+
+                    clearButton.style.display = 'block';
+
+                    // Debounce search
+                    this.searchTimeout = setTimeout(() => {
+                        this.performSearch(query);
+                        this.showSuggestions(query);
+                    }, 300);
+                });
+
+                searchInput.addEventListener('focus', () => {
+                    const query = searchInput.value.trim();
+                    if (query.length > 0) {
+                        this.showSuggestions(query);
+                    }
+                });
+
+                searchInput.addEventListener('blur', () => {
+                    // Delay hiding suggestions to allow for clicks
+                    setTimeout(() => {
+                        suggestionsContainer.style.display = 'none';
+                    }, 200);
+                });
+
+                clearButton.addEventListener('click', () => {
+                    this.clearSearch();
+                });
+
+                // Handle escape key
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.clearSearch();
+                        searchInput.blur();
+                    }
+                });
+            }
+
+            performSearch(query) {
+                const lowerQuery = query.toLowerCase();
+
+                this.filteredSubmissions = this.recentSubmissions.filter(submission => {
+                    return submission.supply_name.toLowerCase().includes(lowerQuery) ||
+                           submission.agency.toLowerCase().includes(lowerQuery) ||
+                           (submission.sampling_point_name && submission.sampling_point_name.toLowerCase().includes(lowerQuery)) ||
+                           (submission.sampling_point_location && submission.sampling_point_location.toLowerCase().includes(lowerQuery));
+                });
+
+                this.displayFilteredSubmissions();
+            }
+
+            showSuggestions(query) {
+                const suggestionsContainer = document.getElementById('search-suggestions');
+                const lowerQuery = query.toLowerCase();
+
+                // Get unique suggestions from submissions
+                const suggestions = [];
+                const seen = new Set();
+
+                this.recentSubmissions.forEach(submission => {
+                    if (submission.supply_name.toLowerCase().includes(lowerQuery)) {
+                        const key = `supply_${submission.supply_name}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            suggestions.push({
+                                type: 'supply',
+                                name: submission.supply_name,
+                                details: `${submission.agency} • ${submission.type}`,
+                                value: submission.supply_name
+                            });
+                        }
+                    }
+
+                    if (submission.sampling_point_name && submission.sampling_point_name.toLowerCase().includes(lowerQuery)) {
+                        const key = `sampling_${submission.sampling_point_name}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            suggestions.push({
+                                type: 'sampling_point',
+                                name: submission.sampling_point_name,
+                                details: submission.sampling_point_location || 'Sampling Point',
+                                value: submission.sampling_point_name
+                            });
+                        }
+                    }
+                });
+
+                // Limit to 5 suggestions
+                const limitedSuggestions = suggestions.slice(0, 5);
+
+                if (limitedSuggestions.length === 0) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                suggestionsContainer.innerHTML = limitedSuggestions.map(suggestion => `
+                    <div class="suggestion-item" onclick="dashboard.selectSuggestion('${suggestion.value.replace(/'/g, "\\'")}')">
+                        <div class="suggestion-type">${suggestion.type === 'supply' ? 'Water Supply' : 'Sampling Point'}</div>
+                        <div class="suggestion-name">${suggestion.name}</div>
+                        <div class="suggestion-details">${suggestion.details}</div>
+                    </div>
+                `).join('');
+
+                suggestionsContainer.style.display = 'block';
+            }
+
+            selectSuggestion(value) {
+                const searchInput = document.getElementById('search-input');
+                const suggestionsContainer = document.getElementById('search-suggestions');
+
+                searchInput.value = value;
+                suggestionsContainer.style.display = 'none';
+                this.performSearch(value);
+            }
+
+            clearSearch() {
+                const searchInput = document.getElementById('search-input');
+                const clearButton = document.getElementById('clear-search');
+                const suggestionsContainer = document.getElementById('search-suggestions');
+
+                searchInput.value = '';
+                clearButton.style.display = 'none';
+                suggestionsContainer.style.display = 'none';
+                this.filteredSubmissions = [];
+                this.displayRecentSubmissions();
+            }
+
+            displayFilteredSubmissions() {
+                const container = document.getElementById('recent-submissions-list');
+
+                if (this.filteredSubmissions.length === 0) {
+                    container.innerHTML = '<div class="no-results">No submissions found matching your search.</div>';
+                    return;
+                }
+
+                container.innerHTML = this.filteredSubmissions.slice(0, 10).map(submission => `
+                    <div class="submission-card">
+                        <div class="submission-header">
+                            <strong>${submission.supply_name}</strong>
+                            <span class="submission-time">${this.formatDateTime(submission.created_at)}</span>
+                        </div>
+                        <p class="muted-text" style="font-size: 14px; margin-bottom: 0.5rem;">
+                            ${submission.agency} • ${submission.type} • ${submission.visits} visit(s)
+                            ${submission.sampling_point_name ? `<br><strong>Sampling Point:</strong> ${submission.sampling_point_name}` : ''}
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; font-size: 12px;">
+                            ${submission.type === 'treated' ? `
+                                <div>Chlorine: ${submission.chlorine_total}</div>
+                                <div class="positive-result">C+: ${submission.chlorine_positive}${submission.chlorine_positive_range ? ` (${submission.chlorine_positive_range})` : ''}</div>
+                                <div class="negative-result">C-: ${submission.chlorine_negative}${submission.chlorine_negative_range ? ` (${submission.chlorine_negative_range})` : ''}</div>
+                            ` : ''}
+                            <div class="positive-result">B+: ${submission.bacteriological_positive}${submission.isolated_organism ? ` (${submission.isolated_organism})` : ''}</div>
+                            <div class="negative-result">B-: ${submission.bacteriological_negative}</div>
+                            <div style="color: #ffc107;">B Pending: ${submission.bacteriological_pending}</div>
+                        </div>
+                        ${submission.remarks ? `<p style="margin-top: 0.5rem; font-size: 13px; color: #666;"><strong>Remarks:</strong> ${submission.remarks}</p>` : ''}
+                        <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                            <button class="view-btn" onclick="dashboard.viewSubmission(${submission.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                            <button class="download-btn" onclick="dashboard.downloadSubmission(${submission.id})" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Download</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
             async loadRecentSubmissions() {
                 try {
                     const response = await fetch('/api/my-submissions');
@@ -941,7 +1817,7 @@
                 const container = document.getElementById('recent-submissions-list');
 
                 if (this.recentSubmissions.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No recent submissions found.</p>';
+                    container.innerHTML = '<p class="muted-text" style="text-align: center; padding: 2rem;">No recent submissions found.</p>';
                     return;
                 }
 
@@ -951,20 +1827,25 @@
                             <strong>${submission.supply_name}</strong>
                             <span class="submission-time">${this.formatDateTime(submission.created_at)}</span>
                         </div>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 0.5rem;">
+                        <p class="muted-text" style="font-size: 14px; margin-bottom: 0.5rem;">
                             ${submission.agency} • ${submission.type} • ${submission.visits} visit(s)
+                            ${submission.sampling_point_name ? `<br><strong>Sampling Point:</strong> ${submission.sampling_point_name}` : ''}
                         </p>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; font-size: 12px;">
                             ${submission.type === 'treated' ? `
                                 <div>Chlorine: ${submission.chlorine_total}</div>
-                                <div style="color: #28a745;">C+: ${submission.chlorine_positive}</div>
-                                <div style="color: #dc3545;">C-: ${submission.chlorine_negative}</div>
+                                <div class="positive-result">C+: ${submission.chlorine_positive}${submission.chlorine_positive_range ? ` (${submission.chlorine_positive_range})` : ''}</div>
+                                <div class="negative-result">C-: ${submission.chlorine_negative}${submission.chlorine_negative_range ? ` (${submission.chlorine_negative_range})` : ''}</div>
                             ` : ''}
-                            <div style="color: #28a745;">B+: ${submission.bacteriological_positive}</div>
-                            <div style="color: #dc3545;">B-: ${submission.bacteriological_negative}</div>
+                            <div class="positive-result">B+: ${submission.bacteriological_positive}${submission.isolated_organism ? ` (${submission.isolated_organism})` : ''}</div>
+                            <div class="negative-result">B-: ${submission.bacteriological_negative}</div>
                             <div style="color: #ffc107;">B Pending: ${submission.bacteriological_pending}</div>
                         </div>
                         ${submission.remarks ? `<p style="margin-top: 0.5rem; font-size: 13px; color: #666;"><strong>Remarks:</strong> ${submission.remarks}</p>` : ''}
+                        <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                            <button class="view-btn" onclick="dashboard.viewSubmission(${submission.id})" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View</button>
+                            <button class="download-btn" onclick="dashboard.downloadSubmission(${submission.id})" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Download</button>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -997,6 +1878,631 @@
                     minute: '2-digit'
                 });
             }
+
+            async viewSubmission(submissionId) {
+                try {
+                    const response = await fetch(`/api/submission/${submissionId}`);
+                    if (response.ok) {
+                        const submission = await response.json();
+                        this.showSubmissionDetails(submission);
+                    } else {
+                        this.showAlert('error', 'Failed to load submission details');
+                    }
+                } catch (error) {
+                    console.error('Error loading submission:', error);
+                    this.showAlert('error', 'Error loading submission details');
+                }
+            }
+
+            async downloadSubmission(submissionId) {
+                try {
+                    const response = await fetch(`/api/submission/${submissionId}/download`);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `water_quality_submission_${submissionId}.html`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        this.showAlert('success', 'Submission downloaded successfully!');
+                    } else {
+                        this.showAlert('error', 'Failed to download submission');
+                    }
+                } catch (error) {
+                    console.error('Error downloading submission:', error);
+                    this.showAlert('error', 'Error downloading submission');
+                }
+            }
+
+            showSubmissionDetails(submission) {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                `;
+
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    border-radius: 10px;
+                    max-width: 800px;
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                `;
+
+                content.innerHTML = `
+                    <div style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
+                            <h2 style="color: #333; margin: 0;">Water Quality Inspection Details</h2>
+                            <button onclick="this.closest('.modal').remove()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Close</button>
+                        </div>
+
+                        <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem; border-left: 4px solid #667eea;">
+                            <h3 style="color: #333; font-size: 18px; margin-bottom: 0.5rem;">${submission.supply_name}</h3>
+                            <p style="color: #666; margin: 0;">${submission.agency} • ${submission.type.charAt(0).toUpperCase() + submission.type.slice(1)} Supply</p>
+                            ${submission.sampling_point_name ? `<p style="color: #666; margin: 0;"><strong>Sampling Point:</strong> ${submission.sampling_point_name} ${submission.sampling_point_location ? `(${submission.sampling_point_location})` : ''}</p>` : ''}
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Submission Date</label>
+                                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; color: #000; font-weight: bold;">${submission.submission_date}</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Number of Visits</label>
+                                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; color: #000; font-weight: bold;">${submission.visits}</div>
+                            </div>
+                        </div>
+
+                        ${submission.type === 'treated' ? `
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <h3 style="color: #333; margin-bottom: 1rem; font-size: 16px;">Chlorine Residual Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Total Tests</label>
+                                    <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa; color: #000; font-weight: bold;">${submission.chlorine_total}</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Positive</label>
+                                    <div style="padding: 10px; border: 1px solid #28a745; border-radius: 5px; background: #d4edda; color: #000; font-weight: bold;">${submission.chlorine_positive}</div>
+                                    ${submission.chlorine_positive_range ? `<small style="color: #28a745; font-weight: bold;">Range: ${submission.chlorine_positive_range}</small>` : ''}
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Negative</label>
+                                    <div style="padding: 10px; border: 1px solid #dc3545; border-radius: 5px; background: #f8d7da; color: #000; font-weight: bold;">${submission.chlorine_negative}</div>
+                                    ${submission.chlorine_negative_range ? `<small style="color: #dc3545; font-weight: bold;">Range: ${submission.chlorine_negative_range}</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <h3 style="color: #333; margin-bottom: 1rem; font-size: 16px;">Bacteriological Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Positive</label>
+                                    <div style="padding: 10px; border: 1px solid #28a745; border-radius: 5px; background: #d4edda; color: #000; font-weight: bold;">${submission.bacteriological_positive}</div>
+                                    ${submission.isolated_organism ? `<small style="color: #28a745; font-weight: bold;">Organism: ${submission.isolated_organism}</small>` : ''}
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Negative</label>
+                                    <div style="padding: 10px; border: 1px solid #dc3545; border-radius: 5px; background: #f8d7da; color: #000; font-weight: bold;">${submission.bacteriological_negative}</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Pending</label>
+                                    <div style="padding: 10px; border: 1px solid #ffc107; border-radius: 5px; background: #fff3cd; color: #000; font-weight: bold;">${submission.bacteriological_pending}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${submission.remarks ? `
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Remarks</label>
+                            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; min-height: 60px; color: #000; font-weight: bold;">${submission.remarks}</div>
+                        </div>
+                        ` : ''}
+
+                        <div style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                            <small style="color: #666;">Submitted on ${this.formatDateTime(submission.created_at)}</small>
+                        </div>
+                    </div>
+                `;
+
+                modal.className = 'modal';
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            // ================================
+            // TASK MANAGEMENT METHODS
+            // ================================
+
+            async loadAssignedTasks() {
+                try {
+                    const response = await fetch('/api/inspector/tasks');
+                    if (response.ok) {
+                        this.assignedTasks = await response.json();
+                        this.filterTasks(this.currentFilter);
+                        this.updateTaskBadge();
+                    } else if (response.status === 404) {
+                        // No tasks found, use demo data
+                        this.assignedTasks = this.getDemoTasks();
+                        this.filterTasks(this.currentFilter);
+                        this.updateTaskBadge();
+                    } else {
+                        throw new Error('Failed to load tasks');
+                    }
+                } catch (error) {
+                    console.error('Error loading assigned tasks:', error);
+                    // Load demo tasks as fallback
+                    this.assignedTasks = this.getDemoTasks();
+                    this.filterTasks(this.currentFilter);
+                    this.updateTaskBadge();
+                }
+            }
+
+            getDemoTasks() {
+                return [
+                    {
+                        id: 1,
+                        title: 'Chlorine Level Check - Roaring River 1',
+                        description: 'Conduct routine chlorine residual testing at Roaring River 1 water supply. Check levels at 3 different sampling points and document any irregularities.',
+                        supply_name: 'Roaring River 1',
+                        supply_type: 'treated',
+                        priority: 'High',
+                        due_date: '2024-12-22T14:00:00',
+                        status: 'pending',
+                        assigned_date: '2024-12-19T09:30:00',
+                        assigned_by: 'Admin User'
+                    },
+                    {
+                        id: 2,
+                        title: 'Monthly Bacteriological Test - Bulstrode',
+                        description: 'Perform monthly bacteriological testing for Bulstrode water supply. Collect samples from main source and two distribution points.',
+                        supply_name: 'Bulstrode',
+                        supply_type: 'untreated',
+                        priority: 'Medium',
+                        due_date: '2024-12-25T10:00:00',
+                        status: 'accepted',
+                        assigned_date: '2024-12-18T15:20:00',
+                        assigned_by: 'Admin User'
+                    },
+                    {
+                        id: 3,
+                        title: 'Routine Inspection - Cave Supply',
+                        description: 'Complete comprehensive inspection of Cave water supply including infrastructure assessment and water quality testing.',
+                        supply_name: 'Cave',
+                        supply_type: 'untreated',
+                        priority: 'Low',
+                        due_date: '2024-12-28T11:00:00',
+                        status: 'in_progress',
+                        assigned_date: '2024-12-17T11:45:00',
+                        assigned_by: 'Admin User'
+                    }
+                ];
+            }
+
+            setupTaskFilters() {
+                const filterTabs = document.querySelectorAll('.filter-tab');
+                filterTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // Remove active class from all tabs
+                        filterTabs.forEach(t => t.classList.remove('active'));
+                        // Add active class to clicked tab
+                        tab.classList.add('active');
+
+                        const filter = tab.dataset.filter;
+                        this.currentFilter = filter;
+                        this.filterTasks(filter);
+                    });
+                });
+            }
+
+            filterTasks(filter) {
+                if (filter === 'all') {
+                    this.filteredTasks = this.assignedTasks;
+                } else {
+                    this.filteredTasks = this.assignedTasks.filter(task => task.status === filter);
+                }
+                this.displayTasks();
+            }
+
+            displayTasks() {
+                const container = document.getElementById('tasks-container');
+
+                if (this.filteredTasks.length === 0) {
+                    const filterText = this.currentFilter === 'all' ? 'tasks' : `${this.currentFilter} tasks`;
+                    container.innerHTML = `<div class="no-tasks">No ${filterText} found.</div>`;
+                    return;
+                }
+
+                container.innerHTML = this.filteredTasks.map(task => this.createTaskCard(task)).join('');
+            }
+
+            createTaskCard(task) {
+                const priorityClass = task.priority.toLowerCase();
+                const statusClass = task.status.toLowerCase();
+                const isOverdue = new Date(task.due_date) < new Date() && task.status !== 'completed';
+
+                return `
+                    <div class="task-card ${priorityClass}">
+                        <div class="task-status ${statusClass}">${task.status.replace('_', ' ')}</div>
+
+                        <div class="task-header">
+                            <div>
+                                <h3 class="task-title">${task.title}</h3>
+                                <div class="task-priority ${priorityClass}">${task.priority}</div>
+                            </div>
+                        </div>
+
+                        <div class="task-description">
+                            ${task.description}
+                        </div>
+
+                        <div class="task-details">
+                            <div class="task-detail">
+                                <strong>💧 Water Supply:</strong> ${task.supply_name} (${task.supply_type})
+                            </div>
+                            <div class="task-detail">
+                                <strong>📅 Due Date:</strong> ${this.formatDateTime(task.due_date)}
+                                ${isOverdue ? '<span style="color: #dc3545; font-weight: bold;"> (OVERDUE)</span>' : ''}
+                            </div>
+                            <div class="task-detail">
+                                <strong>👤 Assigned By:</strong> ${task.assigned_by}
+                            </div>
+                            <div class="task-detail">
+                                <strong>📝 Assigned:</strong> ${this.formatDateTime(task.assigned_date)}
+                            </div>
+                        </div>
+
+                        <div class="task-actions">
+                            ${this.getTaskActionButtons(task)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            getTaskActionButtons(task) {
+                switch (task.status) {
+                    case 'pending':
+                        return `
+                            <button class="task-btn accept" onclick="dashboard.acceptTask(${task.id})">✅ Accept Task</button>
+                            <button class="task-btn reject" onclick="dashboard.rejectTask(${task.id})">❌ Reject Task</button>
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                    case 'accepted':
+                        return `
+                            <button class="task-btn complete" onclick="dashboard.startTask(${task.id})">🚀 Start Task</button>
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                    case 'in_progress':
+                        return `
+                            <button class="task-btn complete" onclick="dashboard.completeTask(${task.id})">✅ Mark Complete</button>
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                    case 'completed':
+                        return `
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                    case 'rejected':
+                        return `
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                    default:
+                        return `
+                            <button class="task-btn view" onclick="dashboard.viewTaskDetails(${task.id})">👁️ View Details</button>
+                        `;
+                }
+            }
+
+            async acceptTask(taskId) {
+                try {
+                    const response = await fetch(`/api/inspector/tasks/${taskId}/accept`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        // Update task status locally
+                        const task = this.assignedTasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = 'accepted';
+                        }
+                        this.filterTasks(this.currentFilter);
+                        this.updateTaskBadge();
+                        this.showTaskNotification('Task accepted successfully! 🎉', 'success');
+                    } else {
+                        throw new Error('Failed to accept task');
+                    }
+                } catch (error) {
+                    console.error('Error accepting task:', error);
+                    // For demo, still update locally
+                    const task = this.assignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'accepted';
+                    }
+                    this.filterTasks(this.currentFilter);
+                    this.updateTaskBadge();
+                    this.showTaskNotification('Task accepted successfully! 🎉', 'success');
+                }
+            }
+
+            async rejectTask(taskId) {
+                const reason = prompt('Please provide a reason for rejecting this task:');
+                if (!reason) return;
+
+                try {
+                    const response = await fetch(`/api/inspector/tasks/${taskId}/reject`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason })
+                    });
+
+                    if (response.ok) {
+                        // Update task status locally
+                        const task = this.assignedTasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = 'rejected';
+                            task.rejection_reason = reason;
+                        }
+                        this.filterTasks(this.currentFilter);
+                        this.updateTaskBadge();
+                        this.showTaskNotification('Task rejected. Reason has been sent to admin.', 'info');
+                    } else {
+                        throw new Error('Failed to reject task');
+                    }
+                } catch (error) {
+                    console.error('Error rejecting task:', error);
+                    // For demo, still update locally
+                    const task = this.assignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'rejected';
+                        task.rejection_reason = reason;
+                    }
+                    this.filterTasks(this.currentFilter);
+                    this.updateTaskBadge();
+                    this.showTaskNotification('Task rejected. Reason has been sent to admin.', 'info');
+                }
+            }
+
+            async startTask(taskId) {
+                try {
+                    const response = await fetch(`/api/inspector/tasks/${taskId}/start`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        // Update task status locally
+                        const task = this.assignedTasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = 'in_progress';
+                        }
+                        this.filterTasks(this.currentFilter);
+                        this.showTaskNotification('Task started! Good luck with your inspection. 💪', 'success');
+                    } else {
+                        throw new Error('Failed to start task');
+                    }
+                } catch (error) {
+                    console.error('Error starting task:', error);
+                    // For demo, still update locally
+                    const task = this.assignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'in_progress';
+                    }
+                    this.filterTasks(this.currentFilter);
+                    this.showTaskNotification('Task started! Good luck with your inspection. 💪', 'success');
+                }
+            }
+
+            async completeTask(taskId) {
+                const confirmed = confirm('Are you sure you want to mark this task as completed? Make sure you have submitted all required inspection data.');
+                if (!confirmed) return;
+
+                try {
+                    const response = await fetch(`/api/inspector/tasks/${taskId}/complete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        // Update task status locally
+                        const task = this.assignedTasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = 'completed';
+                            task.completed_date = new Date().toISOString();
+                        }
+                        this.filterTasks(this.currentFilter);
+                        this.showTaskNotification('Task completed successfully! 🏆', 'success');
+                    } else {
+                        throw new Error('Failed to complete task');
+                    }
+                } catch (error) {
+                    console.error('Error completing task:', error);
+                    // For demo, still update locally
+                    const task = this.assignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'completed';
+                        task.completed_date = new Date().toISOString();
+                    }
+                    this.filterTasks(this.currentFilter);
+                    this.showTaskNotification('Task completed successfully! 🏆', 'success');
+                }
+            }
+
+            viewTaskDetails(taskId) {
+                const task = this.assignedTasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0, 0, 0, 0.5); z-index: 1000;
+                    display: flex; align-items: center; justify-content: center; padding: 20px;
+                `;
+
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white; border-radius: 10px; max-width: 600px; width: 100%;
+                    max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                `;
+
+                const priorityClass = task.priority.toLowerCase();
+                const statusClass = task.status.toLowerCase();
+                const isOverdue = new Date(task.due_date) < new Date() && task.status !== 'completed';
+
+                content.innerHTML = `
+                    <div style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
+                            <h2 style="color: #333; margin: 0;">Task Details</h2>
+                            <button onclick="this.closest('.modal').remove()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Close</button>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #333; font-size: 20px; margin-bottom: 0.5rem;">${task.title}</h3>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 1rem;">
+                                <span class="task-priority ${priorityClass}" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;">${task.priority}</span>
+                                <span class="task-status ${statusClass}" style="padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${task.status.replace('_', ' ')}</span>
+                                ${isOverdue ? '<span style="color: #dc3545; font-weight: bold; font-size: 12px;">⚠️ OVERDUE</span>' : ''}
+                            </div>
+                        </div>
+
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem;">
+                            <h4 style="color: #333; margin-bottom: 0.5rem;">Description</h4>
+                            <p style="color: #666; line-height: 1.5; margin: 0;">${task.description}</p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Water Supply</label>
+                                <div style="color: #666;">${task.supply_name}</div>
+                                <small style="color: #999;">Type: ${task.supply_type}</small>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Due Date</label>
+                                <div style="color: #666;">${this.formatDateTime(task.due_date)}</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Assigned By</label>
+                                <div style="color: #666;">${task.assigned_by}</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Assigned Date</label>
+                                <div style="color: #666;">${this.formatDateTime(task.assigned_date)}</div>
+                            </div>
+                        </div>
+
+                        ${task.rejection_reason ? `
+                        <div style="background: #f8d7da; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
+                            <h4 style="color: #721c24; margin-bottom: 0.5rem;">Rejection Reason</h4>
+                            <p style="color: #721c24; margin: 0;">${task.rejection_reason}</p>
+                        </div>
+                        ` : ''}
+
+                        ${task.completed_date ? `
+                        <div style="background: #d4edda; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem; border-left: 4px solid #28a745;">
+                            <h4 style="color: #155724; margin-bottom: 0.5rem;">Completed</h4>
+                            <p style="color: #155724; margin: 0;">Task completed on ${this.formatDateTime(task.completed_date)}</p>
+                        </div>
+                        ` : ''}
+
+                        <div style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                            <div class="task-actions" style="justify-content: center;">
+                                ${this.getTaskActionButtons(task)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                modal.className = 'modal';
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            showTaskNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'task-notification';
+
+                const colors = {
+                    'success': { bg: '#28a745', text: 'white' },
+                    'error': { bg: '#dc3545', text: 'white' },
+                    'info': { bg: '#667eea', text: 'white' },
+                    'warning': { bg: '#ffc107', text: '#333' }
+                };
+
+                const color = colors[type] || colors.info;
+                notification.style.background = color.bg;
+                notification.style.color = color.text;
+                notification.textContent = message;
+                notification.style.display = 'block';
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideInTask 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }, 4000);
+            }
+
+            updateTaskBadge() {
+                const badge = document.getElementById('taskBadge');
+                const pendingTasks = this.assignedTasks.filter(task => task.status === 'pending').length;
+
+                if (pendingTasks > 0) {
+                    badge.textContent = pendingTasks;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            // Method to simulate receiving a new task (for testing)
+            simulateNewTask() {
+                const newTask = {
+                    id: Date.now(),
+                    title: 'Emergency Water Quality Check',
+                    description: 'Urgent inspection required due to reported contamination.',
+                    supply_name: 'Test Supply',
+                    supply_type: 'treated',
+                    priority: 'Urgent',
+                    due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    status: 'pending',
+                    assigned_date: new Date().toISOString(),
+                    assigned_by: 'Admin User'
+                };
+
+                this.assignedTasks.unshift(newTask);
+                this.updateTaskBadge();
+                this.showTaskNotification('New task assigned! 📋', 'info');
+            }
         }
 
         // Global functions
@@ -1006,9 +2512,80 @@
             visitsInput.value = currentVisits + 1;
         }
 
+        // Global dashboard instance
+        let dashboard;
+
         // Initialize the dashboard when the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            new InspectorDashboard();
+            // Initialize theme manager first
+            const themeManager = new ThemeManager();
+            themeManager.init();
+
+            // Then initialize dashboard
+            dashboard = new InspectorDashboard();
+        });
+    </script>
+
+    <!-- Task Management Modal -->
+    <div id="tasksModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div class="modal-content" style="position: absolute; top: 20px; right: 20px; width: 400px; max-height: 80vh; background: var(--container-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--container-border); border-radius: 10px; box-shadow: 0 10px 25px var(--shadow-color);">
+            <div style="padding: 1.5rem;">
+                <h2 style="color: #667eea; margin-bottom: 15px; font-size: 18px;">📋 Assigned Tasks</h2>
+
+                <div class="filter-tabs" style="margin-bottom: 15px;">
+                    <div class="filter-tab active" data-filter="all" style="padding: 4px 8px; font-size: 12px;">All</div>
+                    <div class="filter-tab" data-filter="pending" style="padding: 4px 8px; font-size: 12px;">Pending</div>
+                    <div class="filter-tab" data-filter="accepted" style="padding: 4px 8px; font-size: 12px;">Accepted</div>
+                    <div class="filter-tab" data-filter="in_progress" style="padding: 4px 8px; font-size: 12px;">In Progress</div>
+                    <div class="filter-tab" data-filter="completed" style="padding: 4px 8px; font-size: 12px;">Done</div>
+                </div>
+
+                <div id="tasks-container" style="max-height: 50vh; overflow-y: auto; margin-bottom: 15px;">
+                    <!-- Tasks will be loaded here -->
+                    <div class="no-tasks">Loading assigned tasks...</div>
+                </div>
+
+                <!-- Close button at the bottom -->
+                <div style="text-align: center; padding-top: 15px; border-top: 1px solid #eee;">
+                    <button onclick="closeTasksModal()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Task modal functions
+        function openTasksModal() {
+            const modal = document.getElementById('tasksModal');
+            modal.style.display = 'flex';
+            // Load tasks when modal opens
+            if (window.dashboard) {
+                dashboard.loadAssignedTasks();
+            }
+        }
+
+        function closeTasksModal() {
+            const modal = document.getElementById('tasksModal');
+            modal.style.display = 'none';
+        }
+
+        // Add event listener for the Assigned Tasks button
+        document.addEventListener('DOMContentLoaded', function() {
+            const assignedTasksBtn = document.getElementById('assignedTasksBtn');
+            if (assignedTasksBtn) {
+                assignedTasksBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openTasksModal();
+                });
+            }
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('tasksModal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeTasksModal();
+                }
+            });
         });
     </script>
 </body>

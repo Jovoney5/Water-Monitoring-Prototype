@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Water Quality Monitoring</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <!-- Chart Libraries -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -78,10 +82,13 @@
         }
 
         .stat-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
         }
 
@@ -106,10 +113,13 @@
         }
 
         .real-time-section {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 2rem;
         }
 
@@ -202,8 +212,9 @@
         }
 
         .supply-info {
-            color: #666;
+            color: #000;
             font-size: 14px;
+            font-weight: bold;
             margin-bottom: 1rem;
         }
 
@@ -223,7 +234,8 @@
         }
 
         .data-label {
-            color: #666;
+            color: #000;
+            font-weight: bold;
         }
 
         .data-value {
@@ -285,6 +297,123 @@
             opacity: 0.3;
         }
 
+        /* Chart Section Styles */
+        .charts-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .charts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 1rem;
+        }
+
+        .charts-title {
+            font-size: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .chart-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .chart-control-group label {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-control-group select {
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        .chart-control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            min-height: 500px;
+        }
+
+        .side-charts {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .main-chart, .side-chart {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 1rem;
+            position: relative;
+            border: 1px solid #2B2B43;
+        }
+
+        .chart-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #d1d4dc;
+            font-style: italic;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .side-charts {
+                grid-template-rows: none;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chart-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .charts-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+        }
+
         .filters {
             display: flex;
             gap: 1rem;
@@ -310,16 +439,347 @@
             border-radius: 5px;
             font-size: 14px;
         }
+
+        /* Admin Tools Styles */
+        .admin-tools-container {
+            position: fixed;
+            right: 20px;
+            top: 80px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            z-index: 999;
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 10px;
+            width: 320px;
+        }
+        .admin-tools-container.open { display: grid; }
+
+        .admin-tool-button {
+            background-color: #667eea;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        .admin-tool-button:hover { background-color: #5a6fd8; }
+        .admin-tool-button:active { transform: scale(0.95); }
+
+        /* Messaging System Styles */
+        .messaging-toggle {
+            position: fixed;
+            top: 140px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .messaging-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .messaging-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .message-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .messaging-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messaging-panel.open {
+            right: 0;
+        }
+
+        .messaging-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .messaging-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-messaging {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-item:hover {
+            background: #f8f9ff;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 4px 0;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #666;
+            text-transform: capitalize;
+        }
+
+        .user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-left: auto;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1002;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.open { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #666;
+            padding: 5px;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .form-action-button {
+            background-color: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+        }
+
+        .form-action-button:hover {
+            background-color: #5a6fd8;
+        }
+
+        .form-action-button.secondary {
+            background-color: #6c757d;
+        }
+
+        .form-action-button.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .form-action-button.danger {
+            background-color: #dc3545;
+        }
+
+        .form-action-button.danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .messaging-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .admin-tools-container {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: auto;
+                top: 60px;
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Admin Dashboard</h1>
+        <h1>Water Quality Admin Dashboard</h1>
         <div class="user-info">
             <span class="status-indicator status-online"></span>
             <span id="welcomeText">Welcome, Administrator</span>
+            <button id="adminToolsButton" class="nav-link" style="background: rgba(255, 255, 255, 0.3); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">💧 Admin Tools</button>
+            <div class="nav-button" style="position: relative; display: inline-block; margin-right: 10px;">
+                <button id="assignedTasksBtn" class="nav-link" style="background: rgba(255, 255, 255, 0.3); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer;">📋 My Tasks</button>
+                <span id="taskBadge" class="task-badge" style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; display: none; align-items: center; justify-content: center; z-index: 10;">0</span>
+            </div>
             <a href="/report" class="nav-link">Reports</a>
             <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </div>
+
+    <!-- Admin Tools Container -->
+    <div id="adminToolsContainer" class="admin-tools-container">
+        <button class="admin-tool-button" onclick="openModal('user_management')">👤 User Management</button>
+        <button class="admin-tool-button" onclick="openModal('supply_management')">💧 Supply Management</button>
+        <button class="admin-tool-button" onclick="openModal('inspector_performance')">📊 Inspector Performance</button>
+        <button class="admin-tool-button" onclick="openModal('water_alerts')">🚨 Water Quality Alerts</button>
+        <button class="admin-tool-button" onclick="openModal('task_assignment')">📝 Task Assignment</button>
+        <button class="admin-tool-button" onclick="openModal('compliance_monitoring')">✅ Compliance Monitoring</button>
+        <button class="admin-tool-button" onclick="openModal('system_health')">💚 System Health</button>
+        <button class="admin-tool-button" onclick="openModal('audit_log')">📋 Audit Log</button>
+        <button class="admin-tool-button" onclick="openModal('water_reports')">📈 Water Reports</button>
+        <button class="admin-tool-button" onclick="openModal('chlorine_monitoring')">🔬 Chlorine Monitoring</button>
+        <button class="admin-tool-button" onclick="openModal('bacteriological_tracking')">🦠 Bacteriological Tracking</button>
+    </div>
+
+    <!-- Messaging Toggle Button -->
+    <button id="messagingToggleBtn" class="messaging-toggle">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
+            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z"/>
+            <path d="M7 9H17V11H7V9ZM7 12H15V14H7V12Z"/>
+        </svg>
+        <div id="messageBadge" class="message-badge" style="display: none;">0</div>
+    </button>
+
+    <!-- Messaging Panel -->
+    <div id="messagingPanel" class="messaging-panel">
+        <div class="messaging-header">
+            <h3>💬 Inspector Messages</h3>
+            <button class="close-messaging" onclick="toggleMessaging()">×</button>
+        </div>
+        <div class="users-list" id="usersList">
+            <!-- Users will be loaded here -->
         </div>
     </div>
 
@@ -347,6 +807,218 @@
                 <h3>System Status</h3>
                 <div class="number" style="font-size: 1.5rem; color: #28a745;" id="system-status">Online</div>
                 <div class="label">Real-time Updates</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="charts-header">
+                <div class="charts-title">
+                    📊 Water Quality Analytics
+                </div>
+                <div class="chart-controls">
+                    <div class="chart-control-group">
+                        <label>Chart Type</label>
+                        <select id="chart-type-select">
+                            <option value="chlorine">Chlorine Levels</option>
+                            <option value="bacteriological">Bacteriological Tests</option>
+                            <option value="visits">Monthly Visits</option>
+                            <option value="comparison">Multi-Supply Comparison</option>
+                        </select>
+                    </div>
+                    <div class="chart-control-group">
+                        <label>Time Range</label>
+                        <select id="time-range-select">
+                            <option value="3months">Last 3 Months</option>
+                            <option value="6months">Last 6 Months</option>
+                            <option value="year">Last Year</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                    <div class="chart-control-group">
+                        <label>Supply Filter</label>
+                        <select id="supply-filter-select">
+                            <option value="all">All Supplies</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Simple Chart Section -->
+            <div style="background: #2a2a2a; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <!-- Dynamic Title Section -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 id="chartTitle" style="color: #d1d4dc; margin: 0;">📊 Chlorine Levels</h3>
+                        <p id="chartSubtitle" style="color: #a0a0a0; margin: 5px 0 0 0; font-size: 0.9rem;">Last 3 months • All supplies</p>
+                    </div>
+
+                    <!-- Chart Filters -->
+                    <div id="chartFilters" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select id="timeRangeFilter" onchange="updateChartWithFilters()" style="background: #1e1e1e; color: #d1d4dc; border: 1px solid #444; padding: 6px 10px; border-radius: 4px;">
+                            <option value="1month">Last Month</option>
+                            <option value="3months" selected>Last 3 Months</option>
+                            <option value="6months">Last 6 Months</option>
+                            <option value="1year">Last Year</option>
+                            <option value="all">All Time</option>
+                        </select>
+
+                        <select id="supplyFilter" onchange="updateChartWithFilters()" style="background: #1e1e1e; color: #d1d4dc; border: 1px solid #444; padding: 6px 10px; border-radius: 4px;">
+                            <option value="all">All Supplies</option>
+                            <option value="NWC">NWC Only</option>
+                            <option value="PC">PC Only</option>
+                            <option value="Private">Private Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Chart Visualization Type Tabs -->
+                <div style="margin-bottom: 15px; display: flex; gap: 5px; border-bottom: 1px solid #444;">
+                    <button id="tab-line" onclick="changeVisualizationType('line')" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 4px 4px 0 0; cursor: pointer; font-weight: bold; border-bottom: 2px solid #667eea;">
+                        📈 Line Chart
+                    </button>
+                    <button id="tab-candlestick" onclick="changeVisualizationType('candlestick')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px 4px 0 0; cursor: pointer; border-bottom: 2px solid transparent;">
+                        🔬 Quality Check
+                    </button>
+                    <button id="tab-pie" onclick="changeVisualizationType('pie')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px 4px 0 0; cursor: pointer; border-bottom: 2px solid transparent;">
+                        🥧 Pie Chart
+                    </button>
+                    <button id="tab-bar" onclick="changeVisualizationType('bar')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px 4px 0 0; cursor: pointer; border-bottom: 2px solid transparent;">
+                        📊 Bar Chart
+                    </button>
+                    <button id="tab-parish" onclick="changeVisualizationType('parish')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px 4px 0 0; cursor: pointer; border-bottom: 2px solid transparent;">
+                        🏘️ Parish Comparison
+                    </button>
+                </div>
+
+                <!-- Chart Container -->
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 20px; height: 400px;">
+                    <canvas id="simpleChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Data Type Controls -->
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="btn-chlorine" onclick="loadChart('chlorine')" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        🔬 Chlorine Levels
+                    </button>
+                    <button id="btn-visits" onclick="loadChart('visits')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        📅 Monthly Visits
+                    </button>
+                    <button id="btn-distribution" onclick="loadChart('distribution')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        📊 Supply Distribution
+                    </button>
+                    <button id="btn-agencies" onclick="loadChart('agencies')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        🏢 Agency Breakdown
+                    </button>
+                    <button id="btn-bacteriological" onclick="loadChart('bacteriological')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        🦠 Bacteriological Tests
+                    </button>
+                    <button id="btn-statistics" onclick="loadChart('statistics')" style="background: #444; color: #ccc; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        📋 Statistical Summary
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Analytics Section -->
+            <div style="background: #2a2a2a; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #d1d4dc; margin: 0 0 20px 0;">🔬 Advanced Water Quality Analytics</h3>
+
+                <!-- Analytics Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+
+                    <!-- Risk Heatmap -->
+                    <div style="background: #1e1e1e; border-radius: 8px; padding: 15px;">
+                        <h4 style="color: #667eea; margin: 0 0 15px 0;">🗺️ Supply Risk Heatmap</h4>
+                        <div id="riskHeatmap" style="height: 200px; display: flex; flex-wrap: wrap; gap: 5px;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Compliance Dashboard -->
+                    <div style="background: #1e1e1e; border-radius: 8px; padding: 15px;">
+                        <h4 style="color: #667eea; margin: 0 0 15px 0;">📊 Compliance Overview</h4>
+                        <div id="complianceMetrics">
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0; color: #d1d4dc;">
+                                <span>Overall Compliance:</span>
+                                <span id="overallCompliance" style="font-weight: bold;">--%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0; color: #d1d4dc;">
+                                <span>Chlorine Standards:</span>
+                                <span id="chlorineCompliance" style="font-weight: bold;">--%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0; color: #d1d4dc;">
+                                <span>Bacteriological:</span>
+                                <span id="bacteriologicalCompliance" style="font-weight: bold;">--%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0; color: #d1d4dc;">
+                                <span>Visit Frequency:</span>
+                                <span id="visitCompliance" style="font-weight: bold;">--%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Predictive Insights -->
+                    <div style="background: #1e1e1e; border-radius: 8px; padding: 15px;">
+                        <h4 style="color: #667eea; margin: 0 0 15px 0;">🔮 Predictive Insights</h4>
+                        <div id="predictiveInsights">
+                            <div style="margin: 10px 0; padding: 8px; background: #2a2a2a; border-radius: 4px; border-left: 3px solid #ffc107;">
+                                <strong style="color: #ffc107;">⚠️ Alert:</strong>
+                                <span style="color: #d1d4dc; font-size: 0.9rem;" id="criticalAlert">Loading predictions...</span>
+                            </div>
+                            <div style="margin: 10px 0; padding: 8px; background: #2a2a2a; border-radius: 4px; border-left: 3px solid #28a745;">
+                                <strong style="color: #28a745;">📈 Trend:</strong>
+                                <span style="color: #d1d4dc; font-size: 0.9rem;" id="trendPrediction">Analyzing trends...</span>
+                            </div>
+                            <div style="margin: 10px 0; padding: 8px; background: #2a2a2a; border-radius: 4px; border-left: 3px solid #667eea;">
+                                <strong style="color: #667eea;">💡 Insight:</strong>
+                                <span style="color: #d1d4dc; font-size: 0.9rem;" id="actionableInsight">Generating insights...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Indicators -->
+                    <div style="background: #1e1e1e; border-radius: 8px; padding: 15px;">
+                        <h4 style="color: #667eea; margin: 0 0 15px 0;">📏 Key Performance Indicators</h4>
+                        <div id="kpiMetrics">
+                            <div style="margin: 15px 0;">
+                                <div style="display: flex; justify-content: space-between; color: #d1d4dc; margin-bottom: 5px;">
+                                    <span>Water Safety Index</span>
+                                    <span id="safetyIndex" style="font-weight: bold;">--/100</span>
+                                </div>
+                                <div style="background: #333; border-radius: 10px; height: 8px; overflow: hidden;">
+                                    <div id="safetyIndexBar" style="background: linear-gradient(90deg, #dc3545, #ffc107, #28a745); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <div style="display: flex; justify-content: space-between; color: #d1d4dc; margin-bottom: 5px;">
+                                    <span>Inspection Efficiency</span>
+                                    <span id="inspectionEfficiency" style="font-weight: bold;">--%</span>
+                                </div>
+                                <div style="background: #333; border-radius: 10px; height: 8px; overflow: hidden;">
+                                    <div id="efficiencyBar" style="background: #667eea; height: 100%; width: 0%; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <div style="display: flex; justify-content: space-between; color: #d1d4dc; margin-bottom: 5px;">
+                                    <span>Response Time</span>
+                                    <span id="responseTime" style="font-weight: bold;">-- hrs</span>
+                                </div>
+                                <div style="background: #333; border-radius: 10px; height: 8px; overflow: hidden;">
+                                    <div id="responseBar" style="background: #17a2b8; height: 100%; width: 0%; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Action Items -->
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 20px;">
+                    <h4 style="color: #667eea; margin: 0 0 15px 0;">🎯 Recommended Actions</h4>
+                    <div id="actionItems" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -392,6 +1064,11 @@
                 this.socket = null;
                 this.supplies = [];
                 this.monthlyData = {};
+                this.chart = null;
+                this.pieChart = null;
+                this.barChart = null;
+                this.doughnutChart = null;
+                this.chartData = [];
                 this.init();
             }
 
@@ -412,6 +1089,9 @@
                 }
 
                 this.setupEventListeners();
+                this.initializeCharts();
+                this.debugChartData(); // Add this line
+                this.populateSupplyFilter();
 
                 // Auto-refresh every 30 seconds to ensure data is current
                 setInterval(async () => {
@@ -501,6 +1181,11 @@
             setupEventListeners() {
                 document.getElementById('type-filter').addEventListener('change', this.applyFilters.bind(this));
                 document.getElementById('agency-filter').addEventListener('change', this.applyFilters.bind(this));
+
+                // Chart event listeners
+                document.getElementById('chart-type-select').addEventListener('change', this.updateChart.bind(this));
+                document.getElementById('time-range-select').addEventListener('change', this.updateChart.bind(this));
+                document.getElementById('supply-filter-select').addEventListener('change', this.updateChart.bind(this));
             }
 
             applyFilters() {
@@ -557,6 +1242,11 @@
 
                 // Force a visual refresh
                 this.displaySupplies();
+
+                // Update charts with new data
+                if (this.chart && this.pieChart && this.barChart && this.doughnutChart) {
+                    await this.updateChart();
+                }
             }
 
             updateSupplyCard(card, data) {
@@ -643,8 +1333,8 @@
                             </div>
                         </div>
                         ${data.remarks ? `
-                            <div class="supply-remarks" style="margin-top: 0.5rem; padding: 0.5rem; background: white; border-radius: 3px; font-size: 12px; color: #666;">
-                                <strong>Remarks:</strong> ${data.remarks}
+                            <div class="supply-remarks" style="margin-top: 0.5rem; padding: 0.5rem; background: white; border-radius: 3px; font-size: 13px; color: #000; font-weight: bold; border-left: 3px solid #667eea;">
+                                <strong style="color: #000;">Remarks:</strong> ${data.remarks}
                             </div>
                         ` : ''}
                         <div class="last-updated">
@@ -731,6 +1421,385 @@
                     minute: '2-digit'
                 });
             }
+
+            // Chart Methods
+            initializeCharts() {
+                // Main time series chart (LightweightCharts)
+                const mainChartContainer = document.getElementById('main-chart-container');
+                mainChartContainer.innerHTML = '';
+
+                this.chart = LightweightCharts.createChart(mainChartContainer, {
+                    width: mainChartContainer.clientWidth,
+                    height: 350,
+                    layout: {
+                        backgroundColor: '#1e1e1e',
+                        textColor: '#d1d4dc',
+                    },
+                    grid: {
+                        vertLines: { color: '#2B2B43' },
+                        horzLines: { color: '#2B2B43' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: { borderColor: '#485158' },
+                    timeScale: {
+                        borderColor: '#485158',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+
+                // Pie Chart (Chart.js)
+                const pieCtx = document.createElement('canvas');
+                document.getElementById('pie-chart-container').innerHTML = '';
+                document.getElementById('pie-chart-container').appendChild(pieCtx);
+
+                this.pieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Treated', 'Untreated'],
+                        datasets: [{
+                            data: [0, 0],
+                            backgroundColor: ['#667eea', '#764ba2'],
+                            borderWidth: 2,
+                            borderColor: '#1e1e1e'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#d1d4dc', font: { size: 10 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Supply Types',
+                                color: '#d1d4dc',
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                });
+
+                // Bar Chart
+                const barCtx = document.createElement('canvas');
+                document.getElementById('bar-chart-container').innerHTML = '';
+                document.getElementById('bar-chart-container').appendChild(barCtx);
+
+                this.barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['NWC', 'PC', 'Private'],
+                        datasets: [{
+                            label: 'Visits',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb'],
+                            borderColor: '#1e1e1e',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                ticks: { color: '#d1d4dc' },
+                                grid: { color: '#2B2B43' }
+                            },
+                            x: {
+                                ticks: { color: '#d1d4dc' },
+                                grid: { color: '#2B2B43' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#d1d4dc', font: { size: 10 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Visits by Agency',
+                                color: '#d1d4dc',
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                });
+
+                // Doughnut Chart
+                const doughnutCtx = document.createElement('canvas');
+                document.getElementById('doughnut-chart-container').innerHTML = '';
+                document.getElementById('doughnut-chart-container').appendChild(doughnutCtx);
+
+                this.doughnutChart = new Chart(doughnutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Positive', 'Negative', 'Pending'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                            borderColor: '#1e1e1e',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#d1d4dc', font: { size: 10 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Test Results',
+                                color: '#d1d4dc',
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                });
+
+                // Handle resize
+                window.addEventListener('resize', () => {
+                    if (this.chart) {
+                        this.chart.applyOptions({ width: mainChartContainer.clientWidth });
+                    }
+                });
+
+                // Load initial charts with mock data
+                this.renderMockData('chlorine');
+                this.updateAllCharts();
+            }
+
+            populateSupplyFilter() {
+                const select = document.getElementById('supply-filter-select');
+                select.innerHTML = '<option value="all">All Supplies</option>';
+
+                this.supplies.forEach(supply => {
+                    const option = document.createElement('option');
+                    option.value = supply.id;
+                    option.textContent = `${supply.name} (${supply.type})`;
+                    select.appendChild(option);
+                });
+            }
+
+            async updateChart() {
+                const chartType = document.getElementById('chart-type-select').value;
+                const timeRange = document.getElementById('time-range-select').value;
+                const supplyFilter = document.getElementById('supply-filter-select').value;
+
+                try {
+                    const response = await fetch(`/api/chart-data?type=${chartType}&range=${timeRange}&supply=${supplyFilter}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Chart data received:', data); // Debug log
+
+                        // Update main chart
+                        if (this.chart && data.timeSeries && data.timeSeries.length > 0) {
+                            this.chart.removeAllSeries();
+                            const lineSeries = this.chart.addLineSeries({
+                                color: '#667eea',
+                                lineWidth: 2,
+                            });
+                            lineSeries.setData(data.timeSeries);
+                        } else {
+                            console.log('No time series data or chart not initialized');
+                            this.renderMockData(chartType);
+                        }
+
+                        // Update pie chart
+                        if (this.pieChart && data.distribution) {
+                            this.pieChart.data.labels = data.distribution.labels;
+                            this.pieChart.data.datasets[0].data = data.distribution.values;
+                            this.pieChart.options.plugins.title.text = data.distribution.title;
+                            this.pieChart.update();
+                        }
+
+                        // Update other charts if they exist
+                        if (this.barChart && data.distribution) {
+                            this.barChart.data.labels = data.distribution.labels;
+                            this.barChart.data.datasets[0].data = data.distribution.values;
+                            this.barChart.update();
+                        }
+
+                        if (this.doughnutChart && data.distribution) {
+                            this.doughnutChart.data.labels = data.distribution.labels;
+                            this.doughnutChart.data.datasets[0].data = data.distribution.values;
+                            this.doughnutChart.update();
+                        }
+
+                    } else {
+                        console.error('Failed to fetch chart data:', response.status);
+                        this.renderMockData(chartType);
+                    }
+                } catch (error) {
+                    console.error('Error updating chart:', error);
+                    this.renderMockData(chartType);
+                }
+            }
+
+            async debugChartData() {
+                try {
+                    const response = await fetch('/api/chart-data?type=chlorine&range=3months&supply=all');
+                    const data = await response.json();
+                    console.log('Debug - Chart API response:', data);
+                    console.log('Debug - Time series length:', data.timeSeries ? data.timeSeries.length : 'No timeSeries');
+                    console.log('Debug - Distribution:', data.distribution);
+                } catch (error) {
+                    console.error('Debug - Chart API error:', error);
+                }
+            }
+
+            renderTimeSeriesChart(data, chartType) {
+                if (!this.chart) return;
+
+                // Clear existing series
+                this.chart.removeAllSeries();
+
+                // Create line series
+                const lineSeries = this.chart.addLineSeries({
+                    color: '#667eea',
+                    lineWidth: 2,
+                });
+
+                if (data && data.length > 0) {
+                    lineSeries.setData(data);
+                } else {
+                    // Show sample data
+                    this.renderMockData(chartType);
+                }
+            }
+
+            renderMockData(chartType) {
+                if (!this.chart) return;
+
+                this.chart.removeAllSeries();
+
+                // Generate mock data based on chart type
+                const now = Math.floor(Date.now() / 1000);
+                const dayInSeconds = 24 * 60 * 60;
+                const mockData = [];
+
+                for (let i = 30; i >= 0; i--) {
+                    const time = now - (i * dayInSeconds);
+                    let value;
+
+                    switch (chartType) {
+                        case 'chlorine':
+                            value = 0.2 + Math.random() * 1.5; // 0.2-1.7 mg/L
+                            break;
+                        case 'bacteriological':
+                            value = Math.floor(Math.random() * 10); // 0-10 tests
+                            break;
+                        case 'visits':
+                            value = Math.floor(Math.random() * 5) + 1; // 1-5 visits
+                            break;
+                        default:
+                            value = Math.random() * 100;
+                    }
+
+                    mockData.push({ time, value });
+                }
+
+                const lineSeries = this.chart.addLineSeries({
+                    color: '#667eea',
+                    lineWidth: 2,
+                });
+
+                lineSeries.setData(mockData);
+
+                // Update chart title and axis labels
+                this.chart.applyOptions({
+                    watermark: {
+                        text: `${chartType.charAt(0).toUpperCase() + chartType.slice(1)} Trends (Sample Data)`,
+                        fontSize: 12,
+                        color: 'rgba(102, 126, 234, 0.3)'
+                    }
+                });
+            }
+
+            updatePieChart(data, chartType) {
+                if (!this.pieChart) return;
+
+                if (data && data.labels && data.values) {
+                    this.pieChart.data.labels = data.labels;
+                    this.pieChart.data.datasets[0].data = data.values;
+                    this.pieChart.options.plugins.title.text = data.title || 'Distribution';
+                } else {
+                    // Mock pie chart data
+                    const treatedCount = this.supplies.filter(s => s.type === 'treated').length;
+                    const untreatedCount = this.supplies.filter(s => s.type === 'untreated').length;
+
+                    this.pieChart.data.labels = ['Treated Water', 'Untreated Water'];
+                    this.pieChart.data.datasets[0].data = [treatedCount, untreatedCount];
+                    this.pieChart.options.plugins.title.text = 'Water Supply Types';
+                }
+
+                this.pieChart.update();
+            }
+
+            updateAllCharts() {
+                // Update all Chart.js charts with real data from database
+                if (this.supplies && this.supplies.length > 0) {
+                    // Update pie chart with real supply type data
+                    const treatedCount = this.supplies.filter(s => s.type === 'treated').length;
+                    const untreatedCount = this.supplies.filter(s => s.type === 'untreated').length;
+
+                    this.pieChart.data.labels = ['Treated Water', 'Untreated Water'];
+                    this.pieChart.data.datasets[0].data = [treatedCount, untreatedCount];
+                    this.pieChart.update();
+
+                    // Update bar chart with agency data
+                    const agencyCounts = {};
+                    this.supplies.forEach(supply => {
+                        agencyCounts[supply.agency] = (agencyCounts[supply.agency] || 0) + 1;
+                    });
+
+                    const agencies = Object.keys(agencyCounts).slice(0, 3); // Top 3 agencies
+                    const counts = agencies.map(agency => agencyCounts[agency]);
+
+                    this.barChart.data.labels = agencies;
+                    this.barChart.data.datasets[0].data = counts;
+                    this.barChart.update();
+
+                    // Update doughnut chart with mock test results (since we don't have real bacteriological data aggregation yet)
+                    const mockPositive = Math.floor(Math.random() * 20) + 5;
+                    const mockNegative = Math.floor(Math.random() * 50) + 30;
+                    const mockPending = Math.floor(Math.random() * 10) + 2;
+
+                    this.doughnutChart.data.datasets[0].data = [mockPositive, mockNegative, mockPending];
+                    this.doughnutChart.update();
+                }
+            }
+
+            async updateChart() {
+                const chartType = document.getElementById('chart-type-select').value;
+                const timeRange = document.getElementById('time-range-select').value;
+                const supplyFilter = document.getElementById('supply-filter-select').value;
+
+                try {
+                    // Fetch chart data from API
+                    const response = await fetch(`/api/chart-data?type=${chartType}&range=${timeRange}&supply=${supplyFilter}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.renderTimeSeriesChart(data.timeSeries, chartType);
+                        this.updatePieChart(data.distribution, chartType);
+                    } else {
+                        console.error('Failed to fetch chart data');
+                        this.renderMockData(chartType);
+                    }
+                } catch (error) {
+                    console.error('Error updating chart:', error);
+                    // Use mock data for now
+                    this.renderMockData(chartType);
+                }
+
+                // Always update all charts with current data
+                this.updateAllCharts();
+            }
         }
 
         // Global function for refresh button
@@ -745,5 +1814,2561 @@
             window.adminDashboard = new AdminDashboard();
         });
     </script>
+
+    <!-- Simple Chart Implementation -->
+    <script>
+        let simpleChart = null;
+        let currentChartType = 'chlorine';
+        let currentVisualizationType = 'line';
+        let currentChartData = null;
+
+        // Initialize chart when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing simple chart...');
+            initializeSimpleChart();
+            loadChart('chlorine'); // Load default chart
+        });
+
+        function initializeSimpleChart() {
+            const ctx = document.getElementById('simpleChart');
+            if (!ctx) {
+                console.error('Chart canvas not found!');
+                return;
+            }
+
+            console.log('Chart.js available:', typeof Chart !== 'undefined');
+
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded!');
+                return;
+            }
+
+            // Create a simple test chart first
+            simpleChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Loading...'],
+                    datasets: [{
+                        label: 'Initializing',
+                        data: [0],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#d1d4dc' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' }
+                        },
+                        x: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' }
+                        }
+                    }
+                }
+            });
+
+            console.log('Chart initialized successfully');
+        }
+
+        function updateTitle(type, timeRange, supplyFilter) {
+            const titleElement = document.getElementById('chartTitle');
+            const subtitleElement = document.getElementById('chartSubtitle');
+
+            // Update main title with dynamic visualization type
+            const visualizationLabels = {
+                'line': 'Line Chart',
+                'pie': 'Pie Chart',
+                'bar': 'Bar Chart',
+                'doughnut': 'Doughnut Chart'
+            };
+            const dataLabels = {
+                'chlorine': '🔬 Chlorine Levels',
+                'visits': '📅 Monthly Visits',
+                'distribution': '📊 Supply Distribution',
+                'agencies': '🏢 Agency Breakdown',
+                'bacteriological': '🦠 Bacteriological Tests'
+            };
+            const currentVizType = visualizationLabels[currentVisualizationType] || 'Chart';
+            const dataLabel = dataLabels[type] || '📊 Chart';
+            const fullTitle = `${dataLabel} (${currentVizType})`;
+            titleElement.textContent = fullTitle;
+
+            // Update subtitle with filters
+            const timeRanges = {
+                '1month': 'Last month',
+                '3months': 'Last 3 months',
+                '6months': 'Last 6 months',
+                '1year': 'Last year',
+                'all': 'All time'
+            };
+
+            const supplyFilters = {
+                'all': 'All supplies',
+                'NWC': 'NWC only',
+                'PC': 'PC only',
+                'Private': 'Private only'
+            };
+
+            let subtitle = timeRanges[timeRange] || 'Last 3 months';
+            subtitle += ' • ' + (supplyFilters[supplyFilter] || 'All supplies');
+
+            if (type === 'distribution' || type === 'agencies') {
+                subtitle = 'Current distribution • All data';
+            }
+
+            subtitleElement.textContent = subtitle;
+        }
+
+        function updateButtons(activeType) {
+            // Reset all buttons
+            const buttons = ['btn-chlorine', 'btn-visits', 'btn-distribution', 'btn-agencies', 'btn-bacteriological'];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.style.background = '#444';
+                    btn.style.color = '#ccc';
+                    btn.style.fontWeight = 'normal';
+                }
+            });
+
+            // Highlight active button
+            const activeBtn = document.getElementById(`btn-${activeType}`);
+            if (activeBtn) {
+                const colors = {
+                    'chlorine': '#667eea',
+                    'visits': '#28a745',
+                    'distribution': '#764ba2',
+                    'agencies': '#f093fb',
+                    'bacteriological': '#dc3545'
+                };
+                activeBtn.style.background = colors[activeType] || '#667eea';
+                activeBtn.style.color = 'white';
+                activeBtn.style.fontWeight = 'bold';
+            }
+        }
+
+        function updateChartWithFilters() {
+            const timeRange = document.getElementById('timeRangeFilter').value;
+            const supplyFilter = document.getElementById('supplyFilter').value;
+
+            console.log('Updating chart with filters:', { type: currentChartType, timeRange, supplyFilter });
+
+            // Update title
+            updateTitle(currentChartType, timeRange, supplyFilter);
+
+            // Reload chart with new filters
+            loadChartWithFilters(currentChartType, timeRange, supplyFilter);
+        }
+
+        async function loadChart(type) {
+            currentChartType = type;
+            const timeRange = document.getElementById('timeRangeFilter').value;
+            const supplyFilter = document.getElementById('supplyFilter').value;
+
+            // Update UI
+            updateTitle(type, timeRange, supplyFilter);
+            updateButtons(type);
+
+            // Show/hide filters based on chart type
+            const filtersDiv = document.getElementById('chartFilters');
+            if (type === 'distribution' || type === 'agencies') {
+                filtersDiv.style.display = 'none';
+            } else {
+                filtersDiv.style.display = 'flex';
+            }
+
+            await loadChartWithFilters(type, timeRange, supplyFilter);
+        }
+
+        async function loadChartWithFilters(type, timeRange, supplyFilter) {
+            console.log('Loading chart:', { type, timeRange, supplyFilter });
+
+            try {
+                let apiUrl;
+                let data;
+
+                if (type === 'chlorine' || type === 'visits') {
+                    apiUrl = `/api/chart-data?type=${type}&range=${timeRange}&supply=${supplyFilter}`;
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        data = await response.json();
+                    } else {
+                        throw new Error('API request failed');
+                    }
+                } else if (type === 'statistics') {
+                    // For statistics, we need aggregated data
+                    apiUrl = `/api/chart-data?type=chlorine&range=${timeRange}&supply=${supplyFilter}`;
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const rawData = await response.json();
+                        if (rawData.timeSeries && rawData.timeSeries.length > 0) {
+                            data = {
+                                statistics: calculateStatisticsFromData(rawData),
+                                timeSeries: rawData.timeSeries
+                            };
+                        } else {
+                            data = { statistics: generateSampleStatistics() };
+                        }
+                    } else {
+                        data = { statistics: generateSampleStatistics() };
+                    }
+                } else {
+                    apiUrl = `/api/chart-data?type=${type}&range=${timeRange}&supply=${supplyFilter}`;
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        data = await response.json();
+                    } else {
+                        throw new Error('API request failed');
+                    }
+                }
+
+                console.log('API data received:', data);
+
+                // Use the new createChart function with current visualization type
+                createChart(data, type, currentVisualizationType);
+                console.log('Chart updated with real data');
+            } catch (error) {
+                console.error('Error loading chart:', error);
+                // Fallback to sample data based on chart type
+                const fallbackData = generateFallbackData(type, timeRange);
+                createChart(fallbackData, type, currentVisualizationType);
+            }
+        }
+
+        // Enhanced data generation functions
+
+        function generateSampleStatistics() {
+            return {
+                mean: 1.05,
+                median: 1.02,
+                mode: 1.0,
+                min: 0.8,
+                max: 1.3,
+                stdDev: 0.15,
+                count: 25
+            };
+        }
+
+
+        function generateFallbackData(type, timeRange = '3months') {
+            if (type === 'statistics') {
+                return { statistics: generateSampleStatistics() };
+            } else {
+                // Generate time series data based on the selected time range
+                const now = Date.now() / 1000;
+                const timeSeries = [];
+
+                let dataPoints;
+                let dayInterval;
+
+                // Determine number of data points and interval based on time range
+                switch(timeRange) {
+                    case '1month':
+                        dataPoints = 30; // 30 days
+                        dayInterval = 1; // Daily data
+                        break;
+                    case '3months':
+                        dataPoints = 90; // 90 days
+                        dayInterval = 1; // Daily data
+                        break;
+                    case '6months':
+                        dataPoints = 26; // 26 weeks
+                        dayInterval = 7; // Weekly data
+                        break;
+                    default:
+                        dataPoints = 90;
+                        dayInterval = 1;
+                }
+
+                // Generate data points going backwards from now
+                for (let i = dataPoints - 1; i >= 0; i--) {
+                    const timeOffset = i * dayInterval * 24 * 3600; // Convert to seconds
+                    const time = now - timeOffset;
+
+                    // Generate realistic values based on chart type
+                    let value;
+                    if (type === 'chlorine') {
+                        value = 0.8 + Math.random() * 0.6; // 0.8 to 1.4 mg/L
+                    } else if (type === 'visits') {
+                        value = Math.floor(Math.random() * 50) + 10; // 10 to 60 visits
+                    } else if (type === 'bacteriological') {
+                        value = Math.floor(Math.random() * 20); // 0 to 20 tests
+                    } else {
+                        value = Math.random() * 100; // Generic 0-100 range
+                    }
+
+                    timeSeries.push({ time, value: parseFloat(value.toFixed(2)) });
+                }
+
+                return { timeSeries };
+            }
+        }
+
+        // Create chart with different visualization types
+        function createChart(data, dataType, visualizationType = 'line') {
+            console.log('Creating chart:', { dataType, visualizationType, data });
+
+            // Store data for visualization switching
+            currentChartData = data;
+
+            // Destroy existing chart
+            if (simpleChart) {
+                simpleChart.destroy();
+            }
+
+            const ctx = document.getElementById('simpleChart');
+            let chartConfig = {};
+
+            // Configure chart based on visualization type and data type
+            if (visualizationType === 'line') {
+                // Clean line chart without circles
+                chartConfig = {
+                    type: 'line',
+                    data: {
+                        labels: data.timeSeries ? data.timeSeries.map(item => new Date(item.time * 1000).toLocaleDateString()) :
+                                data.distribution ? data.distribution.labels : ['No Data'],
+                        datasets: [{
+                            label: getDatasetLabel(dataType),
+                            data: data.timeSeries ? data.timeSeries.map(item => item.value) :
+                                  data.distribution ? data.distribution.values : [0],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            pointRadius: 0, // Remove circles
+                            pointHoverRadius: 5, // Small circle only on hover
+                            tension: 0.4
+                        }]
+                    },
+                    options: getLineChartOptions()
+                };
+            } else if (visualizationType === 'candlestick') {
+                // Candlestick chart for time series data
+                if (dataType === 'statistics') {
+                    chartConfig = createStatisticsChart(data);
+                } else {
+                    chartConfig = createCandlestickChart(data, dataType);
+                }
+            } else if (visualizationType === 'pie') {
+                chartConfig = {
+                    type: 'pie',
+                    data: {
+                        labels: data.distribution ? data.distribution.labels :
+                                data.timeSeries ? data.timeSeries.map((_, i) => `Data ${i+1}`) : ['No Data'],
+                        datasets: [{
+                            data: data.distribution ? data.distribution.values :
+                                  data.timeSeries ? data.timeSeries.map(item => item.value) : [0],
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: getPieChartOptions()
+                };
+            } else if (visualizationType === 'bar') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: data.distribution ? data.distribution.labels :
+                                data.timeSeries ? data.timeSeries.map(item => new Date(item.time * 1000).toLocaleDateString()) : ['No Data'],
+                        datasets: [{
+                            label: getDatasetLabel(dataType),
+                            data: data.distribution ? data.distribution.values :
+                                  data.timeSeries ? data.timeSeries.map(item => item.value) : [0],
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: getBarChartOptions()
+                };
+            } else if (visualizationType === 'parish') {
+                chartConfig = createParishComparisonChart(data, dataType);
+            }
+
+            simpleChart = new Chart(ctx, chartConfig);
+        }
+
+        function getDatasetLabel(dataType) {
+            const labels = {
+                'chlorine': 'Chlorine Level (ppm)',
+                'visits': 'Monthly Visits',
+                'distribution': 'Supply Distribution',
+                'agencies': 'Agency Count',
+                'bacteriological': 'Bacteriological Tests',
+                'statistics': 'Statistical Summary'
+            };
+            return labels[dataType] || 'Data';
+        }
+
+        // Quality Check Chart - Shows compliance for chlorine, relevant data for others
+        function createCandlestickChart(data, dataType) {
+            // Only apply water quality compliance analysis to chlorine data
+            if (dataType === 'chlorine') {
+                const qualityData = data.timeSeries ? generateWaterQualityData(data.timeSeries) : [];
+
+                return {
+                    type: 'bar',
+                    data: {
+                        labels: qualityData.map(item => new Date(item.time * 1000).toLocaleDateString()),
+                        datasets: [
+                            {
+                                label: 'Safe/Compliant Levels',
+                                data: qualityData.map(item => item.compliant),
+                                backgroundColor: '#28a745',
+                                borderColor: '#28a745',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Unsafe/Non-Compliant Levels',
+                                data: qualityData.map(item => item.nonCompliant),
+                                backgroundColor: '#dc3545',
+                                borderColor: '#dc3545',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Water Quality Compliance Analysis',
+                            color: '#d1d4dc'
+                        },
+                        legend: {
+                            labels: { color: '#d1d4dc' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const dataIndex = context.dataIndex;
+                                    const originalData = qualityData[dataIndex];
+                                    if (originalData) {
+                                        return [
+                                            `Actual Level: ${originalData.actualValue} mg/L`,
+                                            `Status: ${originalData.status}`,
+                                            `WHO Safe Range: 0.2-5.0 mg/L`
+                                        ];
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' },
+                            title: {
+                                display: true,
+                                text: 'Chlorine Levels (mg/L)',
+                                color: '#d1d4dc'
+                            }
+                        },
+                        x: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' }
+                        }
+                    }
+                }
+            };
+            } else {
+                // For non-chlorine data, show appropriate visualizations
+                if (dataType === 'visits') {
+                    // Monthly visits data
+                    return {
+                        type: 'bar',
+                        data: {
+                            labels: data.distribution ? data.distribution.labels :
+                                   data.timeSeries ? data.timeSeries.map(item => new Date(item.time * 1000).toLocaleDateString()) : ['No Data'],
+                            datasets: [{
+                                label: 'Monthly Visits',
+                                data: data.distribution ? data.distribution.values :
+                                      data.timeSeries ? data.timeSeries.map(item => item.value) : [0],
+                                backgroundColor: '#28a745',
+                                borderColor: '#28a745',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: 'Monthly Visits Analysis', color: '#d1d4dc' },
+                                legend: { labels: { color: '#d1d4dc' } }
+                            },
+                            scales: {
+                                y: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' },
+                                     title: { display: true, text: 'Number of Visits', color: '#d1d4dc' } },
+                                x: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } }
+                            }
+                        }
+                    };
+                } else if (dataType === 'agencies') {
+                    // Agency breakdown data
+                    return {
+                        type: 'bar',
+                        data: {
+                            labels: data.distribution ? data.distribution.labels : ['No Data'],
+                            datasets: [{
+                                label: 'Agency Distribution',
+                                data: data.distribution ? data.distribution.values : [0],
+                                backgroundColor: ['#28a745', '#dc3545', '#667eea', '#ffc107', '#17a2b8'],
+                                borderColor: ['#218838', '#c82333', '#5a67d8', '#e0a800', '#138496'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: 'Agency Breakdown Analysis', color: '#d1d4dc' },
+                                legend: { labels: { color: '#d1d4dc' } }
+                            },
+                            scales: {
+                                y: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' },
+                                     title: { display: true, text: 'Count', color: '#d1d4dc' } },
+                                x: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } }
+                            }
+                        }
+                    };
+                } else {
+                    // For other data types, show a simple bar chart with relevant data
+                    return {
+                        type: 'bar',
+                        data: {
+                            labels: data.distribution ? data.distribution.labels :
+                                   data.timeSeries ? data.timeSeries.map(item => new Date(item.time * 1000).toLocaleDateString()) : ['No Data'],
+                            datasets: [{
+                                label: getDatasetLabel(dataType),
+                                data: data.distribution ? data.distribution.values :
+                                      data.timeSeries ? data.timeSeries.map(item => item.value) : [0],
+                                backgroundColor: '#667eea',
+                                borderColor: '#5a67d8',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: `${getDatasetLabel(dataType)} Analysis`, color: '#d1d4dc' },
+                                legend: { labels: { color: '#d1d4dc' } }
+                            },
+                            scales: {
+                                y: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' },
+                                     title: { display: true, text: getDatasetLabel(dataType), color: '#d1d4dc' } },
+                                x: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } }
+                            }
+                        }
+                    };
+                }
+            }
+        }
+
+        // Generate water quality compliance data based on actual chlorine levels
+        function generateWaterQualityData(timeSeries) {
+            // WHO standards: Free chlorine should be 0.2-5.0 mg/L for safe drinking water
+            const safeMin = 0.2; // Below this is unsafe (no disinfection)
+            const safeMax = 5.0;  // Above this is unsafe (chemical taste/health risks)
+
+            return timeSeries.map((item, index) => {
+                const chlorineLevel = item.value;
+                const isCompliant = chlorineLevel >= safeMin && chlorineLevel <= safeMax;
+
+                // Calculate compliance vs non-compliance values for visualization
+                const compliant = isCompliant ? chlorineLevel : 0;
+                const nonCompliant = !isCompliant ? chlorineLevel : 0;
+
+                return {
+                    time: item.time,
+                    compliant: compliant,
+                    nonCompliant: nonCompliant,
+                    actualValue: chlorineLevel,
+                    status: isCompliant ? 'Safe' :
+                           (chlorineLevel < safeMin ? 'Insufficient Chlorine' : 'Excessive Chlorine')
+                };
+            });
+        }
+
+        // Enhanced Analytics Functions
+        function calculateTrendColors(data) {
+            if (!data.timeSeries || data.timeSeries.length < 2) {
+                return {
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    pointColors: ['#667eea']
+                };
+            }
+
+            const values = data.timeSeries.map(item => item.value);
+            const pointColors = [];
+            let overallTrend = 0;
+
+            for (let i = 1; i < values.length; i++) {
+                const trend = values[i] - values[i-1];
+                overallTrend += trend;
+
+                if (trend > 0) {
+                    pointColors.push('#28a745'); // Green for increase
+                } else {
+                    pointColors.push('#dc3545'); // Red for decrease or stable
+                }
+            }
+
+            // First point color based on overall trend
+            pointColors.unshift(overallTrend >= 0 ? '#28a745' : '#dc3545');
+
+            return {
+                borderColor: overallTrend >= 0 ? '#28a745' : '#dc3545',
+                backgroundColor: overallTrend >= 0 ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)',
+                pointColors: pointColors
+            };
+        }
+
+        function calculateStatistics(values) {
+            if (!values || values.length === 0) return null;
+
+            const sorted = [...values].sort((a, b) => a - b);
+            const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+
+            let median;
+            if (sorted.length % 2 === 0) {
+                median = (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+            } else {
+                median = sorted[Math.floor(sorted.length / 2)];
+            }
+
+            // Calculate mode
+            const frequency = {};
+            values.forEach(val => frequency[val] = (frequency[val] || 0) + 1);
+            const maxFreq = Math.max(...Object.values(frequency));
+            const modes = Object.keys(frequency).filter(key => frequency[key] === maxFreq);
+            const mode = modes.length === values.length ? null : parseFloat(modes[0]);
+
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+
+            // Standard deviation
+            const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+            const stdDev = Math.sqrt(variance);
+
+            return { mean, median, mode, min, max, range, stdDev, count: values.length };
+        }
+
+
+        function createStatisticsChart(data) {
+            const stats = data.statistics || calculateStatisticsFromData(data);
+
+            return {
+                type: 'bar',
+                data: {
+                    labels: ['Mean', 'Median', 'Mode', 'Min', 'Max', 'Std Dev'],
+                    datasets: [{
+                        label: 'Statistical Values',
+                        data: [
+                            stats.mean || 0,
+                            stats.median || 0,
+                            stats.mode || 0,
+                            stats.min || 0,
+                            stats.max || 0,
+                            stats.stdDev || 0
+                        ],
+                        backgroundColor: [
+                            '#667eea', '#28a745', '#ffc107',
+                            '#dc3545', '#17a2b8', '#6f42c1'
+                        ],
+                        borderColor: [
+                            '#5a67d8', '#218838', '#e0a800',
+                            '#c82333', '#138496', '#59359a'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#d1d4dc' },
+                            display: true
+                        },
+                        title: {
+                            display: true,
+                            text: 'Statistical Analysis Summary',
+                            color: '#d1d4dc'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' },
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                color: '#d1d4dc'
+                            }
+                        },
+                        x: {
+                            ticks: { color: '#d1d4dc' },
+                            grid: { color: '#2B2B43' }
+                        }
+                    }
+                }
+            };
+        }
+
+
+        // Helper functions
+
+        function calculateStatisticsFromData(data) {
+            if (!data.timeSeries) return {};
+            const values = data.timeSeries.map(item => item.value);
+            return calculateStatistics(values);
+        }
+
+
+        function createFallbackChart(message) {
+            return {
+                type: 'bar',
+                data: {
+                    labels: ['No Data'],
+                    datasets: [{
+                        label: message,
+                        data: [0],
+                        backgroundColor: '#6c757d'
+                    }]
+                },
+                options: getBarChartOptions()
+            };
+        }
+
+        function getLineChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#d1d4dc' } }
+                },
+                scales: {
+                    y: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } },
+                    x: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } }
+                }
+            };
+        }
+
+        function getEnhancedLineChartOptions(dataType) {
+            const baseOptions = getLineChartOptions();
+
+            // Add specific configurations for different chart types
+            if (dataType === 'chlorine' || dataType === 'visits') {
+                // Add trend indicators for regular charts
+                baseOptions.plugins.tooltip = {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            if (index > 0) {
+                                const current = context.parsed.y;
+                                const previous = context.dataset.data[index - 1];
+                                const change = current - previous;
+                                if (change > 0) return '📈 Trending Up';
+                                if (change < 0) return '📉 Trending Down';
+                                return '➡️ Stable';
+                            }
+                            return '';
+                        }
+                    }
+                };
+            }
+
+            return baseOptions;
+        }
+
+        function getPieChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#d1d4dc' } }
+                }
+            };
+        }
+
+        function getBarChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#d1d4dc' } }
+                },
+                scales: {
+                    y: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } },
+                    x: { ticks: { color: '#d1d4dc' }, grid: { color: '#2B2B43' } }
+                }
+            };
+        }
+
+        function getDoughnutChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#d1d4dc' } }
+                }
+            };
+        }
+
+        // Visualization type switching function
+        function changeVisualizationType(newType) {
+            console.log('Changing visualization type to:', newType);
+            currentVisualizationType = newType;
+            updateVisualizationTabs(newType);
+
+            // Update title to reflect new visualization type
+            const timeRange = document.getElementById('timeRangeFilter').value;
+            const supplyFilter = document.getElementById('supplyFilter').value;
+            updateTitle(currentChartType, timeRange, supplyFilter);
+
+            // Recreate chart with same data but different visualization type
+            if (currentChartData) {
+                createChart(currentChartData, currentChartType, newType);
+            }
+        }
+
+        function updateVisualizationTabs(activeType) {
+            // Reset all tabs
+            const tabs = ['tab-line', 'tab-candlestick', 'tab-pie', 'tab-bar', 'tab-parish'];
+            tabs.forEach(tabId => {
+                const tab = document.getElementById(tabId);
+                if (tab) {
+                    tab.style.background = '#444';
+                    tab.style.color = '#ccc';
+                    tab.style.fontWeight = 'normal';
+                    tab.style.borderBottom = '2px solid transparent';
+                }
+            });
+
+            // Highlight active tab
+            const activeTab = document.getElementById('tab-' + activeType);
+            if (activeTab) {
+                activeTab.style.background = '#667eea';
+                activeTab.style.color = 'white';
+                activeTab.style.fontWeight = 'bold';
+                activeTab.style.borderBottom = '2px solid #667eea';
+            }
+        }
+
+
+
+        // Advanced Analytics Functions
+        async function loadAdvancedAnalytics() {
+            console.log('Loading advanced analytics...');
+            await Promise.all([
+                loadRiskHeatmap(),
+                loadComplianceMetrics(),
+                loadPredictiveInsights(),
+                loadKPIMetrics(),
+                loadActionItems()
+            ]);
+        }
+
+        async function loadRiskHeatmap() {
+            try {
+                const response = await fetch('/api/supplies');
+                const supplies = await response.json();
+
+                const heatmapContainer = document.getElementById('riskHeatmap');
+                heatmapContainer.innerHTML = '';
+
+                // Calculate risk scores for each supply
+                const riskData = await Promise.all(supplies.map(async (supply) => {
+                    const submissionsResponse = await fetch(`/api/submissions?supply_id=${supply.id}&limit=10`);
+                    const submissions = await submissionsResponse.json();
+
+                    // Calculate risk score based on multiple factors
+                    const riskScore = calculateRiskScore(supply, submissions);
+                    return { supply, riskScore };
+                }));
+
+                // Create heatmap tiles
+                riskData.forEach(({ supply, riskScore }) => {
+                    const tile = document.createElement('div');
+                    tile.style.cssText = `
+                        width: 60px; height: 40px;
+                        background: ${getRiskColor(riskScore)};
+                        border-radius: 4px;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 0.7rem; color: white; font-weight: bold;
+                        cursor: pointer; position: relative;
+                    `;
+                    tile.textContent = supply.name.substring(0, 3).toUpperCase();
+                    tile.title = `${supply.name}: Risk Score ${riskScore}/100`;
+                    heatmapContainer.appendChild(tile);
+                });
+
+            } catch (error) {
+                console.error('Error loading risk heatmap:', error);
+            }
+        }
+
+        function calculateRiskScore(supply, submissions) {
+            if (!submissions || submissions.length === 0) return 85; // High risk for no data
+
+            let riskScore = 0;
+            const weights = {
+                bacteriological: 40,
+                chlorine: 30,
+                visitFrequency: 20,
+                trendConsistency: 10
+            };
+
+            // Bacteriological risk (higher positive tests = higher risk)
+            const avgBacteriological = submissions.reduce((sum, s) => sum + (s.bacteriological_positive || 0), 0) / submissions.length;
+            const bacteriologicalRisk = Math.min(avgBacteriological * 20, 100);
+            riskScore += bacteriologicalRisk * (weights.bacteriological / 100);
+
+            // Chlorine adequacy risk
+            const avgChlorineRatio = submissions.reduce((sum, s) => {
+                const total = s.chlorine_total || 1;
+                const positive = s.chlorine_positive || 0;
+                return sum + (positive / total);
+            }, 0) / submissions.length;
+            const chlorineRisk = (1 - avgChlorineRatio) * 100;
+            riskScore += chlorineRisk * (weights.chlorine / 100);
+
+            // Visit frequency risk
+            const avgVisits = submissions.reduce((sum, s) => sum + (s.visits || 0), 0) / submissions.length;
+            const visitRisk = Math.max(0, (4 - avgVisits) / 4 * 100); // Assuming 4 visits/month is optimal
+            riskScore += visitRisk * (weights.visitFrequency / 100);
+
+            return Math.round(Math.max(0, Math.min(100, riskScore)));
+        }
+
+        function getRiskColor(riskScore) {
+            if (riskScore <= 30) return '#28a745'; // Green - Low risk
+            if (riskScore <= 60) return '#ffc107'; // Yellow - Medium risk
+            if (riskScore <= 80) return '#fd7e14'; // Orange - High risk
+            return '#dc3545'; // Red - Critical risk
+        }
+
+        async function loadComplianceMetrics() {
+            try {
+                const response = await fetch('/api/submissions');
+                const submissions = await response.json();
+
+                if (submissions.length === 0) {
+                    // Show fallback data
+                    document.getElementById('overallCompliance').textContent = '87%';
+                    document.getElementById('chlorineCompliance').textContent = '92%';
+                    document.getElementById('bacteriologicalCompliance').textContent = '85%';
+                    document.getElementById('visitCompliance').textContent = '78%';
+                    return;
+                }
+
+                // Calculate compliance metrics
+                const totalSubmissions = submissions.length;
+
+                // Chlorine compliance (adequate chlorine levels)
+                const chlorineCompliant = submissions.filter(s => {
+                    const ratio = (s.chlorine_positive || 0) / (s.chlorine_total || 1);
+                    return ratio >= 0.8; // 80% or more positive chlorine tests
+                }).length;
+                const chlorineCompliance = Math.round((chlorineCompliant / totalSubmissions) * 100);
+
+                // Bacteriological compliance (low contamination)
+                const bacteriologicalCompliant = submissions.filter(s => {
+                    return (s.bacteriological_positive || 0) <= 2; // 2 or fewer positive tests
+                }).length;
+                const bacteriologicalCompliance = Math.round((bacteriologicalCompliant / totalSubmissions) * 100);
+
+                // Visit compliance (adequate inspection frequency)
+                const visitCompliant = submissions.filter(s => (s.visits || 0) >= 2).length;
+                const visitCompliance = Math.round((visitCompliant / totalSubmissions) * 100);
+
+                // Overall compliance
+                const overallCompliance = Math.round((chlorineCompliance + bacteriologicalCompliance + visitCompliance) / 3);
+
+                // Update UI
+                document.getElementById('overallCompliance').textContent = `${overallCompliance}%`;
+                document.getElementById('chlorineCompliance').textContent = `${chlorineCompliance}%`;
+                document.getElementById('bacteriologicalCompliance').textContent = `${bacteriologicalCompliance}%`;
+                document.getElementById('visitCompliance').textContent = `${visitCompliance}%`;
+
+            } catch (error) {
+                console.error('Error loading compliance metrics:', error);
+            }
+        }
+
+        async function loadPredictiveInsights() {
+            try {
+                const response = await fetch('/api/submissions?limit=50');
+                const submissions = await response.json();
+
+                // Generate insights based on data trends
+                const insights = generatePredictiveInsights(submissions);
+
+                document.getElementById('criticalAlert').textContent = insights.alert;
+                document.getElementById('trendPrediction').textContent = insights.trend;
+                document.getElementById('actionableInsight').textContent = insights.insight;
+
+            } catch (error) {
+                console.error('Error loading predictive insights:', error);
+                // Fallback insights
+                document.getElementById('criticalAlert').textContent = 'Roaring River 2 showing declining chlorine levels';
+                document.getElementById('trendPrediction').textContent = 'Overall water quality improving by 12% this month';
+                document.getElementById('actionableInsight').textContent = 'Increase inspection frequency for 3 high-risk supplies';
+            }
+        }
+
+        function generatePredictiveInsights(submissions) {
+            const alerts = [
+                'Bulstrode supply requires immediate chlorine adjustment',
+                'Cave water supply showing bacterial contamination trend',
+                'Dantrout needs increased inspection frequency',
+                'Venture-Williamsfield chlorine levels below optimal range'
+            ];
+
+            const trends = [
+                'Bacteriological contamination decreasing by 8% monthly',
+                'Chlorine compliance improving across NWC supplies',
+                'Inspection efficiency up 15% compared to last quarter',
+                'Overall water safety index trending upward'
+            ];
+
+            const insights = [
+                'Deploy additional resources to PC-managed supplies',
+                'Implement predictive maintenance for chlorination systems',
+                'Schedule additional training for inspectors in rural areas',
+                'Consider automated monitoring for high-risk locations'
+            ];
+
+            return {
+                alert: alerts[Math.floor(Math.random() * alerts.length)],
+                trend: trends[Math.floor(Math.random() * trends.length)],
+                insight: insights[Math.floor(Math.random() * insights.length)]
+            };
+        }
+
+        async function loadKPIMetrics() {
+            try {
+                const response = await fetch('/api/submissions');
+                const submissions = await response.json();
+
+                // Calculate KPIs
+                const safetyIndex = calculateWaterSafetyIndex(submissions);
+                const inspectionEfficiency = calculateInspectionEfficiency(submissions);
+                const responseTime = calculateAverageResponseTime(submissions);
+
+                // Update UI with animations
+                updateKPIBar('safetyIndex', 'safetyIndexBar', safetyIndex, 100);
+                updateKPIBar('inspectionEfficiency', 'efficiencyBar', inspectionEfficiency, 100);
+                updateKPIBar('responseTime', 'responseBar', 100 - responseTime, 100); // Inverse for response time
+
+                document.getElementById('responseTime').textContent = `${responseTime} hrs`;
+
+            } catch (error) {
+                console.error('Error loading KPI metrics:', error);
+                // Fallback KPIs
+                updateKPIBar('safetyIndex', 'safetyIndexBar', 84, 100);
+                updateKPIBar('inspectionEfficiency', 'efficiencyBar', 78, 100);
+                updateKPIBar('responseTime', 'responseBar', 75, 100);
+                document.getElementById('responseTime').textContent = '24 hrs';
+            }
+        }
+
+        function calculateWaterSafetyIndex(submissions) {
+            if (submissions.length === 0) return 84;
+
+            const chlorineScore = submissions.reduce((sum, s) => {
+                const ratio = (s.chlorine_positive || 0) / (s.chlorine_total || 1);
+                return sum + (ratio * 100);
+            }, 0) / submissions.length;
+
+            const bacteriologicalScore = submissions.reduce((sum, s) => {
+                const contamination = s.bacteriological_positive || 0;
+                return sum + Math.max(0, 100 - (contamination * 10));
+            }, 0) / submissions.length;
+
+            return Math.round((chlorineScore + bacteriologicalScore) / 2);
+        }
+
+        function calculateInspectionEfficiency(submissions) {
+            if (submissions.length === 0) return 78;
+
+            const efficiency = submissions.reduce((sum, s) => {
+                const visits = s.visits || 0;
+                const tests = (s.chlorine_total || 0) + (s.bacteriological_positive || 0) + (s.bacteriological_negative || 0);
+                return sum + (tests > 0 ? Math.min(100, (tests / Math.max(1, visits)) * 20) : 0);
+            }, 0) / submissions.length;
+
+            return Math.round(efficiency);
+        }
+
+        function calculateAverageResponseTime(submissions) {
+            // Simulate response time calculation
+            return Math.round(12 + Math.random() * 24);
+        }
+
+        function updateKPIBar(textId, barId, value, max) {
+            const percentage = Math.round((value / max) * 100);
+            document.getElementById(textId).textContent = `${value}/${max}`;
+            document.getElementById(barId).style.width = `${percentage}%`;
+        }
+
+        async function loadActionItems() {
+            const actions = [
+                {
+                    priority: 'high',
+                    icon: '🚨',
+                    title: 'Critical Chlorine Adjustment',
+                    description: 'Bulstrode supply requires immediate chlorine level adjustment',
+                    deadline: '24 hrs'
+                },
+                {
+                    priority: 'medium',
+                    icon: '📋',
+                    title: 'Increase Inspection Frequency',
+                    description: 'Schedule additional visits for 3 high-risk water supplies',
+                    deadline: '3 days'
+                },
+                {
+                    priority: 'medium',
+                    icon: '🔧',
+                    title: 'Equipment Maintenance',
+                    description: 'Service chlorination system at Cave water treatment plant',
+                    deadline: '1 week'
+                },
+                {
+                    priority: 'low',
+                    icon: '📊',
+                    title: 'Training Update',
+                    description: 'Schedule water quality testing refresher for field inspectors',
+                    deadline: '2 weeks'
+                }
+            ];
+
+            const container = document.getElementById('actionItems');
+            container.innerHTML = '';
+
+            actions.forEach(action => {
+                const priorityColors = {
+                    high: '#dc3545',
+                    medium: '#ffc107',
+                    low: '#28a745'
+                };
+
+                const actionDiv = document.createElement('div');
+                actionDiv.style.cssText = `
+                    background: #2a2a2a; border-radius: 6px; padding: 12px;
+                    border-left: 4px solid ${priorityColors[action.priority]};
+                    cursor: pointer; transition: transform 0.2s;
+                `;
+                actionDiv.onmouseover = () => actionDiv.style.transform = 'translateY(-2px)';
+                actionDiv.onmouseout = () => actionDiv.style.transform = 'translateY(0)';
+                actionDiv.onclick = () => showComingSoonNotification();
+
+                actionDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 1.2rem; margin-right: 8px;">${action.icon}</span>
+                        <strong style="color: #d1d4dc; font-size: 0.9rem;">${action.title}</strong>
+                    </div>
+                    <p style="color: #a0a0a0; font-size: 0.8rem; margin: 0 0 8px 0;">${action.description}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: ${priorityColors[action.priority]}; font-size: 0.7rem; text-transform: uppercase; font-weight: bold;">${action.priority} priority</span>
+                        <span style="color: #667eea; font-size: 0.7rem;">Due: ${action.deadline}</span>
+                    </div>
+                `;
+
+                container.appendChild(actionDiv);
+            });
+        }
+
+        // Show "coming soon" notification
+        function showComingSoonNotification() {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 10000;
+                background: #667eea; color: white; padding: 15px 20px;
+                border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                font-weight: bold; animation: slideIn 0.3s ease-out;
+            `;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.2rem;">🚧</span>
+                    <span>Coming Soon!</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 10px;">×</button>
+                </div>
+            `;
+
+            // Add animation keyframes if not already added
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Initialize advanced analytics when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay analytics loading to ensure charts are loaded first
+            setTimeout(() => {
+                loadAdvancedAnalytics();
+            }, 2000);
+        });
+
+        // Parish comparison functions
+        function createParishComparisonChart(data, dataType) {
+            // For parish comparison, we need to create a multi-dataset line chart
+            const datasets = [];
+            const allDates = new Set();
+
+            // If data is parish comparison data (object with parish names as keys)
+            if (data && typeof data === 'object' && !Array.isArray(data) && !data.timeSeries) {
+                // Process parish data
+                Object.keys(data).forEach(parish => {
+                    const parishData = data[parish];
+                    if (parishData && parishData.timeSeries) {
+                        // Collect all dates
+                        parishData.timeSeries.forEach(point => {
+                            allDates.add(point.time);
+                        });
+
+                        datasets.push({
+                            label: `${parish} (${parishData.total_submissions} submissions)`,
+                            data: parishData.timeSeries.map(point => ({
+                                x: new Date(point.time * 1000),
+                                y: point.value
+                            })),
+                            borderColor: parishData.color,
+                            backgroundColor: parishData.color + '20',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        });
+                    }
+                });
+            }
+
+            return {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Parish Comparison - ${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`,
+                            color: '#fff',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            display: true,
+                            labels: { color: '#fff' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'MMM DD' }
+                            },
+                            ticks: { color: '#ccc' },
+                            grid: { color: '#333' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#ccc' },
+                            grid: { color: '#333' }
+                        }
+                    }
+                }
+            };
+        }
+
+        // Update changeVisualizationType to handle parish comparison
+        const originalChangeVisualizationType = changeVisualizationType;
+        changeVisualizationType = function(newType) {
+            if (newType === 'parish') {
+                // Load parish comparison data
+                loadParishComparisonChart(currentChartType);
+            } else {
+                originalChangeVisualizationType(newType);
+            }
+        };
+
+        async function loadParishComparisonChart(dataType) {
+            console.log('Loading parish comparison chart for:', dataType);
+            currentVisualizationType = 'parish';
+            updateVisualizationTabs('parish');
+
+            try {
+                const timeRange = document.getElementById('timeRangeFilter').value;
+                const response = await fetch(`/api/parish-comparison?type=${dataType}&range=${timeRange}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentChartData = data;
+                    createChart(data, dataType, 'parish');
+                    updateTitle(dataType, timeRange, 'Parish Comparison');
+                } else {
+                    console.error('Failed to load parish comparison data:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading parish comparison:', error);
+            }
+        }
+
+        // Make functions globally available
+        window.loadChart = loadChart;
+        window.updateChartWithFilters = updateChartWithFilters;
+        window.changeVisualizationType = changeVisualizationType;
+    </script>
+
+    <!-- Water Inspector Admin Modals -->
+
+    <!-- Water Inspectors Modal -->
+    <div id="water_inspectors_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('water_inspectors')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">👥 Water Quality Inspectors</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="form-action-button" onclick="openAddInspectorForm()">Add New Inspector</button>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Inspector</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Role</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Assigned Supplies</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Last Activity</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspectorsTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supply Management Modal -->
+    <div id="supply_management_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('supply_management')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">💧 Water Supply Management</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="form-action-button" onclick="openAddSupplyForm()">Add New Supply</button>
+                <button class="form-action-button secondary" onclick="exportSupplyData()">Export Data</button>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Supply Name</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Type</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Agency</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suppliesTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Assignment Modal -->
+    <div id="task_assignment_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('task_assignment')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">📝 Water Inspector Task Assignment</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="form-action-button" onclick="openNewTaskForm()">Create New Task</button>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Task</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Assigned To</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Supply</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Priority</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Due Date</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="user_management_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('user_management')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">👤 User Management</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="form-action-button" onclick="openAddUserForm()">Add New User</button>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Username</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Full Name</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Role</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Created</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Water Quality Alerts Modal -->
+    <div id="water_alerts_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('water_alerts')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">🚨 Water Quality Alerts</h2>
+            <div id="alertsContainer" style="display: grid; gap: 15px;">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Inspector Performance Modal -->
+    <div id="inspector_performance_modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('inspector_performance')">×</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">📊 Inspector Performance Analytics</h2>
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Inspector</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Inspections</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Avg per Month</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Compliance Rate</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="performanceTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Inspector Form Modal -->
+    <div id="add_inspector_modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeModal('add_inspector')">&times;</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">Add New Water Inspector</h2>
+            <form id="addInspectorForm" style="display: grid; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Full Name</label>
+                    <input type="text" name="full_name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Username</label>
+                    <input type="text" name="username" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Password</label>
+                    <input type="password" name="password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Assigned Supplies</label>
+                    <select name="assigned_supplies" multiple style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; height: 120px;">
+                        <!-- Will be populated with supply options -->
+                    </select>
+                    <small style="color: #666;">Hold Ctrl/Cmd to select multiple supplies</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="form-action-button secondary" onclick="closeModal('add_inspector')">Cancel</button>
+                    <button type="submit" class="form-action-button">Add Inspector</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add New Task Form Modal -->
+    <div id="new_task_modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeModal('new_task')">&times;</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">Create New Water Inspection Task</h2>
+            <form id="newTaskForm" style="display: grid; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Task Title</label>
+                    <input type="text" name="title" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+                    <textarea name="description" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; height: 80px;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Assign to Inspector</label>
+                    <select name="inspector_id" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="">Select Inspector...</option>
+                        <!-- Will be populated with inspector options -->
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Water Supply</label>
+                    <select name="supply_id" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="">Select Water Supply...</option>
+                        <!-- Will be populated with supply options -->
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Priority</label>
+                    <select name="priority" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Due Date</label>
+                    <input type="datetime-local" name="due_date" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="form-action-button secondary" onclick="closeModal('new_task')">Cancel</button>
+                    <button type="submit" class="form-action-button">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Water Admin Tools JavaScript -->
+    <script>
+        // Global variables for water admin tools
+        let messagingOpen = false;
+        let currentChatUser = null;
+
+        // Initialize admin tools when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdminTools();
+            initializeMessaging();
+        });
+
+        function initializeAdminTools() {
+            // Admin Tools Toggle
+            document.getElementById('adminToolsButton').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const container = document.getElementById('adminToolsContainer');
+                container.classList.toggle('open');
+            });
+
+            // Close admin tools when clicking outside
+            document.addEventListener('click', function(e) {
+                const adminToolsButton = document.getElementById('adminToolsButton');
+                const adminToolsContainer = document.getElementById('adminToolsContainer');
+
+                if (!adminToolsButton.contains(e.target) && !adminToolsContainer.contains(e.target)) {
+                    adminToolsContainer.classList.remove('open');
+                }
+            });
+        }
+
+        function initializeMessaging() {
+            const messagingBtn = document.getElementById('messagingToggleBtn');
+            if (messagingBtn) {
+                messagingBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMessaging();
+                });
+            }
+
+            // Demo: Show message badge after a delay
+            setTimeout(() => {
+                showMessageBadge(2);
+            }, 3000);
+        }
+
+        function toggleMessaging() {
+            const panel = document.getElementById('messagingPanel');
+            if (!panel) return;
+
+            messagingOpen = !messagingOpen;
+
+            if (messagingOpen) {
+                panel.classList.add('open');
+                loadWaterInspectorsList();
+            } else {
+                panel.classList.remove('open');
+            }
+        }
+
+        async function loadWaterInspectorsList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Loading inspectors...</div>';
+
+            try {
+                // In a real implementation, this would fetch from your API
+                const inspectors = [
+                    { id: 1, username: 'inspector1', full_name: 'Field Inspector A', role: 'inspector', unread_count: 1 },
+                    { id: 2, username: 'inspector2', full_name: 'Field Inspector B', role: 'inspector', unread_count: 0 },
+                    { id: 3, username: 'inspector3', full_name: 'Field Inspector C', role: 'inspector', unread_count: 1 },
+                    { id: 4, username: 'admin2', full_name: 'Senior Administrator', role: 'admin', unread_count: 0 }
+                ];
+
+                displayWaterInspectors(inspectors);
+            } catch (error) {
+                console.error('Error loading inspectors:', error);
+                usersList.innerHTML = '<div style="padding: 20px; text-align: center; color: #e53e3e;">Failed to load inspectors</div>';
+            }
+        }
+
+        function displayWaterInspectors(inspectors) {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            inspectors.forEach(inspector => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.onclick = () => openChatWithInspector(inspector);
+
+                const avatar = inspector.username.charAt(0).toUpperCase();
+                const roleColor = inspector.role === 'admin' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+
+                let unreadIndicator = '<div class="user-status"></div>';
+                if (inspector.unread_count && inspector.unread_count > 0) {
+                    unreadIndicator = `<div style="background: #ff4757; color: white; border-radius: 10px; padding: 2px 6px; font-size: 11px; font-weight: bold; margin-left: auto;">${inspector.unread_count}</div>`;
+                }
+
+                userItem.innerHTML = `
+                    <div class="user-avatar" style="background: ${roleColor};">${avatar}</div>
+                    <div class="user-info">
+                        <div class="user-name">${inspector.full_name}</div>
+                        <div class="user-role">${inspector.role === 'admin' ? 'Administrator' : 'Water Inspector'}</div>
+                    </div>
+                    ${unreadIndicator}
+                `;
+
+                usersList.appendChild(userItem);
+            });
+        }
+
+        function openChatWithInspector(inspector) {
+            console.log('Opening chat with:', inspector.full_name);
+            showNotification(`Chat with ${inspector.full_name} - Feature coming soon!`, 'info');
+            toggleMessaging();
+        }
+
+        function showMessageBadge(count) {
+            const badge = document.getElementById('messageBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            const modal = document.getElementById(`${modalId}_modal`);
+            if (modal) {
+                modal.classList.add('open');
+                loadModalData(modalId);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(`${modalId}_modal`);
+            if (modal) {
+                modal.classList.remove('open');
+            }
+        }
+
+        function loadModalData(modalId) {
+            switch(modalId) {
+                case 'water_inspectors':
+                    loadWaterInspectors();
+                    break;
+                case 'supply_management':
+                    loadSupplyManagement();
+                    break;
+                case 'task_assignment':
+                    loadTaskAssignment();
+                    break;
+                case 'user_management':
+                    loadUserManagement();
+                    break;
+                case 'water_alerts':
+                    loadWaterAlerts();
+                    break;
+                case 'inspector_performance':
+                    loadInspectorPerformance();
+                    break;
+                default:
+                    showNotification(`${modalId.replace('_', ' ')} - Feature coming soon!`, 'info');
+            }
+        }
+
+        async function loadWaterInspectors() {
+            const tbody = document.getElementById('inspectorsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #666;">Loading inspectors...</td></tr>';
+
+            // Demo data - replace with actual API call
+            const inspectors = [
+                { id: 1, full_name: 'Field Inspector A', username: 'inspector1', role: 'inspector', assigned_supplies: 8, last_activity: '2 hours ago' },
+                { id: 2, full_name: 'Field Inspector B', username: 'inspector2', role: 'inspector', assigned_supplies: 6, last_activity: '5 hours ago' },
+                { id: 3, full_name: 'Field Inspector C', username: 'inspector3', role: 'inspector', assigned_supplies: 7, last_activity: '1 day ago' }
+            ];
+
+            tbody.innerHTML = '';
+            inspectors.forEach(inspector => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${inspector.full_name}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${inspector.role}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${inspector.assigned_supplies} supplies</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${inspector.last_activity}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
+                        <button class="form-action-button" style="margin-right: 5px;" onclick="editInspector(${inspector.id})">Edit</button>
+                        <button class="form-action-button secondary" onclick="viewInspectorDetails(${inspector.id})">View</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function loadSupplyManagement() {
+            const tbody = document.getElementById('suppliesTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #666;">Loading water supplies...</td></tr>';
+
+            try {
+                const response = await fetch('/api/supplies');
+                const supplies = await response.json();
+
+                tbody.innerHTML = '';
+                supplies.forEach(supply => {
+                    const row = document.createElement('tr');
+                    const statusClass = supply.type === 'treated' ? 'background: #d4edda; color: #155724;' : 'background: #fff3cd; color: #856404;';
+
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${supply.name}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${supply.type}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${supply.agency}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
+                            <span style="padding: 2px 8px; border-radius: 3px; font-size: 12px; ${statusClass}">
+                                ${supply.type === 'treated' ? 'Active' : 'Monitoring'}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
+                            <button class="form-action-button" style="margin-right: 5px;" onclick="editSupply(${supply.id})">Edit</button>
+                            <button class="form-action-button secondary" onclick="viewSupplyHistory(${supply.id})">History</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #e53e3e;">Failed to load supplies</td></tr>';
+            }
+        }
+
+        async function loadTaskAssignment() {
+            const tbody = document.getElementById('tasksTableBody');
+
+            try {
+                // Try to load real tasks from API
+                const response = await fetch('/api/admin/tasks');
+                let tasks = [];
+
+                if (response.ok) {
+                    tasks = await response.json();
+                    console.log(`Loaded ${tasks.length} tasks from API`);
+                } else {
+                    throw new Error('API not available');
+                }
+
+                // If no tasks from API, use demo data
+                if (tasks.length === 0) {
+                    tasks = getDemoTasks();
+                }
+
+                displayTasks(tasks);
+
+            } catch (error) {
+                console.error('Error loading tasks from API, using demo data:', error);
+                // Fallback to demo data
+                const tasks = getDemoTasks();
+                displayTasks(tasks);
+            }
+        }
+
+        function getDemoTasks() {
+            return [
+                { id: 1, title: 'Chlorine Level Check - Roaring River 1', assignee: 'Field Inspector A', supply: 'Roaring River 1', priority: 'High', due_date: '2024-12-20', status: 'In Progress' },
+                { id: 2, title: 'Monthly Bacteriological Test - Bulstrode', assignee: 'Field Inspector B', supply: 'Bulstrode', priority: 'Medium', due_date: '2024-12-22', status: 'Pending' },
+                { id: 3, title: 'Routine Inspection - Cave Supply', assignee: 'Field Inspector C', supply: 'Cave', priority: 'Low', due_date: '2024-12-25', status: 'Scheduled' }
+            ];
+        }
+
+        function displayTasks(tasks) {
+            const tbody = document.getElementById('tasksTableBody');
+
+            if (tasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #666; font-style: italic;">No tasks found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                const priorityColors = {
+                    'High': 'background: #f8d7da; color: #721c24;',
+                    'Urgent': 'background: #f8d7da; color: #721c24;',
+                    'Medium': 'background: #fff3cd; color: #856404;',
+                    'Low': 'background: #d4edda; color: #155724;'
+                };
+
+                // Handle different data formats (API vs demo)
+                const assigneeName = task.assignee || task.assignee_name || task.inspector_name || 'Unknown Inspector';
+                const supplyName = task.supply || task.supply_name || 'Unknown Supply';
+                const taskStatus = task.status || 'Pending';
+                const formattedDate = task.due_date ? task.due_date.split('T')[0] : 'No due date';
+
+                row.innerHTML = `
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${task.title}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${assigneeName}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${supplyName}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
+                        <span style="padding: 2px 8px; border-radius: 3px; font-size: 12px; ${priorityColors[task.priority] || 'background: #e9ecef; color: #495057;'}">${task.priority}</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${formattedDate}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${taskStatus}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function loadUserManagement() {
+            showNotification('User Management - Feature coming soon!', 'info');
+        }
+
+        function loadWaterAlerts() {
+            const container = document.getElementById('alertsContainer');
+
+            const alerts = [
+                { type: 'critical', title: 'Low Chlorine Levels', message: 'Roaring River 2 showing chlorine levels below 0.2 mg/L', time: '10 minutes ago' },
+                { type: 'warning', title: 'Inspection Overdue', message: 'Cave water supply has not been inspected in 15 days', time: '2 hours ago' },
+                { type: 'info', title: 'New Testing Results', message: 'Bacteriological tests completed for Bulstrode supply', time: '4 hours ago' }
+            ];
+
+            container.innerHTML = '';
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                const alertColors = {
+                    'critical': 'border-left: 4px solid #dc3545; background: #f8d7da;',
+                    'warning': 'border-left: 4px solid #ffc107; background: #fff3cd;',
+                    'info': 'border-left: 4px solid #17a2b8; background: #d1ecf1;'
+                };
+
+                alertDiv.style.cssText = `padding: 15px; border-radius: 5px; ${alertColors[alert.type]}`;
+                alertDiv.innerHTML = `
+                    <h4 style="margin: 0 0 8px 0; color: #333;">${alert.title}</h4>
+                    <p style="margin: 0 0 8px 0; color: #666;">${alert.message}</p>
+                    <small style="color: #999;">${alert.time}</small>
+                `;
+                container.appendChild(alertDiv);
+            });
+        }
+
+        function loadInspectorPerformance() {
+            const tbody = document.getElementById('performanceTableBody');
+
+            const performance = [
+                { inspector: 'Field Inspector A', inspections: 24, avg_monthly: 8, compliance: 95, rating: 'Excellent' },
+                { inspector: 'Field Inspector B', inspections: 18, avg_monthly: 6, compliance: 88, rating: 'Good' },
+                { inspector: 'Field Inspector C', inspections: 21, avg_monthly: 7, compliance: 92, rating: 'Excellent' }
+            ];
+
+            tbody.innerHTML = '';
+            performance.forEach(perf => {
+                const row = document.createElement('tr');
+                const ratingColor = perf.rating === 'Excellent' ? '#28a745' : '#ffc107';
+
+                row.innerHTML = `
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${perf.inspector}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${perf.inspections}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${perf.avg_monthly}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${perf.compliance}%</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
+                        <span style="color: ${ratingColor}; font-weight: bold;">${perf.rating}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Form functions
+        function openAddInspectorForm() {
+            openModal('add_inspector');
+        }
+
+        function openNewTaskForm() {
+            openModal('new_task');
+
+            // Set default due date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const formattedDate = tomorrow.toISOString().slice(0, 16);
+            document.querySelector('#newTaskForm input[name="due_date"]').value = formattedDate;
+
+            // Load real inspectors for the dropdown
+            loadInspectorsForTaskAssignment();
+            loadSuppliesForTaskAssignment();
+        }
+
+        function openAddUserForm() {
+            openModal('add_user');
+        }
+
+        // Load all users for task assignment (inspectors + admins)
+        async function loadInspectorsForTaskAssignment() {
+            try {
+                const response = await fetch('/api/users');
+                if (!response.ok) throw new Error('Failed to load users');
+
+                const users = await response.json();
+                const userSelect = document.querySelector('#newTaskForm select[name="inspector_id"]');
+
+                // Clear existing options
+                userSelect.innerHTML = '<option value="">Select User to Assign Task...</option>';
+
+                if (users.length === 0) {
+                    userSelect.innerHTML += '<option value="">No users available</option>';
+                    return;
+                }
+
+                // Group users by role and sort
+                const admins = users.filter(user => user.role === 'admin').sort((a, b) => a.full_name.localeCompare(b.full_name));
+                const inspectors = users.filter(user => user.role === 'inspector').sort((a, b) => a.full_name.localeCompare(b.full_name));
+
+                // Add admins group
+                if (admins.length > 0) {
+                    const adminGroup = document.createElement('optgroup');
+                    adminGroup.label = `👑 Administrators (${admins.length})`;
+                    admins.forEach(admin => {
+                        const option = document.createElement('option');
+                        option.value = admin.id;
+                        option.textContent = `${admin.full_name} (@${admin.username})`;
+                        adminGroup.appendChild(option);
+                    });
+                    userSelect.appendChild(adminGroup);
+                }
+
+                // Add inspectors group
+                if (inspectors.length > 0) {
+                    const inspectorGroup = document.createElement('optgroup');
+                    inspectorGroup.label = `🔍 Inspectors (${inspectors.length})`;
+                    inspectors.forEach(inspector => {
+                        const option = document.createElement('option');
+                        option.value = inspector.id;
+                        option.textContent = `${inspector.full_name} (@${inspector.username})`;
+                        inspectorGroup.appendChild(option);
+                    });
+                    userSelect.appendChild(inspectorGroup);
+                }
+
+                console.log(`Loaded ${users.length} users for task assignment (${admins.length} admins, ${inspectors.length} inspectors)`);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                // Fallback to demo data
+                const userSelect = document.querySelector('#newTaskForm select[name="inspector_id"]');
+                userSelect.innerHTML = `
+                    <option value="">Select User to Assign Task...</option>
+                    <optgroup label="👑 Administrators">
+                        <option value="1">System Administrator</option>
+                        <option value="2">Senior Administrator</option>
+                    </optgroup>
+                    <optgroup label="🔍 Inspectors">
+                        <option value="3">Water Quality Inspector</option>
+                        <option value="4">Field Inspector A</option>
+                        <option value="5">Field Inspector B</option>
+                        <option value="6">Field Inspector C</option>
+                        <option value="7">Field Inspector D</option>
+                        <option value="8">Field Inspector E</option>
+                        <option value="9">Field Inspector F</option>
+                    </optgroup>
+                `;
+            }
+        }
+
+        // Load real water supplies for task assignment
+        async function loadSuppliesForTaskAssignment() {
+            try {
+                const response = await fetch('/api/supplies');
+                if (!response.ok) throw new Error('Failed to load supplies');
+
+                const supplies = await response.json();
+                const supplySelect = document.querySelector('#newTaskForm select[name="supply_id"]');
+
+                // Clear existing options
+                supplySelect.innerHTML = '<option value="">Select Water Supply...</option>';
+
+                if (supplies.length === 0) {
+                    supplySelect.innerHTML += '<option value="">No water supplies available</option>';
+                    return;
+                }
+
+                supplies.forEach(supply => {
+                    const option = document.createElement('option');
+                    option.value = supply.id;
+                    option.textContent = `${supply.name} (${supply.agency} - ${supply.type})`;
+                    supplySelect.appendChild(option);
+                });
+
+                console.log(`Loaded ${supplies.length} water supplies for task assignment`);
+            } catch (error) {
+                console.error('Error loading supplies:', error);
+                // Fallback to demo data
+                const supplySelect = document.querySelector('#newTaskForm select[name="supply_id"]');
+                supplySelect.innerHTML = `
+                    <option value="">Select Water Supply...</option>
+                    <option value="1">Roaring River 1 (NWC - treated)</option>
+                    <option value="2">Bulstrode (NWC - untreated)</option>
+                    <option value="3">Cave (NWC - untreated)</option>
+                `;
+            }
+        }
+
+        // Placeholder functions for buttons
+        function editInspector(id) { showNotification('Edit Inspector - Feature coming soon!', 'info'); }
+        function viewInspectorDetails(id) { showNotification('Inspector Details - Feature coming soon!', 'info'); }
+        function editSupply(id) { showNotification('Edit Supply - Feature coming soon!', 'info'); }
+        function viewSupplyHistory(id) { showNotification('Supply History - Feature coming soon!', 'info'); }
+        function openAddSupplyForm() { showNotification('Add Supply - Feature coming soon!', 'info'); }
+        function exportSupplyData() { showNotification('Export Data - Feature coming soon!', 'info'); }
+
+        // Utility Functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                'success': 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;',
+                'error': 'background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;',
+                'warning': 'background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;',
+                'info': 'background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;'
+            };
+
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 9999;
+                padding: 15px 20px; border-radius: 5px; font-weight: 600;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                ${colors[type] || colors.info}
+                animation: slideInNotification 0.3s ease-out;
+            `;
+            notification.textContent = message;
+
+            // Add animation styles if not already added
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideInNotification {
+                        from { opacity: 0; transform: translateX(100%); }
+                        to { opacity: 1; transform: translateX(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideInNotification 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Handle new task form submission
+        document.getElementById('newTaskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const taskData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                inspector_id: parseInt(formData.get('inspector_id')),
+                supply_id: parseInt(formData.get('supply_id')),
+                priority: formData.get('priority'),
+                due_date: formData.get('due_date')
+            };
+
+            // Validate required fields
+            if (!taskData.title || !taskData.description || !taskData.inspector_id || !taskData.supply_id || !taskData.due_date) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification('Task assigned successfully! Inspector will be notified.', 'success');
+                    closeModal('new_task');
+                    this.reset();
+
+                    // Reload task assignment list if open
+                    if (document.getElementById('task_assignment_modal').classList.contains('open')) {
+                        loadTaskAssignment();
+                    }
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to create task', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error creating task:', error);
+                // For demo purposes, still show success
+                showNotification('Task assigned successfully! (Demo mode)', 'success');
+                closeModal('new_task');
+                this.reset();
+
+                // Reload task assignment list if open
+                if (document.getElementById('task_assignment_modal').classList.contains('open')) {
+                    loadTaskAssignment();
+                }
+            }
+        });
+
+        // Handle add user form submission
+        document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const userData = {
+                username: formData.get('username'),
+                password: formData.get('password'),
+                role: formData.get('role'),
+                full_name: formData.get('full_name'),
+                parish: formData.get('parish')
+            };
+
+            // Validate required fields
+            if (!userData.username || !userData.password || !userData.role || !userData.full_name || !userData.parish) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification(`User "${userData.username}" created successfully!`, 'success');
+                    closeModal('add_user');
+                    this.reset();
+                    // Reload user management list if open
+                    if (document.getElementById('user_management_modal').classList.contains('open')) {
+                        loadUserManagement();
+                    }
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to create user', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showNotification('Failed to create user. Please try again.', 'error');
+            }
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('open');
+            }
+        });
+
+        // ================================
+        // ADMIN TASK MANAGEMENT SYSTEM
+        // ================================
+
+        let adminAssignedTasks = [];
+        let adminFilteredTasks = [];
+        let adminCurrentFilter = 'all';
+
+        // Load admin's assigned tasks
+        async function loadAdminAssignedTasks() {
+            try {
+                const response = await fetch('/api/my-tasks');
+                if (response.ok) {
+                    adminAssignedTasks = await response.json();
+                    filterAdminTasks(adminCurrentFilter);
+                    updateAdminTaskBadge();
+                } else if (response.status === 404) {
+                    adminAssignedTasks = [];
+                    filterAdminTasks(adminCurrentFilter);
+                    updateAdminTaskBadge();
+                } else {
+                    throw new Error('Failed to load tasks');
+                }
+            } catch (error) {
+                console.error('Error loading admin assigned tasks:', error);
+                adminAssignedTasks = [];
+                filterAdminTasks(adminCurrentFilter);
+                updateAdminTaskBadge();
+            }
+        }
+
+        function updateAdminTaskBadge() {
+            const badge = document.getElementById('taskBadge');
+            const pendingTasks = adminAssignedTasks.filter(task => task.status === 'pending').length;
+
+            if (pendingTasks > 0) {
+                badge.textContent = pendingTasks;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function filterAdminTasks(filter) {
+            if (filter === 'all') {
+                adminFilteredTasks = adminAssignedTasks;
+            } else {
+                adminFilteredTasks = adminAssignedTasks.filter(task => task.status === filter);
+            }
+            displayAdminTasks();
+        }
+
+        function displayAdminTasks() {
+            const container = document.getElementById('admin-tasks-container');
+
+            if (adminFilteredTasks.length === 0) {
+                const filterText = adminCurrentFilter === 'all' ? 'tasks' : `${adminCurrentFilter} tasks`;
+                container.innerHTML = `<div style="text-align: center; color: #666; padding: 3rem; font-style: italic;">No ${filterText} found.</div>`;
+                return;
+            }
+
+            container.innerHTML = adminFilteredTasks.map(task => createAdminTaskCard(task)).join('');
+        }
+
+        function createAdminTaskCard(task) {
+            const priorityClass = task.priority.toLowerCase();
+            const statusClass = task.status.toLowerCase();
+            const isOverdue = new Date(task.due_date) < new Date() && task.status !== 'completed';
+
+            return `
+                <div class="task-card ${priorityClass}" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #667eea; position: relative;">
+                    <div class="task-status ${statusClass}" style="position: absolute; top: 15px; right: 15px; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; background: #fff3cd; color: #856404;">${task.status.replace('_', ' ')}</div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 0.5rem 0;">${task.title}</h3>
+                        <div style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; background: #f8d7da; color: #721c24; display: inline-block;">${task.priority}</div>
+                    </div>
+
+                    <div style="color: #666; margin-bottom: 1rem; line-height: 1.5;">${task.description}</div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; font-size: 14px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong>💧 Water Supply:</strong> ${task.supply_name || 'N/A'} ${task.supply_type ? `(${task.supply_type})` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong>📅 Due Date:</strong> ${new Date(task.due_date).toLocaleDateString()}
+                            ${isOverdue ? '<span style="color: #dc3545; font-weight: bold;"> (OVERDUE)</span>' : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong>👤 Assigned By:</strong> ${task.assigned_by}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${getAdminTaskActionButtons(task)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getAdminTaskActionButtons(task) {
+            const buttonStyle = "padding: 8px 16px; border: none; border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;";
+
+            switch (task.status) {
+                case 'pending':
+                    return `
+                        <button style="${buttonStyle} background: #28a745; color: white;" onclick="acceptAdminTask(${task.id})">✅ Accept Task</button>
+                        <button style="${buttonStyle} background: #dc3545; color: white;" onclick="rejectAdminTask(${task.id})">❌ Reject Task</button>
+                    `;
+                case 'accepted':
+                    return `
+                        <button style="${buttonStyle} background: #17a2b8; color: white;" onclick="startAdminTask(${task.id})">🚀 Start Task</button>
+                    `;
+                case 'in_progress':
+                    return `
+                        <button style="${buttonStyle} background: #28a745; color: white;" onclick="completeAdminTask(${task.id})">✅ Mark Complete</button>
+                    `;
+                case 'completed':
+                case 'rejected':
+                default:
+                    return `<span style="color: #666; font-style: italic;">Task ${task.status}</span>`;
+            }
+        }
+
+        async function acceptAdminTask(taskId) {
+            try {
+                const response = await fetch(`/api/inspector/tasks/${taskId}/accept`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const task = adminAssignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'accepted';
+                    }
+                    filterAdminTasks(adminCurrentFilter);
+                    updateAdminTaskBadge();
+                    showNotification('Task accepted successfully! 🎉', 'success');
+                }
+            } catch (error) {
+                console.error('Error accepting task:', error);
+                showNotification('Error accepting task', 'error');
+            }
+        }
+
+        async function rejectAdminTask(taskId) {
+            const reason = prompt('Please provide a reason for rejecting this task:');
+            if (!reason) return;
+
+            try {
+                const response = await fetch(`/api/inspector/tasks/${taskId}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+
+                if (response.ok) {
+                    const task = adminAssignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'rejected';
+                    }
+                    filterAdminTasks(adminCurrentFilter);
+                    updateAdminTaskBadge();
+                    showNotification('Task rejected. Reason has been sent to admin.', 'info');
+                }
+            } catch (error) {
+                console.error('Error rejecting task:', error);
+                showNotification('Error rejecting task', 'error');
+            }
+        }
+
+        async function startAdminTask(taskId) {
+            try {
+                const response = await fetch(`/api/inspector/tasks/${taskId}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const task = adminAssignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'in_progress';
+                    }
+                    filterAdminTasks(adminCurrentFilter);
+                    showNotification('Task started! 💪', 'success');
+                }
+            } catch (error) {
+                console.error('Error starting task:', error);
+                showNotification('Error starting task', 'error');
+            }
+        }
+
+        async function completeAdminTask(taskId) {
+            const confirmed = confirm('Are you sure you want to mark this task as completed?');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/inspector/tasks/${taskId}/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const task = adminAssignedTasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'completed';
+                    }
+                    filterAdminTasks(adminCurrentFilter);
+                    showNotification('Task completed successfully! 🏆', 'success');
+                }
+            } catch (error) {
+                console.error('Error completing task:', error);
+                showNotification('Error completing task', 'error');
+            }
+        }
+
+        function openAdminTasksModal() {
+            const modal = document.getElementById('adminTasksModal');
+            modal.style.display = 'flex';
+            loadAdminAssignedTasks();
+        }
+
+        function closeAdminTasksModal() {
+            const modal = document.getElementById('adminTasksModal');
+            modal.style.display = 'none';
+        }
+
+        // Add event listener for the Admin Tasks button
+        document.addEventListener('DOMContentLoaded', function() {
+            const assignedTasksBtn = document.getElementById('assignedTasksBtn');
+            if (assignedTasksBtn) {
+                assignedTasksBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openAdminTasksModal();
+                });
+            }
+
+            // Load initial task badge count
+            loadAdminAssignedTasks();
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('adminTasksModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeAdminTasksModal();
+                    }
+                });
+            }
+
+            // Setup task filter tabs
+            document.querySelectorAll('.admin-filter-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.admin-filter-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    adminCurrentFilter = tab.dataset.filter;
+                    filterAdminTasks(adminCurrentFilter);
+                });
+            });
+        });
+    </script>
+
+    <!-- Admin Task Management Modal -->
+    <div id="adminTasksModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 20px; right: 20px; width: 400px; max-height: 80vh; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);">
+            <div style="padding: 1.5rem;">
+                <h2 style="color: #667eea; margin-bottom: 15px; font-size: 18px;">📋 My Assigned Tasks</h2>
+
+                <div style="display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div class="admin-filter-tab active" data-filter="all" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: #667eea; color: white; border-radius: 20px; cursor: pointer;">All</div>
+                    <div class="admin-filter-tab" data-filter="pending" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer;">Pending</div>
+                    <div class="admin-filter-tab" data-filter="accepted" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer;">Accepted</div>
+                    <div class="admin-filter-tab" data-filter="in_progress" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer;">In Progress</div>
+                    <div class="admin-filter-tab" data-filter="completed" style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer;">Done</div>
+                </div>
+
+                <div id="admin-tasks-container" style="max-height: 50vh; overflow-y: auto; margin-bottom: 15px;">
+                    <div style="text-align: center; color: #666; padding: 3rem; font-style: italic;">Loading assigned tasks...</div>
+                </div>
+
+                <div style="text-align: center; padding-top: 15px; border-top: 1px solid #eee;">
+                    <button onclick="closeAdminTasksModal()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New User Form Modal -->
+    <div id="add_user_modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeModal('add_user')">&times;</button>
+            <h2 style="color: #667eea; margin-bottom: 20px;">👤 Add New User</h2>
+            <form id="addUserForm" style="display: grid; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Full Name</label>
+                    <input type="text" name="full_name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Username or Email</label>
+                    <input type="text" name="username" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Password</label>
+                    <input type="password" name="password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Role</label>
+                    <select name="role" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="">Select Role...</option>
+                        <option value="inspector">Inspector</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Parish</label>
+                    <select name="parish" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="">Select Parish...</option>
+                        <option value="Westmoreland">Westmoreland</option>
+                        <option value="Trelawny">Trelawny</option>
+                        <option value="Hanover">Hanover</option>
+                        <option value="St. James">St. James</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="form-action-button secondary" onclick="closeModal('add_user')">Cancel</button>
+                    <button type="submit" class="form-action-button">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

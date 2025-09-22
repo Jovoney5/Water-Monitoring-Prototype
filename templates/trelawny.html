@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trelawny Inspector Dashboard - Water Quality Monitoring</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --input-bg: white;
+            --input-border: #ddd;
+            --card-bg: #f8f9fa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --supply-selected-bg: #e3f2fd;
+            --positive-color: #28a745;
+            --negative-color: #dc3545;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --container-bg: rgba(30, 30, 30, 0.95);
+            --input-bg: #2d2d2d;
+            --input-border: #555;
+            --card-bg: #252525;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --supply-selected-bg: #1e1e1e;
+            --positive-color: #4ade80;
+            --negative-color: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+
+        .form-container {
+            background: var(--container-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .selected-supply {
+            background: var(--supply-selected-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-with-button { display: flex; gap: 10px; align-items: center; }
+        .input-with-button input { flex: 1; }
+
+        .increment-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .test-section {
+            background: var(--card-bg);
+            border: 1px solid var(--input-border);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .test-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .chlorine-total { background: #f8f9fa !important; color: #666 !important; cursor: not-allowed; }
+        .positive-field { background: #d4edda !important; border-color: var(--positive-color) !important; }
+        .negative-field { background: #f8d7da !important; border-color: var(--negative-color) !important; }
+        .pending-field { background: #fff3cd !important; border-color: #ffc107 !important; }
+
+        .urgent-icon { color: #dc3545; font-size: 18px; }
+        .organism-dropdown { margin-left: 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+
+        .warning-text { color: var(--negative-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .ideal-range { color: var(--positive-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .alert { padding: 12px; border-radius: 5px; margin-bottom: 1rem; font-weight: 600; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .hidden { display: none; }
+        .treated-only { opacity: 0.6; }
+
+        .submission-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            border: 2px solid #444 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Trelawny Inspector Dashboard</h1>
+        <div>
+            <span id="welcomeText">Welcome, Inspector</span>
+            <button id="darkModeToggle" class="logout-btn">🌙 Dark Mode</button>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>New Water Quality Submission - Trelawny Parish</h2>
+            <div id="alert-container"></div>
+
+            <div class="form-group">
+                <label for="supply">Select Water Supply</label>
+                <select id="supply">
+                    <option value="">Select a water supply...</option>
+                </select>
+            </div>
+
+            <div id="facility-type-group" class="form-group hidden">
+                <label for="facility-type">MOH Facility Type</label>
+                <select id="facility-type">
+                    <option value="">Select facility type...</option>
+                    <option value="Health Center">Health Center</option>
+                    <option value="Hospital">Hospital</option>
+                    <option value="Commercial Building">Commercial Building</option>
+                </select>
+            </div>
+
+            <div id="submission-form-section" class="hidden">
+                <div class="selected-supply">
+                    <h3 id="selected-supply-name"></h3>
+                    <p id="selected-supply-info"></p>
+                </div>
+
+                <form id="submission-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="visits">Number of Visits</label>
+                            <div class="input-with-button">
+                                <input type="number" id="visits" min="1" value="1">
+                                <button type="button" class="increment-btn" onclick="incrementVisits()">+1 Visit</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="submission-date">Submission Date</label>
+                            <input type="date" id="submission-date" required>
+                        </div>
+                    </div>
+
+                    <div class="test-section" id="chlorine-section">
+                        <h3>Chlorine Residual Tests (mg/L)</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="chlorine-total">Total Tests</label>
+                                <input type="number" id="chlorine-total" value="0" readonly class="chlorine-total">
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-less-02">&lt; 0.2</label>
+                                <input type="number" id="chlorine-less-02" min="0" value="0" class="negative-field">
+                                <div class="warning-text">Low - action needed</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-02-15">0.2 - 1.5</label>
+                                <input type="number" id="chlorine-02-15" min="0" value="0" class="positive-field">
+                                <div class="ideal-range">Ideal range</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chlorine-greater-15">&gt; 1.5</label>
+                                <input type="number" id="chlorine-greater-15" min="0" value="0" class="negative-field">
+                                <div class="warning-text">High - check dosing</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
+                        <h3>Bacteriological Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="bacteriological-positive">Positive</label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input">
+                                    <span id="urgent-icon" class="urgent-icon" style="display: none;">⚠️</span>
+                                    <select id="isolated-organism" name="isolated_organism" class="organism-dropdown" style="display: none;">
+                                        <option value="">Select organism</option>
+                                        <option value="E. coli">E. coli</option>
+                                        <option value="Coliform">Coliform</option>
+                                        <option value="Enterococcus">Enterococcus</option>
+                                        <option value="Pseudomonas">Pseudomonas</option>
+                                        <option value="Salmonella">Salmonella</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-negative">Negative</label>
+                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field">
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-pending">Pending</label>
+                                <input type="number" id="bacteriological-pending" name="bacteriological_pending" min="0" value="0" class="pending-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="remarks">Remarks</label>
+                        <textarea id="remarks" rows="3" placeholder="Enter any observations..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Inspection Data</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h2>Recent Submissions</h2>
+            <div id="recent-submissions-list">
+                <p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TRELAWNY_SUPPLIES = [
+            {id:1,name:"New Martha Brae Plant #1",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:2,name:"New Martha Brae Plant #2",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:3,name:"Old Martha Brae",agency:"NWC",type:"treated",sample_point:"Stand pipe @ Coopers Pen"},
+            {id:4,name:"Wakefield #1",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:5,name:"Wakefield #3",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:6,name:"Wakefield #4",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:7,name:"Sherwood Content",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:8,name:"Clark's Town",agency:"NWC",type:"treated",sample_point:"Tap @ Mn. Rd. Kinloss"},
+            {id:9,name:"Duanvale",agency:"NWC",type:"treated",sample_point:"Tap adj. Comm. Centre"},
+            {id:10,name:"Barnstaple",agency:"NWC",type:"treated",sample_point:"Plant"},
+            {id:11,name:"Dornoch",agency:"NWC",type:"treated",sample_point:"Stand pipe in Calabar"},
+            {id:12,name:"Ettingdon",agency:"NWC",type:"treated",sample_point:"Tap @ Brian's Slaughterplace"},
+            {id:13,name:"Ulster Spring/Freeman's Hall",agency:"NWC",type:"treated",sample_point:"Tap opp. Old Library"},
+            {id:14,name:"Troy",agency:"NWC",type:"treated",sample_point:"Tap @ Troy Square"},
+            {id:15,name:"Wilson's Run",agency:"NWC",type:"treated",sample_point:"Tap @ Base of Hill"},
+            {id:16,name:"Mahogany Hall",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:17,name:"Sawyers RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:18,name:"Burke RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:19,name:"Alps RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:20,name:"Lorrimer's RWCT",agency:"PC",type:"untreated",sample_point:"Plant (UNTREATED)"},
+            {id:21,name:"Wilson's Run RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:22,name:"Huie",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:23,name:"Stettin",agency:"PC",type:"treated",sample_point:"Tap adj. Hardware Store"},
+            {id:24,name:"John Daggie",agency:"PC",type:"treated",sample_point:"Tap @ storage tank"},
+            {id:25,name:"Campbell's Spring",agency:"PC",type:"treated",sample_point:"Plant"},
+            {id:26,name:"Gager/Spring Garden",agency:"PC",type:"treated",sample_point:"Tap opp. Pingue's Place"},
+            {id:27,name:"Freemans Hall",agency:"PC",type:"treated",sample_point:"Not specified"},
+            {id:28,name:"Stewart Town",agency:"PC",type:"treated",sample_point:"Not specified"},
+            {id:29,name:"Lobster Bowl",agency:"PT",type:"treated",sample_point:"Kitchen"},
+            {id:30,name:"Rafters Village",agency:"PT",type:"treated",sample_point:"Tap @ Bar"},
+            {id:31,name:"Good Hope/Chukka",agency:"PT",type:"treated",sample_point:"Tap @ Bar"},
+            {id:32,name:"Tank-Weld",agency:"PT",type:"treated",sample_point:"Tap @ Roundabout"},
+            {id:33,name:"Braco Resort",agency:"PT",type:"treated",sample_point:"Not specified"},
+            {id:34,name:"Ocean Coral Spring Hotel",agency:"PT",type:"treated",sample_point:"Not specified"},
+            {id:35,name:"Bamboo Beach",agency:"PT",type:"treated",sample_point:"Not specified"},
+            {id:36,name:"Rio Bueno Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
+            {id:37,name:"Sherwood Content Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
+            {id:38,name:"Ulster Spring",agency:"MOH",type:"treated",sample_point:"Not specified"},
+            {id:39,name:"Albert Town Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
+            {id:40,name:"Rock Spring Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
+            {id:41,name:"Warsop Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
+            {id:42,name:"Wait-A-Bit Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"}
+        ];
+
+        class TrelawnyDashboard {
+            constructor() {
+                this.supplies = TRELAWNY_SUPPLIES;
+                this.currentSupply = null;
+                this.submissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+                this.init();
+            }
+
+            init() {
+                this.populateDropdown();
+                this.setupEvents();
+                this.setToday();
+                this.loadSubmissions();
+            }
+
+            async findSupplyId(supplyName) {
+                try {
+                    const response = await fetch('/api/supplies');
+                    const supplies = await response.json();
+                    const supply = supplies.find(s => s.name === supplyName);
+                    return supply ? supply.id : null;
+                } catch (error) {
+                    console.error('Failed to find supply ID:', error);
+                    return null;
+                }
+            }
+
+            populateDropdown() {
+                const select = document.getElementById('supply');
+                const agencies = {'NWC':'National Water Commission','PC':'Parish Council','PT':'Private','MOH':'Ministry of Health'};
+
+                Object.keys(agencies).forEach(code => {
+                    const supplies = this.supplies.filter(s => s.agency === code);
+                    if (supplies.length) {
+                        const group = document.createElement('optgroup');
+                        group.label = agencies[code];
+                        supplies.forEach(s => {
+                            const opt = document.createElement('option');
+                            opt.value = s.id;
+                            opt.textContent = `${s.name} (${s.type})`;
+                            group.appendChild(opt);
+                        });
+                        select.appendChild(group);
+                    }
+                });
+            }
+
+            setupEvents() {
+                document.getElementById('supply').addEventListener('change', () => this.selectSupply());
+                document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
+                document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
+                ['chlorine-less-02','chlorine-02-15','chlorine-greater-15'].forEach(id =>
+                    document.getElementById(id).addEventListener('input', () => this.updateTotal())
+                );
+
+                // Handle bacteriological positive input for urgent warnings
+                document.getElementById('bacteriological-positive').addEventListener('input', () => this.handleBacteriologicalChange());
+            }
+
+            setToday() {
+                document.getElementById('submission-date').value = new Date().toISOString().split('T')[0];
+            }
+
+            selectSupply() {
+                const id = parseInt(document.getElementById('supply').value);
+                const facilityTypeGroup = document.getElementById('facility-type-group');
+
+                if (!id) {
+                    document.getElementById('submission-form-section').classList.add('hidden');
+                    facilityTypeGroup.classList.add('hidden');
+                    return;
+                }
+
+                this.currentSupply = this.supplies.find(s => s.id === id);
+                document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
+                document.getElementById('selected-supply-info').textContent =
+                    `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.sample_point}`;
+
+                // Show/hide facility type dropdown for MOH supplies
+                if (this.currentSupply.agency === 'MOH') {
+                    facilityTypeGroup.classList.remove('hidden');
+                } else {
+                    facilityTypeGroup.classList.add('hidden');
+                    document.getElementById('facility-type').value = '';
+                }
+
+                const section = document.getElementById('chlorine-section');
+                if (this.currentSupply.type === 'untreated') {
+                    section.classList.add('treated-only');
+                    ['chlorine-less-02','chlorine-02-15','chlorine-greater-15'].forEach(id =>
+                        document.getElementById(id).disabled = true
+                    );
+                } else {
+                    section.classList.remove('treated-only');
+                    ['chlorine-less-02','chlorine-02-15','chlorine-greater-15'].forEach(id =>
+                        document.getElementById(id).disabled = false
+                    );
+                }
+
+                document.getElementById('submission-form-section').classList.remove('hidden');
+            }
+
+            updateTotal() {
+                if (this.currentSupply?.type === 'untreated') return;
+                const total = ['chlorine-less-02','chlorine-02-15','chlorine-greater-15']
+                    .reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
+                document.getElementById('chlorine-total').value = total;
+            }
+
+            handleBacteriologicalChange() {
+                const positiveValue = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const urgentIcon = document.getElementById('urgent-icon');
+                const organismDropdown = document.getElementById('isolated-organism');
+
+                if (positiveValue > 0) {
+                    urgentIcon.style.display = 'inline';
+                    organismDropdown.style.display = 'inline';
+                } else {
+                    urgentIcon.style.display = 'none';
+                    organismDropdown.style.display = 'none';
+                    organismDropdown.value = '';
+                }
+            }
+
+            async submit(e) {
+                e.preventDefault();
+
+                // Find the database supply ID by name
+                const dbSupplyId = await this.findSupplyId(this.currentSupply.name);
+                if (!dbSupplyId) {
+                    this.showAlert('error', 'Could not find supply in database. Please try again.');
+                    return;
+                }
+
+                const data = {
+                    supply_id: dbSupplyId,
+                    visits: parseInt(document.getElementById('visits').value) || 0,
+                    chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
+                    chlorine_positive: parseInt(document.getElementById('chlorine-02-15').value) || 0,
+                    chlorine_negative: parseInt(document.getElementById('chlorine-less-02').value) + parseInt(document.getElementById('chlorine-greater-15').value) || 0,
+                    chlorine_positive_range: '0.2-1.5 mg/L',
+                    chlorine_negative_range: '<0.2 mg/L, >1.5 mg/L',
+                    bacteriological_positive: parseInt(document.getElementById('bacteriological-positive').value) || 0,
+                    bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
+                    bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
+                    isolated_organism: document.getElementById('isolated-organism').value || '',
+                    remarks: document.getElementById('remarks').value || '',
+                    facility_type: document.getElementById('facility-type').value || ''
+                };
+
+                try {
+                    const response = await fetch('/api/submit-inspection', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showAlert('success', `Submission for ${this.currentSupply.name} recorded successfully!`);
+                        this.reset();
+                        this.loadSubmissions();
+                    } else {
+                        this.showAlert('error', result.error || 'Submission failed');
+                    }
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    this.showAlert('error', 'Failed to submit inspection. Please try again.');
+                }
+            }
+
+            reset() {
+                document.getElementById('submission-form').reset();
+                document.getElementById('supply').value = '';
+                document.getElementById('facility-type').value = '';
+                document.getElementById('submission-form-section').classList.add('hidden');
+                document.getElementById('facility-type-group').classList.add('hidden');
+                this.setToday();
+            }
+
+            async loadSubmissions() {
+                try {
+                    const response = await fetch('/api/my-submissions');
+                    const submissions = await response.json();
+                    this.displaySubmissions(submissions);
+                } catch (error) {
+                    console.error('Failed to load submissions:', error);
+                    this.displaySubmissions([]);
+                }
+            }
+
+            displaySubmissions(submissions = []) {
+                const container = document.getElementById('recent-submissions-list');
+                if (!submissions.length) {
+                    container.innerHTML = '<p style="text-align:center;color:#666;padding:2rem;">No submissions yet</p>';
+                    return;
+                }
+
+                container.innerHTML = submissions.slice(0, 10).map(s => `
+                    <div class="submission-card">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                            <strong>${s.supply_name}</strong>
+                            <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
+                        </div>
+                        <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
+                            ${s.agency}${s.facility_type ? ` (${s.facility_type})` : ''} • ${s.visits} visit(s) • ${s.type}
+                        </p>
+                        ${s.type === 'treated' ? `
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;">
+                            <div>Total: ${s.chlorine_total}</div>
+                            <div style="color:var(--positive-color);">Positive: ${s.chlorine_positive}</div>
+                            <div style="color:var(--negative-color);">Negative: ${s.chlorine_negative}</div>
+                        </div>
+                        ` : '<div style="font-style:italic;color:#666;">Untreated supply - no chlorine testing</div>'}
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;margin-top:0.5rem;">
+                            <div style="color:var(--positive-color);">B+: ${s.bacteriological_positive}${s.isolated_organism ? ` (${s.isolated_organism})` : ''}</div>
+                            <div style="color:var(--negative-color);">B-: ${s.bacteriological_negative}</div>
+                            <div style="color:#ffc107;">B Pending: ${s.bacteriological_pending}</div>
+                        </div>
+                        ${s.remarks ? `<p style="margin-top:0.5rem;font-size:13px;color:#666;"><strong>Remarks:</strong> ${s.remarks}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            showAlert(type, msg) {
+                const container = document.getElementById('alert-container');
+                container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            toggleTheme() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', next);
+                document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+                localStorage.setItem('theme', next);
+            }
+        }
+
+        function incrementVisits() {
+            const input = document.getElementById('visits');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+            new TrelawnyDashboard();
+        });
+    </script>
+</body>
+</html>
