@@ -177,118 +177,120 @@ def init_db():
 
             # Users table
             cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            role TEXT NOT NULL CHECK (role IN ('inspector', 'admin')),
-            full_name TEXT NOT NULL,
-            parish TEXT NOT NULL DEFAULT 'Westmoreland',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    role TEXT NOT NULL CHECK (role IN ('inspector', 'admin')),
+                    full_name TEXT NOT NULL,
+                    parish TEXT NOT NULL DEFAULT 'Westmoreland',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
 
-    # Add parish column to existing users table if it doesn't exist
-    try:
-        cursor.execute('ALTER TABLE users ADD COLUMN parish TEXT DEFAULT "Westmoreland"')
-    except sqlite3.OperationalError:
-        # Column already exists
-        pass
+            # Add parish column to existing users table if it doesn't exist
+            try:
+                cursor.execute('ALTER TABLE users ADD COLUMN parish TEXT DEFAULT "Westmoreland"')
+            except sqlite3.OperationalError:
+                # Column already exists
+                pass
 
-    # Update existing users without parish to have Westmoreland
-    cursor.execute('UPDATE users SET parish = "Westmoreland" WHERE parish IS NULL OR parish = ""')
+            # Update existing users without parish to have Westmoreland
+            cursor.execute('UPDATE users SET parish = "Westmoreland" WHERE parish IS NULL OR parish = ""')
 
-    # Water supplies table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS water_supplies (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            type TEXT NOT NULL CHECK (type IN ('treated', 'untreated')),
-            agency TEXT NOT NULL,
-            location TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+            # Water supplies table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS water_supplies (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL CHECK (type IN ('treated', 'untreated')),
+                    agency TEXT NOT NULL,
+                    location TEXT,
+                    parish TEXT DEFAULT 'Westmoreland',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
 
-    # Monthly supply data table for accumulative reporting
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS monthly_supply_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            supply_id INTEGER NOT NULL,
-            month INTEGER NOT NULL,
-            year INTEGER NOT NULL,
-            visits INTEGER DEFAULT 0,
-            chlorine_total INTEGER DEFAULT 0,
-            chlorine_positive INTEGER DEFAULT 0,
-            chlorine_negative INTEGER DEFAULT 0,
-            bacteriological_positive INTEGER DEFAULT 0,
-            bacteriological_negative INTEGER DEFAULT 0,
-            bacteriological_pending INTEGER DEFAULT 0,
-            remarks TEXT,
-            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
-            UNIQUE(supply_id, month, year)
-        )
-    ''')
+            # Monthly supply data table for accumulative reporting
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS monthly_supply_data (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    supply_id INTEGER NOT NULL,
+                    month INTEGER NOT NULL,
+                    year INTEGER NOT NULL,
+                    visits INTEGER DEFAULT 0,
+                    chlorine_total INTEGER DEFAULT 0,
+                    chlorine_positive INTEGER DEFAULT 0,
+                    chlorine_negative INTEGER DEFAULT 0,
+                    bacteriological_positive INTEGER DEFAULT 0,
+                    bacteriological_negative INTEGER DEFAULT 0,
+                    bacteriological_pending INTEGER DEFAULT 0,
+                    remarks TEXT,
+                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    UNIQUE(supply_id, month, year)
+                )
+            ''')
 
-    # Inspection submissions table for individual submissions
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS inspection_submissions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            supply_id INTEGER NOT NULL,
-            inspector_id INTEGER NOT NULL,
-            sampling_point_id INTEGER,
-            submission_date DATE NOT NULL,
-            visits INTEGER DEFAULT 0,
-            chlorine_total INTEGER DEFAULT 0,
-            chlorine_positive INTEGER DEFAULT 0,
-            chlorine_negative INTEGER DEFAULT 0,
-            chlorine_positive_range TEXT,
-            chlorine_negative_range TEXT,
-            bacteriological_positive INTEGER DEFAULT 0,
-            bacteriological_negative INTEGER DEFAULT 0,
-            bacteriological_pending INTEGER DEFAULT 0,
-            isolated_organism TEXT,
-            remarks TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
-            FOREIGN KEY (inspector_id) REFERENCES users (id),
-            FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
-        )
-    ''')
+            # Inspection submissions table for individual submissions
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspection_submissions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    supply_id INTEGER NOT NULL,
+                    inspector_id INTEGER NOT NULL,
+                    sampling_point_id INTEGER,
+                    submission_date DATE NOT NULL,
+                    visits INTEGER DEFAULT 0,
+                    chlorine_total INTEGER DEFAULT 0,
+                    chlorine_positive INTEGER DEFAULT 0,
+                    chlorine_negative INTEGER DEFAULT 0,
+                    chlorine_positive_range TEXT,
+                    chlorine_negative_range TEXT,
+                    bacteriological_positive INTEGER DEFAULT 0,
+                    bacteriological_negative INTEGER DEFAULT 0,
+                    bacteriological_pending INTEGER DEFAULT 0,
+                    isolated_organism TEXT,
+                    remarks TEXT,
+                    facility_type TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    FOREIGN KEY (inspector_id) REFERENCES users (id),
+                    FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
+                )
+            ''')
 
-    # Sampling points table for water supplies
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sampling_points (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            supply_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            location TEXT,
-            description TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (supply_id) REFERENCES water_supplies (id)
-        )
-    ''')
+            # Sampling points table for water supplies
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sampling_points (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    supply_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    location TEXT,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id)
+                )
+            ''')
 
-    # Tasks table for inspector assignments
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS inspector_tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            description TEXT,
-            assigned_to_id INTEGER NOT NULL,
-            supply_id INTEGER,
-            priority TEXT NOT NULL CHECK (priority IN ('Low', 'Medium', 'High', 'Urgent')),
-            due_date DATE NOT NULL,
-            status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'in_progress', 'completed', 'rejected')) DEFAULT 'pending',
-            created_by_id INTEGER NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (assigned_to_id) REFERENCES users (id),
-            FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
-            FOREIGN KEY (created_by_id) REFERENCES users (id)
-        )
-    ''')
+            # Tasks table for inspector assignments
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspector_tasks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    description TEXT,
+                    assigned_to_id INTEGER NOT NULL,
+                    supply_id INTEGER,
+                    priority TEXT NOT NULL CHECK (priority IN ('Low', 'Medium', 'High', 'Urgent')),
+                    due_date DATE NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'in_progress', 'completed', 'rejected')) DEFAULT 'pending',
+                    created_by_id INTEGER NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (assigned_to_id) REFERENCES users (id),
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    FOREIGN KEY (created_by_id) REFERENCES users (id)
+                )
+            ''')
 
         # Populate initial data using shared function
         _populate_initial_data(conn, cursor)
