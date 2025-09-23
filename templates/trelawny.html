@@ -193,9 +193,14 @@
             height: 100%;
             background: radial-gradient(ellipse at center, rgba(35, 6, 45, 0.95) 0%, rgba(15, 0, 25, 0.98) 100%);
             backdrop-filter: blur(12px);
-            animation: modalFadeIn 0.5s ease-out;
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
             align-items: center;
             justify-content: center;
+        }
+
+        .water-modal.show {
+            opacity: 1;
         }
 
         .water-modal-content {
@@ -217,6 +222,12 @@
                 inset 0 0 50px rgba(147, 51, 234, 0.1);
             scrollbar-width: thin;
             scrollbar-color: rgba(147, 51, 234, 0.5) transparent;
+            transform: scale(0.8) translateY(-20px);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+
+        .water-modal.show .water-modal-content {
+            transform: scale(1) translateY(0);
         }
 
         .water-modal-content::before {
@@ -627,6 +638,7 @@
         <h1>Trelawny Inspector Dashboard</h1>
         <div>
             <span id="welcomeText">Welcome, Inspector</span>
+            <button onclick="window.open('https://www.wrha.gov.jm/', '_blank')" class="logout-btn">🌐 Connect on WRHA Hub</button>
             <button id="darkModeToggle" class="logout-btn">🌙 Dark Mode</button>
             <a href="/logout" class="logout-btn">Logout</a>
         </div>
@@ -1197,8 +1209,11 @@
                 const customMessage = `Water quality inspection for ${supplyName} has been successfully submitted!`;
                 waterModalMessage.textContent = customMessage;
 
-                // Show modal
+                // Show modal with smooth fade-in animation
                 waterModal.style.display = 'flex';
+                setTimeout(() => {
+                    waterModal.classList.add('show');
+                }, 10);
             }
 
             closeWaterModal() {
@@ -1232,13 +1247,10 @@
             const container = document.querySelector('.container');
 
             // Fade out modal
-            modal.style.transition = 'opacity 0.5s ease';
-            modal.style.opacity = '0';
+            modal.classList.remove('show');
 
             setTimeout(() => {
                 modal.style.display = 'none';
-                modal.style.opacity = '1';
-                modal.style.transition = '';
 
                 // Fade in dashboard
                 if (container) {
@@ -1248,7 +1260,7 @@
                         container.style.opacity = '1';
                     }, 100);
                 }
-            }, 500);
+            }, 400);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
