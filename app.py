@@ -382,7 +382,7 @@ def _populate_initial_data(conn, cursor):
                 VALUES (?, ?, ?, ?, ?)
             ''', supplies)
 
-    # Insert sampling points for Roaring River supplies
+    # Insert sampling points for all water supplies
     if USE_POSTGRESQL:
         cursor.execute("SELECT COUNT(*) FROM sampling_points")
         point_count = cursor.fetchone()[0]
@@ -391,23 +391,23 @@ def _populate_initial_data(conn, cursor):
         point_count = cursor.fetchone()[0]
 
     if point_count == 0:
-        # Get the IDs for Roaring River 1 and Roaring River 2
-        if USE_POSTGRESQL:
-            cursor.execute('SELECT id FROM water_supplies WHERE name = %s', ('Roaring River 1',))
-            roaring_river_1_result = cursor.fetchone()
-            cursor.execute('SELECT id FROM water_supplies WHERE name = %s', ('Roaring River 2',))
-            roaring_river_2_result = cursor.fetchone()
-        else:
-            cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 1"')
-            roaring_river_1_result = cursor.fetchone()
-            cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 2"')
-            roaring_river_2_result = cursor.fetchone()
+        sampling_points = []
 
-        if roaring_river_1_result and roaring_river_2_result:
-            roaring_river_1_id = roaring_river_1_result[0]
-            roaring_river_2_id = roaring_river_2_result[0]
+        # Helper function to get supply ID
+        def get_supply_id(name):
+            if USE_POSTGRESQL:
+                cursor.execute('SELECT id FROM water_supplies WHERE name = %s', (name,))
+            else:
+                cursor.execute('SELECT id FROM water_supplies WHERE name = ?', (name,))
+            result = cursor.fetchone()
+            return result[0] if result else None
 
-            sampling_points = [
+        # Westmoreland - Roaring River sampling points
+        roaring_river_1_id = get_supply_id('Roaring River 1')
+        roaring_river_2_id = get_supply_id('Roaring River 2')
+
+        if roaring_river_1_id and roaring_river_2_id:
+            westmoreland_points = [
                 # Roaring River 1 sampling points
                 (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
                 (roaring_river_1_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
@@ -431,7 +431,72 @@ def _populate_initial_data(conn, cursor):
                 (roaring_river_2_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
                 (roaring_river_2_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
             ]
+            sampling_points.extend(westmoreland_points)
 
+        # Hanover - HMC Supplies (34 supplies - all untreated, source sampling points)
+        hmc_supplies = [
+            'Claremont Catchment', 'Thompson Hill Catchment', 'Upper Rock Spring', 'Success Catchment',
+            'Bamboo Spring', 'Jericho Spring', 'Lethe Spring', 'Welcome Spring', 'Knockalva Catchment',
+            'Flamstead Spring', 'Pierces Village Catchment', 'Cold Spring', 'Rejion Tank', 'Rejoin Catchment',
+            'Chovey Hole', 'Content Catchment', 'St Simon Spring', 'Donalva Spring', 'Sawpit Spring',
+            'Patty Hill Spring', 'Woodsville Catchment', 'Dias Tank', 'Anderson Spring', 'Bamboo Roadside Overflow',
+            'Axe-and-Adze Catchment', 'Soja Spring', 'Castle Hyde Catchment', 'Medley Spring', 'Craig Nathan',
+            'Jabez Catchment', 'Rockfoot Reservoir', 'Burntside Spring', 'Old Cold Spring', 'Spring Georgia'
+        ]
+
+        for supply_name in hmc_supplies:
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                sampling_points.append((supply_id, 'Source', supply_name.lower().replace(' ', '_'), f'Source sampling point for {supply_name}'))
+                # Special case for St Simon Spring - has additional sampling point
+                if supply_name == 'St Simon Spring':
+                    sampling_points.append((supply_id, 'St. Simon Community Tank', 'st_simon', 'St. Simon Community Tank sampling point'))
+
+        # Hanover - NWC Supplies (5 supplies - all treated)
+        nwc_hanover_supplies = {
+            'Logwood': ['D/T', 'Logwood H/C', 'Green Island H/C', 'Green Island S/P', 'Cave Valley H/C'],
+            'New Milns': ['D/T', 'New Milns S/P'],
+            'Kendal': ['D/T', 'Kendal Cross Road', 'Jehovah Witness S/P', 'Friendship S/P', 'Grange S/P', 'Neva Shop-Cessnock'],
+            'Shettlewood Hanover': ['D/T', 'Ramble H/C', 'Chester Castle H/C', 'Mt. Ward Primary', 'Knockalva Polythecnic', 'Miles Town S/P', 'Colhorn Enterprise', 'Brayhorn Enterprise', 'West Haven Chidren\'s Home', 'Arawak Restaurant', 'Border Jerk', 'Mt. Peto H/C'],
+            'Great River - St. James': ['Hopewell H/C', 'Sandy bay H/C', 'Kew Bridge', 'Hanover H/D', 'First Hill S/P', 'Noel Holmes Hospital (X3)', 'Copperwood Farms', 'Dorcey James Property', 'NWC Lucea Loading Bay', 'Hugh Garwood Premises', 'McQuaire/Woodland Relift Station']
+        }
+
+        for supply_name, sample_points in nwc_hanover_supplies.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Hanover - Private Supplies
+        private_hanover_supplies = {
+            'Tryall Club': ['D/T', 'Tryall Market'],
+            'Vivid Water Store': ['Alkaline tap'],
+            'Aquacity Water Store': ['Mineral Tap'],
+            'M&B Water Store': ['Alkaline Tap'],
+            'Quenched Water Store': ['Purified Tap'],
+            'Epic Blue': ['Alkaline Tap'],
+            'Dynasty Water Store': ['Alkaline Tap'],
+            'Valley Dew': ['Purified Tap'],
+            'Jus Chill': ['Closed (Not operational)'],
+            'Royalton Resorts': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3', 'Sample Point 4', 'Sample Point 5', 'Sample Point 6', 'Sample Point 7'],
+            'Sandals Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Couples Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Sunset At The Palms': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Azul Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Round Hill Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Hedonism II': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Riu Tropical Bay': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+            'Riu Jamiecotel': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3']
+        }
+
+        for supply_name, sample_points in private_hanover_supplies.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Insert all sampling points
+        if sampling_points:
             if USE_POSTGRESQL:
                 cursor.executemany('''
                     INSERT INTO sampling_points (supply_id, name, location, description)
@@ -1421,7 +1486,7 @@ def get_chart_data():
             ''', params).fetchone()
 
             distribution_data = {
-                'labels': ['Positive', 'Negative', 'Pending'],
+                'labels': ['Positive', 'Negative', 'Result Pending'],
                 'values': [results_dist['positive'] or 0, results_dist['negative'] or 0, results_dist['pending'] or 0],
                 'title': 'Bacteriological Test Results'
             }
@@ -1982,7 +2047,7 @@ def generate_submission_html(submission):
                     <div class="form-value negative-field">{submission['bacteriological_negative']}</div>
                 </div>
                 <div class="form-group">
-                    <label>Pending Results</label>
+                    <label>Result Pending</label>
                     <div class="form-value pending-field">{submission['bacteriological_pending']}</div>
                 </div>
             </div>
@@ -2163,7 +2228,7 @@ def create_admin_task():
             FROM inspector_tasks t
             JOIN users u_assigned ON t.assigned_to_id = u_assigned.id
             JOIN users u_created ON t.created_by_id = u_created.id
-            LEFT JOIN water_supplies ws ON t.supply_id = ws.id
+            LEFT JOIN wasamoter_supplies ws ON t.supply_id = ws.id
             WHERE t.id = ?
         ''', (task_id,)).fetchone()
 

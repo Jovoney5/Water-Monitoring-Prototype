@@ -1328,7 +1328,7 @@
                                 <span class="data-value negative">${data.bacteriological_negative || 0}</span>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Bacterio Pending:</span>
+                                <span class="data-label">Bacterio Result Pending:</span>
                                 <span class="data-value pending">${data.bacteriological_pending || 0}</span>
                             </div>
                         </div>
@@ -1536,7 +1536,7 @@
                 this.doughnutChart = new Chart(doughnutCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Positive', 'Negative', 'Pending'],
+                        labels: ['Positive', 'Negative', 'Result Pending'],
                         datasets: [{
                             data: [0, 0, 0],
                             backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
