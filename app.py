@@ -495,6 +495,126 @@ def _populate_initial_data(conn, cursor):
                 for point in sample_points:
                     sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
+        # Trelawny - NWC Supplies (15 supplies - all treated except where noted)
+        trelawny_nwc_supplies = {
+            'Rio Bueno': ['Plant'],
+            'Duncans': ['Plant'],
+            'Falmouth': ['Plant'],
+            'Wakefield': ['Plant'],
+            'Bounty Hall': ['Plant'],
+            'Springvale': ['Plant']
+        }
+
+        # Add specific Trelawny NWC supplies that may not match the water_supplies_data.py names exactly
+        trelawny_nwc_specific = {
+            'New Martha Brae Plant #1': ['Plant'],
+            'New Martha Brae Plant #2': ['Plant'],
+            'Old Martha Brae': ['Stand pipe @ Coopers Pen'],
+            'Wakefield #1': ['Plant'],
+            'Wakefield #3': ['Plant'],
+            'Wakefield #4': ['Plant'],
+            'Sherwood Content': ['Plant'],
+            'Clark\'s Town': ['Tap @ Mn. Rd. Kinloss'],
+            'Duanvale': ['Tap adj. Comm. Centre'],
+            'Barnstaple': ['Plant'],
+            'Dornoch': ['Stand pipe in Calabar'],
+            'Ettingdon': ['Tap @ Brian\'s Slaughterplace'],
+            'Ulster Spring/Freeman\'s Hall': ['Tap opp. Old Library'],
+            'Troy': ['Tap @ Troy Square'],
+            'Wilson\'s Run': ['Tap @ Base of Hill']
+        }
+
+        # Try to match existing water supplies in Trelawny with NWC agency
+        for supply_name, sample_points in trelawny_nwc_supplies.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Add specific Trelawny NWC supplies
+        for supply_name, sample_points in trelawny_nwc_specific.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Trelawny - PC Supplies (13 supplies)
+        trelawny_pc_supplies = {
+            'Albert Town': ['Plant'],
+            'Silver Sands': ['Plant'],
+            'Lorrimers': ['Plant (UNTREATED)'],  # This is the untreated one
+            'Bengal': ['Plant'],
+            'Mahogany Hall': ['Plant'],
+            'Sawyers RWCT': ['Plant'],
+            'Burke RWCT': ['Plant'],
+            'Alps RWCT': ['Plant'],
+            'Wilson\'s Run RWCT': ['Plant'],
+            'Huie': ['Plant'],
+            'Stettin': ['Tap adj. Hardware Store'],
+            'John Daggie': ['Tap @ storage tank'],
+            'Campbell\'s Spring': ['Plant'],
+            'Gager/Spring Garden': ['Tap opp. Pingue\'s Place'],
+            'Freemans Hall': ['Source'],  # Not specified, using generic
+            'Stewart Town': ['Source']    # Not specified, using generic
+        }
+
+        for supply_name, sample_points in trelawny_pc_supplies.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Trelawny - Private Supplies (7 supplies)
+        trelawny_private_supplies = {
+            'Harmony Cove Resort': ['Kitchen'],  # Using similar to Lobster Bowl
+            'Grand Palladium Resort': ['Tap @ Bar'],  # Using similar to Rafters Village
+            'Trelawny Beach Hotel': ['Tap @ Bar'],
+            'Burwood Beach Resort': ['Source'],  # Not specified
+            'Lobster Bowl': ['Kitchen'],
+            'Rafters Village': ['Tap @ Bar'],
+            'Good Hope/Chukka': ['Tap @ Bar'],
+            'Tank-Weld': ['Tap @ Roundabout'],
+            'Braco Resort': ['Source'],  # Not specified
+            'Ocean Coral Spring Hotel': ['Source'],  # Not specified
+            'Bamboo Beach': ['Source']  # Not specified
+        }
+
+        for supply_name, sample_points in trelawny_private_supplies.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Trelawny - Health Centre Supplies (MOH - 7 supplies)
+        # These might be integrated with existing supplies or separate
+        trelawny_health_centres = {
+            'Rio Bueno Health Centre': ['Tap @ Health Centre'],
+            'Sherwood Content Health Centre': ['Tap @ Health Centre'],
+            'Ulster Spring Health Centre': ['Tap @ Health Centre'],
+            'Albert Town Health Centre': ['Tap @ Health Centre'],
+            'Rock Spring Health Centre': ['Tap @ Health Centre'],
+            'Warsop Health Centre': ['Tap @ Health Centre'],
+            'Wait-A-Bit Health Centre': ['Tap @ Health Centre']
+        }
+
+        for supply_name, sample_points in trelawny_health_centres.items():
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                for point in sample_points:
+                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+        # Trelawny - Handle untreated PC supplies that might not have been covered
+        trelawny_untreated_pc = [
+            'Martha Brae', 'Clarks Town', 'Wait-a-Bit', 'Deeside', 'Sherwood Content',
+            'Salem', 'Refuge', 'Ulster Spring', 'Good Hope', 'Bunkers Hill',
+            'Kettering', 'Troy', 'Granville', 'Rock', 'Garlands'
+        ]
+
+        for supply_name in trelawny_untreated_pc:
+            supply_id = get_supply_id(supply_name)
+            if supply_id:
+                sampling_points.append((supply_id, 'Source', supply_name.lower().replace(' ', '_'), f'Source sampling point for {supply_name}'))
+
         # Insert all sampling points
         if sampling_points:
             if USE_POSTGRESQL:
