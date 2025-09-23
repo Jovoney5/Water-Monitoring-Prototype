@@ -60,6 +60,7 @@
             cursor: pointer;
             transition: background 0.3s;
             margin-left: 10px;
+            text-decoration: none;
         }
 
         .logout-btn:hover { background: rgba(255, 255, 255, 0.3); }
@@ -904,12 +905,10 @@
     </div>
 
     <script>
-
         class HanoverDashboard {
             constructor() {
                 this.supplies = [];
                 this.currentSupply = null;
-                this.submissions = JSON.parse(localStorage.getItem('hanover_submissions') || '[]');
                 this.init();
             }
 
@@ -925,7 +924,6 @@
                 try {
                     const response = await fetch('/api/supplies');
                     const allSupplies = await response.json();
-                    // Filter for Hanover parish supplies only
                     this.supplies = allSupplies.filter(s => s.parish === 'Hanover');
                     console.log('Loaded Hanover supplies:', this.supplies.length);
                 } catch (error) {
@@ -934,20 +932,12 @@
                 }
             }
 
-            findSupplyId(supplyName) {
-                const supply = this.supplies.find(s => s.name === supplyName);
-                return supply ? supply.id : null;
-            }
-
             populateDropdown() {
                 const select = document.getElementById('supply');
-
-                // Clear existing options except the default
                 while (select.children.length > 1) {
                     select.removeChild(select.lastChild);
                 }
 
-                // Get unique agencies from the supplies
                 const agencyMap = {
                     'NWC': 'National Water Commission',
                     'PC': 'Parish Council',
@@ -957,7 +947,6 @@
                     'Private': 'Private Sector'
                 };
 
-                // Group supplies by agency
                 const agenciesFound = [...new Set(this.supplies.map(s => s.agency))];
 
                 agenciesFound.forEach(agencyCode => {
@@ -974,32 +963,21 @@
                         select.appendChild(group);
                     }
                 });
-
-                // Add "Other Governments" option
-                const otherGovGroup = document.createElement('optgroup');
-                otherGovGroup.label = 'Other Options';
-                const otherGovOption = document.createElement('option');
-                otherGovOption.value = 'other-governments';
-                otherGovOption.textContent = 'Other Governments';
-                otherGovGroup.appendChild(otherGovOption);
-                select.appendChild(otherGovGroup);
             }
 
             setupEvents() {
                 document.getElementById('supply').addEventListener('change', () => this.selectSupply());
                 document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
                 document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
-                // Auto-calculate chlorine totals and handle range warnings
+
                 ['chlorine-positive', 'chlorine-negative'].forEach(id => {
                     document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
                 });
 
-                // Handle chlorine range change events for warnings
                 ['chlorine-positive-range', 'chlorine-negative-range'].forEach(id => {
                     document.getElementById(id).addEventListener('change', this.handleChlorineRangeChange.bind(this));
                 });
 
-                // Handle bacteriological positive input for urgent warnings
                 document.getElementById('bacteriological-positive').addEventListener('input', () => this.handleBacteriologicalChange());
             }
 
@@ -1014,29 +992,18 @@
                 if (!supplyValue) {
                     document.getElementById('submission-form-section').classList.add('hidden');
                     facilityTypeGroup.classList.add('hidden');
+                    this.hideSamplingPoints();
                     return;
                 }
 
-                // Handle "Other Governments" option
-                if (supplyValue === 'other-governments') {
-                    this.currentSupply = {
-                        id: 'other-governments',
-                        name: 'Other Governments',
-                        agency: 'Other Government Agency',
-                        type: 'treated',
-                        sample_point: 'Various'
-                    };
-                    document.getElementById('selected-supply-name').textContent = 'Other Governments';
-                    document.getElementById('selected-supply-info').textContent = 'Other Government Agency • treated • Various';
-                } else {
-                    const id = parseInt(supplyValue);
-                    this.currentSupply = this.supplies.find(s => s.id === id);
-                    document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
-                    document.getElementById('selected-supply-info').textContent =
-                        `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.sample_point}`;
-                }
+                const id = parseInt(supplyValue);
+                this.currentSupply = this.supplies.find(s => s.id === id);
+                document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
+                document.getElementById('selected-supply-info').textContent =
+                    `${this.currentSupply.agency} • ${this.currentSupply.type}`;
 
-                // Show/hide facility type dropdown for MOH supplies
+                this.loadSamplingPoints(id);
+
                 if (this.currentSupply.agency === 'MOH') {
                     facilityTypeGroup.classList.remove('hidden');
                 } else {
@@ -1060,6 +1027,65 @@
                 }
 
                 document.getElementById('submission-form-section').classList.remove('hidden');
+            }
+
+            async loadSamplingPoints(supplyId) {
+                try {
+                    const response = await fetch(`/api/sampling-points/${supplyId}`);
+                    if (response.ok) {
+                        const samplingPoints = await response.json();
+                        if (samplingPoints.length > 0) {
+                            this.populateSamplingPointsDropdown(samplingPoints);
+                            this.showSamplingPoints();
+                        } else {
+                            this.hideSamplingPoints();
+                        }
+                    } else {
+                        this.hideSamplingPoints();
+                    }
+                } catch (error) {
+                    console.error('Error loading sampling points:', error);
+                    this.hideSamplingPoints();
+                }
+            }
+
+            populateSamplingPointsDropdown(samplingPoints) {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                samplingPointSelect.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
+
+                samplingPoints.forEach(point => {
+                    const option = document.createElement('option');
+                    option.value = point.id;
+                    option.textContent = point.name;
+                    option.dataset.location = point.location;
+                    option.dataset.description = point.description;
+                    samplingPointSelect.appendChild(option);
+                });
+
+                samplingPointSelect.addEventListener('change', this.handleSamplingPointSelection.bind(this));
+            }
+
+            handleSamplingPointSelection() {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                const locationSpan = document.getElementById('sampling-point-location');
+
+                if (samplingPointSelect.value) {
+                    const selectedOption = samplingPointSelect.options[samplingPointSelect.selectedIndex];
+                    const location = selectedOption.dataset.location || 'Not specified';
+                    locationSpan.textContent = location;
+                } else {
+                    locationSpan.textContent = '';
+                }
+            }
+
+            showSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.remove('hidden');
+            }
+
+            hideSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.add('hidden');
+                document.getElementById('sampling-point').value = '';
+                document.getElementById('sampling-point-location').textContent = '';
             }
 
             updateChlorineTotal() {
@@ -1087,7 +1113,6 @@
                     veryHigh: document.getElementById(`chlorine-${type}-very-high`)
                 };
 
-                // Hide all indicators first
                 Object.values(elements).forEach(el => el.style.display = 'none');
 
                 if (!rangeValue) return;
@@ -1095,35 +1120,26 @@
                 const numericValue = this.parseRangeValue(rangeValue);
                 const isTreatmentSite = this.currentSupply && this.currentSupply.type === 'treated';
 
-                // Apply different logic for treatment sites (2.0-2.5 ideal)
                 if (isTreatmentSite && numericValue >= 2.0 && numericValue <= 2.5) {
                     elements.ideal.style.display = 'block';
                 } else if (numericValue === 0 || (numericValue >= 0.1 && numericValue <= 0.4)) {
-                    // 0, 0.1-0.4: low, action needed
                     elements.warning.style.display = 'block';
                 } else if (numericValue >= 0.5 && numericValue <= 1.5) {
-                    // 0.5-1.5: ideal level
                     elements.ideal.style.display = 'block';
                 } else if (numericValue >= 1.6 && numericValue <= 2.0) {
-                    // 1.6-2.0: maximum level
                     elements.maximum.style.display = 'block';
                 } else if (numericValue >= 2.1 && numericValue <= 2.4) {
-                    // 2.1-2.4: high level--adjust chlorine dosage
                     elements.high.style.display = 'block';
-                } else if (numericValue >= 2.5 && (numericValue <= 3.0 || rangeValue === '>3.5')) {
-                    // 2.5-3.0, >3.5: very high level --> adjust chlorine dosage
+                } else if (numericValue >= 2.5 && numericValue <= 3.0) {
                     elements.veryHigh.style.display = 'block';
                 }
             }
 
             parseRangeValue(rangeStr) {
-                // Parse range strings like "<0.2", "0.5", ">3.5" to numeric values
                 if (rangeStr.includes('<')) {
-                    return parseFloat(rangeStr.replace('<', '')) - 0.01; // Slightly below the threshold
-                } else if (rangeStr === '>3.5') {
-                    return 4.0; // Represent >3.5 as a high value for comparison
+                    return parseFloat(rangeStr.replace('<', '')) - 0.01;
                 } else if (rangeStr.includes('>')) {
-                    return parseFloat(rangeStr.replace('>', '')) + 0.01; // Slightly above the threshold
+                    return parseFloat(rangeStr.replace('>', '')) + 0.01;
                 } else {
                     return parseFloat(rangeStr);
                 }
@@ -1147,15 +1163,10 @@
             async submit(e) {
                 e.preventDefault();
 
-                // Find the database supply ID by name
-                const dbSupplyId = this.findSupplyId(this.currentSupply.name);
-                if (!dbSupplyId) {
-                    this.showAlert('error', 'Could not find supply in database. Please try again.');
-                    return;
-                }
-
                 const data = {
-                    supply_id: dbSupplyId,
+                    supply_id: this.currentSupply.id,
+                    sampling_point_id: document.getElementById('sampling-point').value || null,
+                    water_source_type: document.getElementById('water-source-type').value || '',
                     visits: parseInt(document.getElementById('visits').value) || 0,
                     chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
                     chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
@@ -1197,6 +1208,7 @@
                 document.getElementById('facility-type').value = '';
                 document.getElementById('submission-form-section').classList.add('hidden');
                 document.getElementById('facility-type-group').classList.add('hidden');
+                this.hideSamplingPoints();
                 this.setToday();
             }
 
@@ -1226,6 +1238,7 @@
                         </div>
                         <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
                             ${s.agency}${s.facility_type ? ` (${s.facility_type})` : ''} • ${s.visits} visit(s) • ${s.type}
+                            ${s.sampling_point_name ? `<br><strong>Sampling Point:</strong> ${s.sampling_point_name}` : ''}
                         </p>
                         ${s.type === 'treated' ? `
                         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;">
@@ -1246,25 +1259,18 @@
 
             showAlert(type, msg) {
                 if (type === 'success') {
-                    // Use water modal for success messages
-                    this.showWaterModal(msg);
+                    this.showFuturisticHanoverModal(msg);
                 } else {
-                    // Use regular alert for errors
                     const container = document.getElementById('alert-container');
                     container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
                     setTimeout(() => container.innerHTML = '', 5000);
                 }
             }
 
-            showWaterModal(message) {
-                this.showFuturisticHanoverModal(message);
-            }
-
             showFuturisticHanoverModal(message) {
                 const waterModal = document.getElementById('waterModal');
                 const waterModalMessage = document.getElementById('waterModalMessage');
 
-                // Set timestamp
                 const now = new Date();
                 const timestamp = now.toLocaleTimeString('en-US', {
                     hour12: false,
@@ -1274,13 +1280,11 @@
                 });
                 document.getElementById('hanover-analysis-timestamp').textContent = timestamp;
 
-                // Get form data for analysis summary
                 const chlorinePositive = parseInt(document.getElementById('chlorine-positive').value) || 0;
                 const chlorineNegative = parseInt(document.getElementById('chlorine-negative').value) || 0;
                 const bacteriaPositive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
                 const bacteriaNegative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
 
-                // Update chlorine analysis summary
                 const chlorineTotal = chlorinePositive + chlorineNegative;
                 let chlorineSummary = 'NO DATA';
                 if (chlorineTotal > 0) {
@@ -1292,7 +1296,6 @@
                 }
                 document.getElementById('hanover-chlorine-summary').textContent = chlorineSummary;
 
-                // Update bacteria analysis summary
                 const bacteriaTotal = bacteriaPositive + bacteriaNegative;
                 let bacteriaSummary = 'NO DATA';
                 if (bacteriaTotal > 0) {
@@ -1304,23 +1307,15 @@
                 }
                 document.getElementById('hanover-bacteria-summary').textContent = bacteriaSummary;
 
-                // Update supply status
                 const supplyName = this.currentSupply ? this.currentSupply.name : 'UNKNOWN';
                 document.getElementById('hanover-supply-summary').textContent = `${supplyName} - ACTIVE`;
 
-                // Set main message
                 waterModalMessage.textContent = 'INSPECTION DATA SUCCESSFULLY TRANSMITTED TO HANOVER CENTRAL';
 
-                // Show modal with smooth fade-in animation
                 waterModal.style.display = 'flex';
                 setTimeout(() => {
                     waterModal.classList.add('show');
                 }, 10);
-            }
-
-            closeWaterModal() {
-                const modal = document.getElementById('waterModal');
-                modal.style.display = 'none';
             }
 
             toggleTheme() {
@@ -1332,29 +1327,20 @@
             }
         }
 
-        let dashboardInstance = null;
-
         function incrementVisits() {
             const input = document.getElementById('visits');
             input.value = parseInt(input.value) + 1;
-        }
-
-        function closeWaterModal() {
-            const modal = document.getElementById('waterModal');
-            modal.style.display = 'none';
         }
 
         function closeHanoverWaterModalWithFade() {
             const modal = document.getElementById('waterModal');
             const container = document.querySelector('.container');
 
-            // Fade out modal
             modal.classList.remove('show');
 
             setTimeout(() => {
                 modal.style.display = 'none';
 
-                // Fade in dashboard
                 if (container) {
                     container.style.opacity = '0.3';
                     container.style.transition = 'opacity 0.8s ease';
@@ -1369,7 +1355,7 @@
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-            dashboardInstance = new HanoverDashboard();
+            new HanoverDashboard();
         });
     </script>
 </body>

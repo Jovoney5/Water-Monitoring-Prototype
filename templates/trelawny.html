@@ -970,6 +970,7 @@
                 if (!supplyValue) {
                     document.getElementById('submission-form-section').classList.add('hidden');
                     facilityTypeGroup.classList.add('hidden');
+                    this.hideSamplingPoints();
                     return;
                 }
 
@@ -979,18 +980,20 @@
                         id: 'other-governments',
                         name: 'Other Governments',
                         agency: 'Other Government Agency',
-                        type: 'treated',
-                        sample_point: 'Various'
+                        type: 'treated'
                     };
                     document.getElementById('selected-supply-name').textContent = 'Other Governments';
-                    document.getElementById('selected-supply-info').textContent = 'Other Government Agency • treated • Various';
+                    document.getElementById('selected-supply-info').textContent = 'Other Government Agency • Treated';
                 } else {
                     const id = parseInt(supplyValue);
                     this.currentSupply = this.supplies.find(s => s.id === id);
                     document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
                     document.getElementById('selected-supply-info').textContent =
-                        `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.sample_point}`;
+                        `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
                 }
+
+                // Load sampling points for this supply
+                this.loadSamplingPoints(supplyValue);
 
                 // Show/hide facility type dropdown for MOH supplies
                 if (this.currentSupply.agency === 'MOH') {
@@ -1112,6 +1115,8 @@
 
                 const data = {
                     supply_id: dbSupplyId,
+                    sampling_point_id: document.getElementById('sampling-point').value || null,
+                    water_source_type: document.getElementById('water-source-type').value || '',
                     visits: parseInt(document.getElementById('visits').value) || 0,
                     chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
                     chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
@@ -1147,12 +1152,72 @@
                 }
             }
 
+            async loadSamplingPoints(supplyId) {
+                try {
+                    const response = await fetch(`/api/sampling-points/${supplyId}`);
+                    if (response.ok) {
+                        const samplingPoints = await response.json();
+                        if (samplingPoints.length > 0) {
+                            this.populateSamplingPointsDropdown(samplingPoints);
+                            this.showSamplingPoints();
+                        } else {
+                            this.hideSamplingPoints();
+                        }
+                    } else {
+                        this.hideSamplingPoints();
+                    }
+                } catch (error) {
+                    console.error('Error loading sampling points:', error);
+                    this.hideSamplingPoints();
+                }
+            }
+
+            populateSamplingPointsDropdown(samplingPoints) {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                samplingPointSelect.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
+
+                samplingPoints.forEach(point => {
+                    const option = document.createElement('option');
+                    option.value = point.id;
+                    option.textContent = point.name;
+                    option.dataset.location = point.location;
+                    option.dataset.description = point.description;
+                    samplingPointSelect.appendChild(option);
+                });
+
+                samplingPointSelect.addEventListener('change', this.handleSamplingPointSelection.bind(this));
+            }
+
+            handleSamplingPointSelection() {
+                const samplingPointSelect = document.getElementById('sampling-point');
+                const locationSpan = document.getElementById('sampling-point-location');
+
+                if (samplingPointSelect.value) {
+                    const selectedOption = samplingPointSelect.options[samplingPointSelect.selectedIndex];
+                    const location = selectedOption.dataset.location || 'Not specified';
+                    locationSpan.textContent = location;
+                } else {
+                    locationSpan.textContent = '';
+                }
+            }
+
+            showSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.remove('hidden');
+            }
+
+            hideSamplingPoints() {
+                document.getElementById('sampling-points-section').classList.add('hidden');
+                document.getElementById('sampling-point').value = '';
+                document.getElementById('sampling-point-location').textContent = '';
+            }
+
             reset() {
                 document.getElementById('submission-form').reset();
                 document.getElementById('supply').value = '';
                 document.getElementById('facility-type').value = '';
                 document.getElementById('submission-form-section').classList.add('hidden');
                 document.getElementById('facility-type-group').classList.add('hidden');
+                this.hideSamplingPoints();
                 this.setToday();
             }
 
