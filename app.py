@@ -5,20 +5,178 @@ import hashlib
 from datetime import datetime, date, timedelta
 import json
 import os
+import urllib.parse
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'water-monitoring-secret-key-2024'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Sessions last 7 days
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-DATABASE = 'water_monitoring.db'
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Production: Use PostgreSQL
+    try:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+        USE_POSTGRESQL = True
+        print("[STARTUP] Using PostgreSQL database")
+
+        # Parse DATABASE_URL for psycopg2
+        parsed = urllib.parse.urlparse(DATABASE_URL)
+        DB_CONFIG = {
+            'host': parsed.hostname,
+            'port': parsed.port,
+            'database': parsed.path[1:],  # Remove leading '/'
+            'user': parsed.username,
+            'password': parsed.password,
+            'sslmode': 'require'
+        }
+    except ImportError:
+        print("[ERROR] psycopg2 not installed. Install with: pip install psycopg2-binary")
+        USE_POSTGRESQL = False
+        DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'water_monitoring.db')
+else:
+    # Development: Use SQLite
+    USE_POSTGRESQL = False
+    DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'water_monitoring.db')
+    print("[STARTUP] Using SQLite database")
 
 def init_db():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection()
 
-    # Users table
-    cursor.execute('''
+        if USE_POSTGRESQL:
+            cursor = conn.cursor()
+
+            # PostgreSQL-specific table creation
+            # Users table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    role VARCHAR(50) NOT NULL CHECK (role IN ('inspector', 'admin')),
+                    full_name VARCHAR(255) NOT NULL,
+                    parish VARCHAR(100) NOT NULL DEFAULT 'Westmoreland',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+
+            # Add parish column to existing users table if it doesn't exist
+            try:
+                cursor.execute('ALTER TABLE users ADD COLUMN parish VARCHAR(100) DEFAULT %s', ('Westmoreland',))
+            except Exception:
+                # Column already exists
+                pass
+
+            # Update existing users without parish to have Westmoreland
+            cursor.execute("UPDATE users SET parish = %s WHERE parish IS NULL OR parish = ''", ('Westmoreland',))
+
+            # Water supplies table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS water_supplies (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    type VARCHAR(50) NOT NULL CHECK (type IN ('treated', 'untreated')),
+                    agency VARCHAR(100) NOT NULL,
+                    location VARCHAR(255),
+                    parish VARCHAR(100) DEFAULT 'Westmoreland',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+
+            # Monthly supply data table for accumulative reporting
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS monthly_supply_data (
+                    id SERIAL PRIMARY KEY,
+                    supply_id INTEGER NOT NULL,
+                    month INTEGER NOT NULL,
+                    year INTEGER NOT NULL,
+                    visits INTEGER DEFAULT 0,
+                    chlorine_total INTEGER DEFAULT 0,
+                    chlorine_positive INTEGER DEFAULT 0,
+                    chlorine_negative INTEGER DEFAULT 0,
+                    bacteriological_positive INTEGER DEFAULT 0,
+                    bacteriological_negative INTEGER DEFAULT 0,
+                    bacteriological_pending INTEGER DEFAULT 0,
+                    remarks TEXT,
+                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    UNIQUE(supply_id, month, year)
+                )
+            ''')
+
+            # Inspection submissions table for individual submissions
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspection_submissions (
+                    id SERIAL PRIMARY KEY,
+                    supply_id INTEGER NOT NULL,
+                    inspector_id INTEGER NOT NULL,
+                    sampling_point_id INTEGER,
+                    submission_date DATE NOT NULL,
+                    visits INTEGER DEFAULT 0,
+                    chlorine_total INTEGER DEFAULT 0,
+                    chlorine_positive INTEGER DEFAULT 0,
+                    chlorine_negative INTEGER DEFAULT 0,
+                    chlorine_positive_range VARCHAR(50),
+                    chlorine_negative_range VARCHAR(50),
+                    bacteriological_positive INTEGER DEFAULT 0,
+                    bacteriological_negative INTEGER DEFAULT 0,
+                    bacteriological_pending INTEGER DEFAULT 0,
+                    isolated_organism VARCHAR(255),
+                    remarks TEXT,
+                    facility_type VARCHAR(100),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    FOREIGN KEY (inspector_id) REFERENCES users (id),
+                    FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
+                )
+            ''')
+
+            # Sampling points table for water supplies
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sampling_points (
+                    id SERIAL PRIMARY KEY,
+                    supply_id INTEGER NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    location VARCHAR(255),
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id)
+                )
+            ''')
+
+            # Tasks table for inspector assignments
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspector_tasks (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    assigned_to_id INTEGER NOT NULL,
+                    supply_id INTEGER,
+                    priority VARCHAR(50) NOT NULL CHECK (priority IN ('Low', 'Medium', 'High', 'Urgent')),
+                    due_date DATE NOT NULL,
+                    status VARCHAR(50) NOT NULL CHECK (status IN ('pending', 'accepted', 'in_progress', 'completed', 'rejected')) DEFAULT 'pending',
+                    created_by_id INTEGER NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (assigned_to_id) REFERENCES users (id),
+                    FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
+                    FOREIGN KEY (created_by_id) REFERENCES users (id)
+                )
+            ''')
+
+        else:
+            # SQLite-specific table creation (existing code)
+            cursor = conn.cursor()
+
+            # Users table
+            cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -132,15 +290,41 @@ def init_db():
         )
     ''')
 
+        # Populate initial data using shared function
+        _populate_initial_data(conn, cursor)
+
+        conn.commit()
+        if USE_POSTGRESQL:
+            cursor.close()
+        conn.close()
+        print(f"Database initialized successfully using {'PostgreSQL' if USE_POSTGRESQL else 'SQLite'}")
+
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        if 'conn' in locals():
+            if USE_POSTGRESQL:
+                conn.rollback()
+            conn.close()
+        raise
+
+def _populate_initial_data(conn, cursor):
+    """Populate initial data for both PostgreSQL and SQLite"""
+    import hashlib
+    from water_supplies_data import get_all_supplies
+
     # Insert default users
-    cursor.execute("SELECT COUNT(*) FROM users")
-    if cursor.fetchone()[0] == 0:
-        # Test users for demo/testing phase
+    if USE_POSTGRESQL:
+        cursor.execute("SELECT COUNT(*) FROM users")
+        user_count = cursor.fetchone()[0]
+    else:
+        cursor.execute("SELECT COUNT(*) FROM users")
+        user_count = cursor.fetchone()[0]
+
+    if user_count == 0:
         test_users = [
             # Admins (password: admin123)
             ('admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'System Administrator', 'Westmoreland'),
             ('admin2', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Senior Administrator', 'Westmoreland'),
-
             # Inspectors (password: inspector123)
             ('inspector', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Water Quality Inspector', 'Westmoreland'),
             ('inspector1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector A', 'Westmoreland'),
@@ -149,130 +333,165 @@ def init_db():
             ('inspector4', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector D', 'Westmoreland'),
             ('inspector5', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector E', 'Westmoreland'),
             ('inspector6', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Field Inspector F', 'Westmoreland'),
-
             # Trelawny Inspectors (password: inspector123)
             ('trelawny1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Trelawny Inspector A', 'Trelawny'),
             ('trelawny2', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Trelawny Inspector B', 'Trelawny'),
             ('trelawny3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Trelawny Inspector C', 'Trelawny'),
-
             # Trelawny Admin (password: admin123)
             ('trelawny_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Trelawny Administrator', 'Trelawny'),
-
             # Hanover Inspectors (password: inspector123)
             ('hanover1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector A', 'Hanover'),
             ('hanover2', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector B', 'Hanover'),
             ('hanover3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector C', 'Hanover'),
-
             # Hanover Admin (password: admin123)
             ('hanover_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Hanover Administrator', 'Hanover'),
         ]
 
-        cursor.executemany('''
-            INSERT INTO users (username, password_hash, role, full_name, parish)
-            VALUES (?, ?, ?, ?, ?)
-        ''', test_users)
+        if USE_POSTGRESQL:
+            cursor.executemany('''
+                INSERT INTO users (username, password_hash, role, full_name, parish)
+                VALUES (%s, %s, %s, %s, %s)
+            ''', test_users)
+        else:
+            cursor.executemany('''
+                INSERT INTO users (username, password_hash, role, full_name, parish)
+                VALUES (?, ?, ?, ?, ?)
+            ''', test_users)
 
-    # Insert water supplies from the updated list
-    cursor.execute('SELECT COUNT(*) FROM water_supplies')
-    if cursor.fetchone()[0] == 0:
-        supplies = [
-            # Treated Supplies
-            ('Roaring River 1', 'treated', 'NWC', ''),
-            ('Roaring River 2', 'treated', 'NWC', ''),
-            ('Bulstrode', 'treated', 'NWC', ''),
-            ('Dantrout', 'treated', 'NWC', ''),
-            ('Bluefield\'s', 'treated', 'NWC', ''),
-            ('Negril/Logwood', 'treated', 'NWC', ''),
-            ('Bethel Town/Cambridge', 'treated', 'NWC', ''),
-            ('Venture-Williamsfield', 'treated', 'NWC', ''),
-            ('Shettlewood', 'treated', 'NWC', ''),
-            ('Cave', 'treated', 'NWC', ''),
-            ('Carawina', 'treated', 'NWC', ''),
-            ('Dean\'s Valley', 'treated', 'NWC', ''),
-            ('New Works', 'treated', 'PC', ''),
-            ('New Works-Steward Lands', 'treated', 'PC', ''),
-            ('Castle Mountain', 'treated', 'PC', ''),
-            ('Berkshire', 'treated', 'PC', ''),
-            ('Amity Mountains', 'treated', 'PC', ''),
-            ('Beeston Spring', 'treated', 'PC', ''),
-            ('Spring Gardens', 'treated', 'Private', ''),
+    # Insert water supplies from the shared data module
+    if USE_POSTGRESQL:
+        cursor.execute("SELECT COUNT(*) FROM water_supplies")
+        supply_count = cursor.fetchone()[0]
+    else:
+        cursor.execute("SELECT COUNT(*) FROM water_supplies")
+        supply_count = cursor.fetchone()[0]
 
-            # Untreated Supplies
-            ('Content', 'untreated', 'PC', ''),
-            ('Holly Hill', 'untreated', 'PC', ''),
-            ('Bunion (Bunyan)', 'untreated', 'PC', ''),
-            ('Lundi', 'untreated', 'PC', ''),
-            ('Pinnock Shafton', 'untreated', 'PC', ''),
-            ('Orange Hill', 'untreated', 'PC', ''),
-            ('Cair Curran Cedar Valley', 'untreated', 'PC', ''),
-            ('Leamington', 'untreated', 'PC', ''),
-            ('Charlie Mount', 'untreated', 'PC', ''),
-            ('New Roads', 'untreated', 'PC', ''),
-            ('Belvedere', 'untreated', 'PC', ''),
-            ('York Mountain', 'untreated', 'PC', ''),
-            ('Ashton', 'untreated', 'PC', ''),
-            ('Kilmarnock', 'untreated', 'PC', ''),
-            ('Bronti', 'untreated', 'PC', ''),
-            ('Argyle Mountain', 'untreated', 'PC', ''),
-            ('Bog', 'untreated', 'PC', ''),
-            ('Porters Mountain', 'untreated', 'PC', ''),
-            ('Ketto', 'untreated', 'Private', ''),
-            ('Lambs River', 'untreated', 'PC', ''),
-            ('Bath Mtns.', 'untreated', 'PC', '')
-        ]
-        cursor.executemany('''
-            INSERT INTO water_supplies (name, type, agency, location)
-            VALUES (?, ?, ?, ?)
-        ''', supplies)
+    if supply_count == 0:
+        supplies = get_all_supplies()
+
+        if USE_POSTGRESQL:
+            cursor.executemany('''
+                INSERT INTO water_supplies (name, type, agency, location, parish)
+                VALUES (%s, %s, %s, %s, %s)
+            ''', supplies)
+        else:
+            cursor.executemany('''
+                INSERT INTO water_supplies (name, type, agency, location, parish)
+                VALUES (?, ?, ?, ?, ?)
+            ''', supplies)
 
     # Insert sampling points for Roaring River supplies
-    cursor.execute('SELECT COUNT(*) FROM sampling_points')
-    if cursor.fetchone()[0] == 0:
+    if USE_POSTGRESQL:
+        cursor.execute("SELECT COUNT(*) FROM sampling_points")
+        point_count = cursor.fetchone()[0]
+    else:
+        cursor.execute("SELECT COUNT(*) FROM sampling_points")
+        point_count = cursor.fetchone()[0]
+
+    if point_count == 0:
         # Get the IDs for Roaring River 1 and Roaring River 2
-        roaring_river_1_id = cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 1"').fetchone()[0]
-        roaring_river_2_id = cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 2"').fetchone()[0]
+        if USE_POSTGRESQL:
+            cursor.execute('SELECT id FROM water_supplies WHERE name = %s', ('Roaring River 1',))
+            roaring_river_1_result = cursor.fetchone()
+            cursor.execute('SELECT id FROM water_supplies WHERE name = %s', ('Roaring River 2',))
+            roaring_river_2_result = cursor.fetchone()
+        else:
+            cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 1"')
+            roaring_river_1_result = cursor.fetchone()
+            cursor.execute('SELECT id FROM water_supplies WHERE name = "Roaring River 2"')
+            roaring_river_2_result = cursor.fetchone()
 
-        # Clear existing sampling points first (if updating)
-        cursor.execute('DELETE FROM sampling_points WHERE supply_id IN (SELECT id FROM water_supplies WHERE name IN ("Roaring River 1", "Roaring River 2"))')
+        if roaring_river_1_result and roaring_river_2_result:
+            roaring_river_1_id = roaring_river_1_result[0]
+            roaring_river_2_id = roaring_river_2_result[0]
 
-        sampling_points = [
-            # Roaring River 1 sampling points
-            (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
-            (roaring_river_1_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
-            (roaring_river_1_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
-            (roaring_river_1_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
-            (roaring_river_1_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
-            (roaring_river_1_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
-            (roaring_river_1_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
-            (roaring_river_1_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
-            (roaring_river_1_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
-            (roaring_river_1_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
+            sampling_points = [
+                # Roaring River 1 sampling points
+                (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
+                (roaring_river_1_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
+                (roaring_river_1_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
+                (roaring_river_1_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
+                (roaring_river_1_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
+                (roaring_river_1_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
+                (roaring_river_1_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
+                (roaring_river_1_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
+                (roaring_river_1_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
+                (roaring_river_1_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
+                # Roaring River 2 sampling points (same locations)
+                (roaring_river_2_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
+                (roaring_river_2_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
+                (roaring_river_2_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
+                (roaring_river_2_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
+                (roaring_river_2_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
+                (roaring_river_2_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
+                (roaring_river_2_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
+                (roaring_river_2_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
+                (roaring_river_2_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
+                (roaring_river_2_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
+            ]
 
-            # Roaring River 2 sampling points (same locations)
-            (roaring_river_2_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
-            (roaring_river_2_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
-            (roaring_river_2_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
-            (roaring_river_2_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
-            (roaring_river_2_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
-            (roaring_river_2_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
-            (roaring_river_2_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
-            (roaring_river_2_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
-            (roaring_river_2_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
-            (roaring_river_2_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
-        ]
-
-        cursor.executemany('''
-            INSERT INTO sampling_points (supply_id, name, location, description)
-            VALUES (?, ?, ?, ?)
-        ''', sampling_points)
-
-    conn.commit()
-    conn.close()
+            if USE_POSTGRESQL:
+                cursor.executemany('''
+                    INSERT INTO sampling_points (supply_id, name, location, description)
+                    VALUES (%s, %s, %s, %s)
+                ''', sampling_points)
+            else:
+                cursor.executemany('''
+                    INSERT INTO sampling_points (supply_id, name, location, description)
+                    VALUES (?, ?, ?, ?)
+                ''', sampling_points)
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if USE_POSTGRESQL:
+        try:
+            conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+            return conn
+        except Exception as e:
+            print(f"[ERROR] PostgreSQL connection failed: {e}")
+            raise
+    else:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+def execute_query(query, params=None, fetch=None):
+    """
+    Universal query executor that handles both PostgreSQL and SQLite
+    fetch options: None, 'one', 'all'
+    """
+    conn = get_db_connection()
+    try:
+        if USE_POSTGRESQL:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params or [])
+                if fetch == 'one':
+                    return cursor.fetchone()
+                elif fetch == 'all':
+                    return cursor.fetchall()
+                elif fetch is None:
+                    conn.commit()
+                    return cursor.rowcount
+        else:
+            cursor = conn.cursor()
+            cursor.execute(query, params or [])
+            if fetch == 'one':
+                result = cursor.fetchone()
+                conn.close()
+                return result
+            elif fetch == 'all':
+                result = cursor.fetchall()
+                conn.close()
+                return result
+            elif fetch is None:
+                conn.commit()
+                rowcount = cursor.rowcount
+                conn.close()
+                return rowcount
+    except Exception as e:
+        if conn:
+            conn.rollback() if USE_POSTGRESQL else None
+            conn.close()
+        raise e
 
 def add_sample_data():
     '''Add sample inspection data for testing charts'''

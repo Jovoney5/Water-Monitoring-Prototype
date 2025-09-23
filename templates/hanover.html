@@ -191,9 +191,10 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 123, 191, 0.15);
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
             backdrop-filter: blur(3px);
             animation: modalFadeIn 0.3s ease-out;
+            overflow: hidden;
         }
 
         .water-modal-content {
@@ -298,25 +299,33 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .water-drops {
+        .ocean-bubbles {
             position: absolute;
             width: 100%;
             height: 100%;
             pointer-events: none;
+            overflow: hidden;
         }
 
-        .water-drop {
+        .bubble {
             position: absolute;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0.1) 100%);
             border-radius: 50%;
-            animation: dropFall 3s linear infinite;
+            animation: bubbleRise 4s ease-in-out infinite;
+            opacity: 0.8;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .water-drop:nth-child(1) { left: 10%; animation-delay: 0s; width: 8px; height: 8px; }
-        .water-drop:nth-child(2) { left: 30%; animation-delay: 0.5s; width: 12px; height: 12px; }
-        .water-drop:nth-child(3) { left: 50%; animation-delay: 1s; width: 6px; height: 6px; }
-        .water-drop:nth-child(4) { left: 70%; animation-delay: 1.5s; width: 10px; height: 10px; }
-        .water-drop:nth-child(5) { left: 90%; animation-delay: 2s; width: 8px; height: 8px; }
+        .bubble:nth-child(1) { left: 15%; animation-delay: 0s; width: 20px; height: 20px; animation-duration: 3.5s; }
+        .bubble:nth-child(2) { left: 35%; animation-delay: 0.8s; width: 15px; height: 15px; animation-duration: 4.2s; }
+        .bubble:nth-child(3) { left: 60%; animation-delay: 1.5s; width: 25px; height: 25px; animation-duration: 3.8s; }
+        .bubble:nth-child(4) { left: 80%; animation-delay: 2.2s; width: 12px; height: 12px; animation-duration: 4.5s; }
+        .bubble:nth-child(5) { left: 25%; animation-delay: 3s; width: 18px; height: 18px; animation-duration: 3.2s; }
+        .bubble:nth-child(6) { left: 45%; animation-delay: 0.3s; width: 10px; height: 10px; animation-duration: 4.8s; }
+        .bubble:nth-child(7) { left: 70%; animation-delay: 1.8s; width: 22px; height: 22px; animation-duration: 3.6s; }
+        .bubble:nth-child(8) { left: 90%; animation-delay: 2.5s; width: 14px; height: 14px; animation-duration: 4.1s; }
+        .bubble:nth-child(9) { left: 5%; animation-delay: 1.2s; width: 16px; height: 16px; animation-duration: 4.3s; }
+        .bubble:nth-child(10) { left: 85%; animation-delay: 0.7s; width: 8px; height: 8px; animation-duration: 3.9s; }
 
         @keyframes modalFadeIn {
             from { opacity: 0; }
@@ -349,20 +358,25 @@
             100% { transform: translateX(100%); }
         }
 
-        @keyframes dropFall {
+        @keyframes bubbleRise {
             0% {
-                top: -10px;
+                bottom: -30px;
                 opacity: 0;
+                transform: translateX(0);
             }
-            10% {
+            15% {
                 opacity: 1;
             }
-            90% {
+            50% {
+                transform: translateX(20px);
+            }
+            85% {
                 opacity: 1;
             }
             100% {
-                top: 100%;
+                bottom: 110%;
                 opacity: 0;
+                transform: translateX(-10px);
             }
         }
     </style>
@@ -372,14 +386,19 @@
     <div id="waterModal" class="water-modal">
         <div class="water-modal-content">
             <div class="water-modal-header">
-                <div class="water-drops">
-                    <div class="water-drop"></div>
-                    <div class="water-drop"></div>
-                    <div class="water-drop"></div>
-                    <div class="water-drop"></div>
-                    <div class="water-drop"></div>
+                <div class="ocean-bubbles">
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
                 </div>
-                <span class="water-icon">💧</span>
+                <span class="water-icon">🌊</span>
                 <h2>Thank You, Inspector!</h2>
             </div>
             <div class="water-modal-body">
