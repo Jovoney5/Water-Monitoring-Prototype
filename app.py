@@ -1354,13 +1354,24 @@ def get_supplies():
 @app.route('/api/sampling-points/<int:supply_id>')
 def get_sampling_points(supply_id):
     conn = get_db_connection()
-    sampling_points = conn.execute('''
-        SELECT sp.*, ws.name as supply_name
-        FROM sampling_points sp
-        JOIN water_supplies ws ON sp.supply_id = ws.id
-        WHERE sp.supply_id = ?
-        ORDER BY sp.name
-    ''', (supply_id,)).fetchall()
+    if USE_POSTGRESQL:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT sp.*, ws.name as supply_name
+            FROM sampling_points sp
+            JOIN water_supplies ws ON sp.supply_id = ws.id
+            WHERE sp.supply_id = %s
+            ORDER BY sp.name
+        ''', (supply_id,))
+        sampling_points = cursor.fetchall()
+    else:
+        sampling_points = conn.execute('''
+            SELECT sp.*, ws.name as supply_name
+            FROM sampling_points sp
+            JOIN water_supplies ws ON sp.supply_id = ws.id
+            WHERE sp.supply_id = ?
+            ORDER BY sp.name
+        ''', (supply_id,)).fetchall()
     conn.close()
     return jsonify([dict(point) for point in sampling_points])
 
