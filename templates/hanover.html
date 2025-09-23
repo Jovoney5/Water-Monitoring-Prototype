@@ -135,9 +135,19 @@
             gap: 1rem;
         }
 
+        .chlorine-total { background: #f8f9fa !important; color: #666 !important; cursor: not-allowed; }
+        .positive-field { background: #d4edda !important; border-color: var(--positive-color) !important; }
+        .negative-field { background: #f8d7da !important; border-color: var(--negative-color) !important; }
+        .pending-field { background: #fff3cd !important; border-color: #ffc107 !important; }
+
+        .urgent-icon { color: #dc3545; font-size: 18px; }
+        .organism-dropdown { margin-left: 10px; padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+
         .warning-text { color: var(--negative-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
         .ideal-range { color: var(--positive-color); font-weight: bold; font-size: 12px; margin-top: 5px; }
-        .high-level { color: #fd7e14; font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .maximum-level { color: #fd7e14; font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .high-level { color: #dc3545; font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .very-high-level { color: #721c24; font-weight: bold; font-size: 12px; margin-top: 5px; }
 
         .submit-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -171,9 +181,221 @@
             color: #ffffff !important;
             border: 2px solid #444 !important;
         }
+
+        /* Water-themed Success Modal */
+        .water-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 123, 191, 0.15);
+            backdrop-filter: blur(3px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .water-modal-content {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 123, 191, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        .water-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .water-modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: waterShimmer 3s ease-in-out infinite;
+        }
+
+        .water-modal-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: waterDrop 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-modal-body {
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            position: relative;
+        }
+
+        .water-modal-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
+            animation: waterFlow 2s linear infinite;
+        }
+
+        .water-message {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .water-submessage {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .water-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .water-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .water-drops {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .water-drop {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+            border-radius: 50%;
+            animation: dropFall 3s linear infinite;
+        }
+
+        .water-drop:nth-child(1) { left: 10%; animation-delay: 0s; width: 8px; height: 8px; }
+        .water-drop:nth-child(2) { left: 30%; animation-delay: 0.5s; width: 12px; height: 12px; }
+        .water-drop:nth-child(3) { left: 50%; animation-delay: 1s; width: 6px; height: 6px; }
+        .water-drop:nth-child(4) { left: 70%; animation-delay: 1.5s; width: 10px; height: 10px; }
+        .water-drop:nth-child(5) { left: 90%; animation-delay: 2s; width: 8px; height: 8px; }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes waterDrop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes waterShimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes waterFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes dropFall {
+            0% {
+                top: -10px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Water-themed Success Modal -->
+    <div id="waterModal" class="water-modal">
+        <div class="water-modal-content">
+            <div class="water-modal-header">
+                <div class="water-drops">
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                </div>
+                <span class="water-icon">💧</span>
+                <h2>Thank You, Inspector!</h2>
+            </div>
+            <div class="water-modal-body">
+                <div class="water-message" id="waterModalMessage">
+                    Your water quality inspection has been successfully submitted!
+                </div>
+                <div class="water-submessage">
+                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work! 🌊
+                </div>
+                <button class="water-close-btn" onclick="closeWaterModal()">
+                    Continue Inspecting
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1>Hanover Inspector Dashboard</h1>
         <div>
@@ -192,6 +414,16 @@
                 <label for="supply">Select Water Supply</label>
                 <select id="supply">
                     <option value="">Select a water supply...</option>
+                </select>
+            </div>
+
+            <div id="facility-type-group" class="form-group hidden">
+                <label for="facility-type">MOH Facility Type</label>
+                <select id="facility-type">
+                    <option value="">Select facility type...</option>
+                    <option value="Health Center">Health Center</option>
+                    <option value="Hospital">Hospital</option>
+                    <option value="Commercial Building">Commercial Building</option>
                 </select>
             </div>
 
@@ -220,19 +452,126 @@
                         <h3>Chlorine Residual Tests (mg/L)</h3>
                         <div class="test-inputs">
                             <div class="form-group">
-                                <label for="chlorine-low">Low (&lt;0.2 mg/L)</label>
-                                <input type="number" id="chlorine-low" min="0" value="0">
-                                <div class="warning-text">Action needed - low chlorine level</div>
+                                <label for="chlorine-total">Total Tests</label>
+                                <input type="number" id="chlorine-total" value="0" readonly class="chlorine-total">
                             </div>
                             <div class="form-group">
-                                <label for="chlorine-ideal">Ideal (0.2-1.5 mg/L)</label>
-                                <input type="number" id="chlorine-ideal" min="0" value="0">
-                                <div class="ideal-range">Ideal chlorine level</div>
+                                <label for="chlorine-positive">Positive</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="chlorine-positive" name="chlorine_positive" min="0" value="0" class="positive-field count-input">
+                                    <select id="chlorine-positive-range" name="chlorine_positive_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="0.1">0.1</option>
+                                        <option value="0.2">0.2</option>
+                                        <option value="0.3">0.3</option>
+                                        <option value="0.4">0.4</option>
+                                        <option value="0.5">0.5</option>
+                                        <option value="0.6">0.6</option>
+                                        <option value="0.7">0.7</option>
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0">1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                        <option value="1.4">1.4</option>
+                                        <option value="1.5">1.5</option>
+                                        <option value="1.6">1.6</option>
+                                        <option value="1.7">1.7</option>
+                                        <option value="1.8">1.8</option>
+                                        <option value="1.9">1.9</option>
+                                        <option value="2.0">2.0</option>
+                                        <option value="2.1">2.1</option>
+                                        <option value="2.2">2.2</option>
+                                        <option value="2.3">2.3</option>
+                                        <option value="2.4">2.4</option>
+                                        <option value="2.5">2.5</option>
+                                        <option value="2.6">2.6</option>
+                                        <option value="2.7">2.7</option>
+                                        <option value="2.8">2.8</option>
+                                        <option value="2.9">2.9</option>
+                                        <option value="3.0">3.0</option>
+                                    </select>
+                                </div>
+                                <div id="chlorine-positive-warning" class="warning-text" style="display: none;">Low chlorine level - action needed</div>
+                                <div id="chlorine-positive-ideal" class="ideal-range" style="display: none;">Ideal level</div>
+                                <div id="chlorine-positive-maximum" class="maximum-level" style="display: none;">Maximum level</div>
+                                <div id="chlorine-positive-high" class="high-level" style="display: none;">High level - adjust chlorine dosage</div>
+                                <div id="chlorine-positive-very-high" class="very-high-level" style="display: none;">Very high level - adjust chlorine dosage</div>
                             </div>
                             <div class="form-group">
-                                <label for="chlorine-high">High (&gt;1.5 mg/L)</label>
-                                <input type="number" id="chlorine-high" min="0" value="0">
-                                <div class="high-level">High level - adjust dosage</div>
+                                <label for="chlorine-negative">Negative</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="chlorine-negative" name="chlorine_negative" min="0" value="0" class="negative-field count-input">
+                                    <select id="chlorine-negative-range" name="chlorine_negative_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="0.1">0.1</option>
+                                        <option value="0.2">0.2</option>
+                                        <option value="0.3">0.3</option>
+                                        <option value="0.4">0.4</option>
+                                        <option value="0.5">0.5</option>
+                                        <option value="0.6">0.6</option>
+                                        <option value="0.7">0.7</option>
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0">1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                        <option value="1.4">1.4</option>
+                                        <option value="1.5">1.5</option>
+                                        <option value="1.6">1.6</option>
+                                        <option value="1.7">1.7</option>
+                                        <option value="1.8">1.8</option>
+                                        <option value="1.9">1.9</option>
+                                        <option value="2.0">2.0</option>
+                                        <option value="2.1">2.1</option>
+                                        <option value="2.2">2.2</option>
+                                        <option value="2.3">2.3</option>
+                                        <option value="2.4">2.4</option>
+                                        <option value="2.5">2.5</option>
+                                        <option value="2.6">2.6</option>
+                                        <option value="2.7">2.7</option>
+                                        <option value="2.8">2.8</option>
+                                        <option value="2.9">2.9</option>
+                                        <option value="3.0">3.0</option>
+                                    </select>
+                                </div>
+                                <div id="chlorine-negative-warning" class="warning-text" style="display: none;">Low chlorine level - action needed</div>
+                                <div id="chlorine-negative-ideal" class="ideal-range" style="display: none;">Ideal level</div>
+                                <div id="chlorine-negative-maximum" class="maximum-level" style="display: none;">Maximum level</div>
+                                <div id="chlorine-negative-high" class="high-level" style="display: none;">High level - adjust chlorine dosage</div>
+                                <div id="chlorine-negative-very-high" class="very-high-level" style="display: none;">Very high level - adjust chlorine dosage</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
+                        <h3>Bacteriological Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="bacteriological-positive">Positive</label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input">
+                                    <span id="urgent-icon" class="urgent-icon" style="display: none;">⚠️</span>
+                                    <select id="isolated-organism" name="isolated_organism" class="organism-dropdown" style="display: none;">
+                                        <option value="">Select organism</option>
+                                        <option value="E. coli">E. coli</option>
+                                        <option value="Coliform">Coliform</option>
+                                        <option value="Enterococcus">Enterococcus</option>
+                                        <option value="Pseudomonas">Pseudomonas</option>
+                                        <option value="Salmonella">Salmonella</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-negative">Negative</label>
+                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field">
+                            </div>
+                            <div class="form-group">
+                                <label for="bacteriological-pending">Pending</label>
+                                <input type="number" id="bacteriological-pending" name="bacteriological_pending" min="0" value="0" class="pending-field">
                             </div>
                         </div>
                     </div>
@@ -256,6 +595,7 @@
     </div>
 
     <script>
+
         class HanoverDashboard {
             constructor() {
                 this.supplies = [];
@@ -275,44 +615,83 @@
             async loadSupplies() {
                 try {
                     const response = await fetch('/api/supplies');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    this.supplies = await response.json();
+                    const allSupplies = await response.json();
+                    // Filter for Hanover parish supplies only
+                    this.supplies = allSupplies.filter(s => s.parish === 'Hanover');
+                    console.log('Loaded Hanover supplies:', this.supplies.length);
                 } catch (error) {
                     console.error('Failed to load supplies:', error);
-                    this.showAlert('error', 'Failed to load water supplies. Please refresh the page.');
+                    this.supplies = [];
                 }
+            }
+
+            findSupplyId(supplyName) {
+                const supply = this.supplies.find(s => s.name === supplyName);
+                return supply ? supply.id : null;
             }
 
             populateDropdown() {
                 const select = document.getElementById('supply');
-                const agencies = {
-                    'HMC': 'Hanover Municipal Corporation',
+
+                // Clear existing options except the default
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+
+                // Get unique agencies from the supplies
+                const agencyMap = {
                     'NWC': 'National Water Commission',
-                    'Private': 'Private'
+                    'PC': 'Parish Council',
+                    'PT': 'Private',
+                    'MOH': 'Ministry of Health',
+                    'HMC': 'Hanover Municipal Corporation',
+                    'Private': 'Private Sector'
                 };
 
-                Object.keys(agencies).forEach(code => {
-                    const supplies = this.supplies.filter(s => s.agency === code);
+                // Group supplies by agency
+                const agenciesFound = [...new Set(this.supplies.map(s => s.agency))];
+
+                agenciesFound.forEach(agencyCode => {
+                    const supplies = this.supplies.filter(s => s.agency === agencyCode);
                     if (supplies.length) {
                         const group = document.createElement('optgroup');
-                        group.label = agencies[code];
+                        group.label = agencyMap[agencyCode] || agencyCode;
                         supplies.forEach(s => {
                             const opt = document.createElement('option');
                             opt.value = s.id;
-                            opt.textContent = `${s.name} (${s.type})`;
+                            opt.textContent = `${s.name} (${s.type || 'treated'})`;
                             group.appendChild(opt);
                         });
                         select.appendChild(group);
                     }
                 });
+
+                // Add "Other Governments" option
+                const otherGovGroup = document.createElement('optgroup');
+                otherGovGroup.label = 'Other Options';
+                const otherGovOption = document.createElement('option');
+                otherGovOption.value = 'other-governments';
+                otherGovOption.textContent = 'Other Governments';
+                otherGovGroup.appendChild(otherGovOption);
+                select.appendChild(otherGovGroup);
             }
 
             setupEvents() {
                 document.getElementById('supply').addEventListener('change', () => this.selectSupply());
                 document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
                 document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
+                // Auto-calculate chlorine totals and handle range warnings
+                ['chlorine-positive', 'chlorine-negative'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
+                });
+
+                // Handle chlorine range change events for warnings
+                ['chlorine-positive-range', 'chlorine-negative-range'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', this.handleChlorineRangeChange.bind(this));
+                });
+
+                // Handle bacteriological positive input for urgent warnings
+                document.getElementById('bacteriological-positive').addEventListener('input', () => this.handleBacteriologicalChange());
             }
 
             setToday() {
@@ -321,69 +700,206 @@
 
             selectSupply() {
                 const supplyValue = document.getElementById('supply').value;
+                const facilityTypeGroup = document.getElementById('facility-type-group');
 
                 if (!supplyValue) {
                     document.getElementById('submission-form-section').classList.add('hidden');
+                    facilityTypeGroup.classList.add('hidden');
                     return;
                 }
 
-                const id = parseInt(supplyValue);
-                this.currentSupply = this.supplies.find(s => s.id === id);
-                document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
-                document.getElementById('selected-supply-info').textContent =
-                    `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.location}`;
+                // Handle "Other Governments" option
+                if (supplyValue === 'other-governments') {
+                    this.currentSupply = {
+                        id: 'other-governments',
+                        name: 'Other Governments',
+                        agency: 'Other Government Agency',
+                        type: 'treated',
+                        sample_point: 'Various'
+                    };
+                    document.getElementById('selected-supply-name').textContent = 'Other Governments';
+                    document.getElementById('selected-supply-info').textContent = 'Other Government Agency • treated • Various';
+                } else {
+                    const id = parseInt(supplyValue);
+                    this.currentSupply = this.supplies.find(s => s.id === id);
+                    document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
+                    document.getElementById('selected-supply-info').textContent =
+                        `${this.currentSupply.agency} • ${this.currentSupply.type} • ${this.currentSupply.sample_point}`;
+                }
+
+                // Show/hide facility type dropdown for MOH supplies
+                if (this.currentSupply.agency === 'MOH') {
+                    facilityTypeGroup.classList.remove('hidden');
+                } else {
+                    facilityTypeGroup.classList.add('hidden');
+                    document.getElementById('facility-type').value = '';
+                }
 
                 const section = document.getElementById('chlorine-section');
                 if (this.currentSupply.type === 'untreated') {
                     section.classList.add('treated-only');
-                    document.getElementById('chlorine-low').disabled = true;
-                    document.getElementById('chlorine-ideal').disabled = true;
-                    document.getElementById('chlorine-high').disabled = true;
+                    document.getElementById('chlorine-positive').disabled = true;
+                    document.getElementById('chlorine-negative').disabled = true;
+                    document.getElementById('chlorine-positive-range').disabled = true;
+                    document.getElementById('chlorine-negative-range').disabled = true;
                 } else {
                     section.classList.remove('treated-only');
-                    document.getElementById('chlorine-low').disabled = false;
-                    document.getElementById('chlorine-ideal').disabled = false;
-                    document.getElementById('chlorine-high').disabled = false;
+                    document.getElementById('chlorine-positive').disabled = false;
+                    document.getElementById('chlorine-negative').disabled = false;
+                    document.getElementById('chlorine-positive-range').disabled = false;
+                    document.getElementById('chlorine-negative-range').disabled = false;
                 }
 
                 document.getElementById('submission-form-section').classList.remove('hidden');
             }
 
-            submit(e) {
-                e.preventDefault();
+            updateChlorineTotal() {
+                if (this.currentSupply?.type === 'untreated') return;
+                const positive = parseInt(document.getElementById('chlorine-positive').value) || 0;
+                const negative = parseInt(document.getElementById('chlorine-negative').value) || 0;
+                const total = positive + negative;
+                document.getElementById('chlorine-total').value = total;
+            }
 
-                const submission = {
-                    id: Date.now(),
-                    supply_name: this.currentSupply.name,
-                    agency: this.currentSupply.agency,
-                    location: this.currentSupply.location,
-                    type: this.currentSupply.type,
-                    visits: parseInt(document.getElementById('visits').value) || 0,
-                    submission_date: document.getElementById('submission-date').value,
-                    chlorine_low: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-low').value) || 0) : 0,
-                    chlorine_ideal: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-ideal').value) || 0) : 0,
-                    chlorine_high: this.currentSupply.type === 'treated' ? (parseInt(document.getElementById('chlorine-high').value) || 0) : 0,
-                    remarks: document.getElementById('remarks').value || '',
-                    created_at: new Date().toISOString()
+            handleChlorineRangeChange() {
+                const positiveRange = document.getElementById('chlorine-positive-range').value;
+                const negativeRange = document.getElementById('chlorine-negative-range').value;
+
+                this.updateChlorineStatusForRange('positive', positiveRange);
+                this.updateChlorineStatusForRange('negative', negativeRange);
+            }
+
+            updateChlorineStatusForRange(type, rangeValue) {
+                const elements = {
+                    warning: document.getElementById(`chlorine-${type}-warning`),
+                    ideal: document.getElementById(`chlorine-${type}-ideal`),
+                    maximum: document.getElementById(`chlorine-${type}-maximum`),
+                    high: document.getElementById(`chlorine-${type}-high`),
+                    veryHigh: document.getElementById(`chlorine-${type}-very-high`)
                 };
 
-                this.submissions.unshift(submission);
-                localStorage.setItem('hanover_submissions', JSON.stringify(this.submissions));
+                // Hide all indicators first
+                Object.values(elements).forEach(el => el.style.display = 'none');
 
-                this.showAlert('success', `Submission for ${this.currentSupply.name} recorded successfully!`);
-                this.reset();
-                this.loadSubmissions();
+                if (!rangeValue) return;
+
+                const numericValue = this.parseRangeValue(rangeValue);
+                const isTreatmentSite = this.currentSupply && this.currentSupply.type === 'treated';
+
+                // Apply different logic for treatment sites (2.0-2.5 ideal)
+                if (isTreatmentSite && numericValue >= 2.0 && numericValue <= 2.5) {
+                    elements.ideal.style.display = 'block';
+                } else if (numericValue === 0 || (numericValue >= 0.1 && numericValue <= 0.4)) {
+                    // 0, 0.1-0.4: low, action needed
+                    elements.warning.style.display = 'block';
+                } else if (numericValue >= 0.5 && numericValue <= 1.5) {
+                    // 0.5-1.5: ideal level
+                    elements.ideal.style.display = 'block';
+                } else if (numericValue >= 1.6 && numericValue <= 2.0) {
+                    // 1.6-2.0: maximum level
+                    elements.maximum.style.display = 'block';
+                } else if (numericValue >= 2.1 && numericValue <= 2.4) {
+                    // 2.1-2.4: high level--adjust chlorine dosage
+                    elements.high.style.display = 'block';
+                } else if (numericValue >= 2.5 && (numericValue <= 3.0 || rangeValue === '>3.5')) {
+                    // 2.5-3.0, >3.5: very high level --> adjust chlorine dosage
+                    elements.veryHigh.style.display = 'block';
+                }
+            }
+
+            parseRangeValue(rangeStr) {
+                // Parse range strings like "<0.2", "0.5", ">3.5" to numeric values
+                if (rangeStr.includes('<')) {
+                    return parseFloat(rangeStr.replace('<', '')) - 0.01; // Slightly below the threshold
+                } else if (rangeStr === '>3.5') {
+                    return 4.0; // Represent >3.5 as a high value for comparison
+                } else if (rangeStr.includes('>')) {
+                    return parseFloat(rangeStr.replace('>', '')) + 0.01; // Slightly above the threshold
+                } else {
+                    return parseFloat(rangeStr);
+                }
+            }
+
+            handleBacteriologicalChange() {
+                const positiveValue = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const urgentIcon = document.getElementById('urgent-icon');
+                const organismDropdown = document.getElementById('isolated-organism');
+
+                if (positiveValue > 0) {
+                    urgentIcon.style.display = 'inline';
+                    organismDropdown.style.display = 'inline';
+                } else {
+                    urgentIcon.style.display = 'none';
+                    organismDropdown.style.display = 'none';
+                    organismDropdown.value = '';
+                }
+            }
+
+            async submit(e) {
+                e.preventDefault();
+
+                // Find the database supply ID by name
+                const dbSupplyId = this.findSupplyId(this.currentSupply.name);
+                if (!dbSupplyId) {
+                    this.showAlert('error', 'Could not find supply in database. Please try again.');
+                    return;
+                }
+
+                const data = {
+                    supply_id: dbSupplyId,
+                    visits: parseInt(document.getElementById('visits').value) || 0,
+                    chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
+                    chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
+                    chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
+                    chlorine_positive_range: document.getElementById('chlorine-positive-range').value || '',
+                    chlorine_negative_range: document.getElementById('chlorine-negative-range').value || '',
+                    bacteriological_positive: parseInt(document.getElementById('bacteriological-positive').value) || 0,
+                    bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
+                    bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
+                    isolated_organism: document.getElementById('isolated-organism').value || '',
+                    remarks: document.getElementById('remarks').value || '',
+                    facility_type: document.getElementById('facility-type').value || ''
+                };
+
+                try {
+                    const response = await fetch('/api/submit-inspection', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showAlert('success', `Submission for ${this.currentSupply.name} recorded successfully!`);
+                        this.reset();
+                        this.loadSubmissions();
+                    } else {
+                        this.showAlert('error', result.error || 'Submission failed');
+                    }
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    this.showAlert('error', 'Failed to submit inspection. Please try again.');
+                }
             }
 
             reset() {
                 document.getElementById('submission-form').reset();
                 document.getElementById('supply').value = '';
+                document.getElementById('facility-type').value = '';
                 document.getElementById('submission-form-section').classList.add('hidden');
+                document.getElementById('facility-type-group').classList.add('hidden');
                 this.setToday();
             }
 
-            loadSubmissions() {
-                this.displaySubmissions(this.submissions);
+            async loadSubmissions() {
+                try {
+                    const response = await fetch('/api/my-submissions');
+                    const submissions = await response.json();
+                    this.displaySubmissions(submissions);
+                } catch (error) {
+                    console.error('Failed to load submissions:', error);
+                    this.displaySubmissions([]);
+                }
             }
 
             displaySubmissions(submissions = []) {
@@ -400,24 +916,54 @@
                             <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
                         </div>
                         <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
-                            ${s.agency} • ${s.visits} visit(s) • ${s.type} • ${s.location}
+                            ${s.agency}${s.facility_type ? ` (${s.facility_type})` : ''} • ${s.visits} visit(s) • ${s.type}
                         </p>
                         ${s.type === 'treated' ? `
                         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;">
-                            <div style="color:var(--negative-color);">Low: ${s.chlorine_low}</div>
-                            <div style="color:var(--positive-color);">Ideal: ${s.chlorine_ideal}</div>
-                            <div style="color:#fd7e14;">High: ${s.chlorine_high}</div>
+                            <div>Total: ${s.chlorine_total}</div>
+                            <div style="color:var(--positive-color);">Positive: ${s.chlorine_positive}</div>
+                            <div style="color:var(--negative-color);">Negative: ${s.chlorine_negative}</div>
                         </div>
                         ` : '<div style="font-style:italic;color:#666;">Untreated supply - no chlorine testing</div>'}
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;margin-top:0.5rem;">
+                            <div style="color:var(--positive-color);">B+: ${s.bacteriological_positive}${s.isolated_organism ? ` (${s.isolated_organism})` : ''}</div>
+                            <div style="color:var(--negative-color);">B-: ${s.bacteriological_negative}</div>
+                            <div style="color:#ffc107;">B Pending: ${s.bacteriological_pending}</div>
+                        </div>
                         ${s.remarks ? `<p style="margin-top:0.5rem;font-size:13px;color:#666;"><strong>Remarks:</strong> ${s.remarks}</p>` : ''}
                     </div>
                 `).join('');
             }
 
             showAlert(type, msg) {
-                const container = document.getElementById('alert-container');
-                container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-                setTimeout(() => container.innerHTML = '', 5000);
+                if (type === 'success') {
+                    // Use water modal for success messages
+                    this.showWaterModal(msg);
+                } else {
+                    // Use regular alert for errors
+                    const container = document.getElementById('alert-container');
+                    container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+                    setTimeout(() => container.innerHTML = '', 5000);
+                }
+            }
+
+            showWaterModal(message) {
+                const modal = document.getElementById('waterModal');
+                const messageElement = document.getElementById('waterModalMessage');
+
+                // Customize message based on supply
+                const supplyName = this.currentSupply ? this.currentSupply.name : 'this water supply';
+                const customMessage = `Water quality inspection for ${supplyName} has been successfully submitted!`;
+                messageElement.textContent = customMessage;
+
+                modal.style.display = 'block';
+
+                // Modal stays open until user clicks "Continue Inspecting"
+            }
+
+            closeWaterModal() {
+                const modal = document.getElementById('waterModal');
+                modal.style.display = 'none';
             }
 
             toggleTheme() {
@@ -429,16 +975,23 @@
             }
         }
 
+        let dashboardInstance = null;
+
         function incrementVisits() {
             const input = document.getElementById('visits');
             input.value = parseInt(input.value) + 1;
+        }
+
+        function closeWaterModal() {
+            const modal = document.getElementById('waterModal');
+            modal.style.display = 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-            new HanoverDashboard();
+            dashboardInstance = new HanoverDashboard();
         });
     </script>
 </body>

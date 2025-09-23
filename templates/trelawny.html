@@ -181,9 +181,219 @@
             color: #ffffff !important;
             border: 2px solid #444 !important;
         }
+
+        /* Water-themed Success Modal */
+        .water-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 123, 191, 0.15);
+            backdrop-filter: blur(3px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .water-modal-content {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 123, 191, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        .water-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .water-modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: waterShimmer 3s ease-in-out infinite;
+        }
+
+        .water-modal-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: waterDrop 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-modal-body {
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            position: relative;
+        }
+
+        .water-modal-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
+            animation: waterFlow 2s linear infinite;
+        }
+
+        .water-message {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .water-submessage {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .water-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .water-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .water-drops {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .water-drop {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+            border-radius: 50%;
+            animation: dropFall 3s linear infinite;
+        }
+
+        .water-drop:nth-child(1) { left: 10%; animation-delay: 0s; width: 8px; height: 8px; }
+        .water-drop:nth-child(2) { left: 30%; animation-delay: 0.5s; width: 12px; height: 12px; }
+        .water-drop:nth-child(3) { left: 50%; animation-delay: 1s; width: 6px; height: 6px; }
+        .water-drop:nth-child(4) { left: 70%; animation-delay: 1.5s; width: 10px; height: 10px; }
+        .water-drop:nth-child(5) { left: 90%; animation-delay: 2s; width: 8px; height: 8px; }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes waterDrop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes waterShimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes waterFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes dropFall {
+            0% {
+                top: -20px;
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Water-themed Success Modal -->
+    <div id="waterModal" class="water-modal">
+        <div class="water-modal-content">
+            <div class="water-modal-header">
+                <div class="water-drops">
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                </div>
+                <span class="water-icon">💧</span>
+                <h2>Thank You, Inspector!</h2>
+            </div>
+            <div class="water-modal-body">
+                <div class="water-message" id="waterModalMessage">
+                    Your water quality inspection has been successfully submitted!
+                </div>
+                <div class="water-submessage">
+                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work! 🌊
+                </div>
+                <button class="water-close-btn" onclick="closeWaterModal()">
+                    Continue Inspecting
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1>Trelawny Inspector Dashboard</h1>
         <div>
@@ -383,91 +593,71 @@
     </div>
 
     <script>
-        const TRELAWNY_SUPPLIES = [
-            {id:1,name:"New Martha Brae Plant #1",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:2,name:"New Martha Brae Plant #2",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:3,name:"Old Martha Brae",agency:"NWC",type:"treated",sample_point:"Stand pipe @ Coopers Pen"},
-            {id:4,name:"Wakefield #1",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:5,name:"Wakefield #3",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:6,name:"Wakefield #4",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:7,name:"Sherwood Content",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:8,name:"Clark's Town",agency:"NWC",type:"treated",sample_point:"Tap @ Mn. Rd. Kinloss"},
-            {id:9,name:"Duanvale",agency:"NWC",type:"treated",sample_point:"Tap adj. Comm. Centre"},
-            {id:10,name:"Barnstaple",agency:"NWC",type:"treated",sample_point:"Plant"},
-            {id:11,name:"Dornoch",agency:"NWC",type:"treated",sample_point:"Stand pipe in Calabar"},
-            {id:12,name:"Ettingdon",agency:"NWC",type:"treated",sample_point:"Tap @ Brian's Slaughterplace"},
-            {id:13,name:"Ulster Spring/Freeman's Hall",agency:"NWC",type:"treated",sample_point:"Tap opp. Old Library"},
-            {id:14,name:"Troy",agency:"NWC",type:"treated",sample_point:"Tap @ Troy Square"},
-            {id:15,name:"Wilson's Run",agency:"NWC",type:"treated",sample_point:"Tap @ Base of Hill"},
-            {id:16,name:"Mahogany Hall",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:17,name:"Sawyers RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:18,name:"Burke RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:19,name:"Alps RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:20,name:"Lorrimer's RWCT",agency:"PC",type:"untreated",sample_point:"Plant (UNTREATED)"},
-            {id:21,name:"Wilson's Run RWCT",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:22,name:"Huie",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:23,name:"Stettin",agency:"PC",type:"treated",sample_point:"Tap adj. Hardware Store"},
-            {id:24,name:"John Daggie",agency:"PC",type:"treated",sample_point:"Tap @ storage tank"},
-            {id:25,name:"Campbell's Spring",agency:"PC",type:"treated",sample_point:"Plant"},
-            {id:26,name:"Gager/Spring Garden",agency:"PC",type:"treated",sample_point:"Tap opp. Pingue's Place"},
-            {id:27,name:"Freemans Hall",agency:"PC",type:"treated",sample_point:"Not specified"},
-            {id:28,name:"Stewart Town",agency:"PC",type:"treated",sample_point:"Not specified"},
-            {id:29,name:"Lobster Bowl",agency:"PT",type:"treated",sample_point:"Kitchen"},
-            {id:30,name:"Rafters Village",agency:"PT",type:"treated",sample_point:"Tap @ Bar"},
-            {id:31,name:"Good Hope/Chukka",agency:"PT",type:"treated",sample_point:"Tap @ Bar"},
-            {id:32,name:"Tank-Weld",agency:"PT",type:"treated",sample_point:"Tap @ Roundabout"},
-            {id:33,name:"Braco Resort",agency:"PT",type:"treated",sample_point:"Not specified"},
-            {id:34,name:"Ocean Coral Spring Hotel",agency:"PT",type:"treated",sample_point:"Not specified"},
-            {id:35,name:"Bamboo Beach",agency:"PT",type:"treated",sample_point:"Not specified"},
-            {id:36,name:"Rio Bueno Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
-            {id:37,name:"Sherwood Content Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
-            {id:38,name:"Ulster Spring",agency:"MOH",type:"treated",sample_point:"Not specified"},
-            {id:39,name:"Albert Town Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
-            {id:40,name:"Rock Spring Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
-            {id:41,name:"Warsop Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"},
-            {id:42,name:"Wait-A-Bit Health Centre",agency:"MOH",type:"treated",sample_point:"Tap @ Health Centre"}
-        ];
 
         class TrelawnyDashboard {
             constructor() {
-                this.supplies = TRELAWNY_SUPPLIES;
+                this.supplies = [];
                 this.currentSupply = null;
                 this.submissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
                 this.init();
             }
 
-            init() {
+            async init() {
+                await this.loadSupplies();
                 this.populateDropdown();
                 this.setupEvents();
                 this.setToday();
                 this.loadSubmissions();
             }
 
-            async findSupplyId(supplyName) {
+            async loadSupplies() {
                 try {
                     const response = await fetch('/api/supplies');
-                    const supplies = await response.json();
-                    const supply = supplies.find(s => s.name === supplyName);
-                    return supply ? supply.id : null;
+                    const allSupplies = await response.json();
+                    // Filter for Trelawny parish supplies only
+                    this.supplies = allSupplies.filter(s => s.parish === 'Trelawny');
+                    console.log('Loaded Trelawny supplies:', this.supplies.length);
                 } catch (error) {
-                    console.error('Failed to find supply ID:', error);
-                    return null;
+                    console.error('Failed to load supplies:', error);
+                    this.supplies = [];
                 }
+            }
+
+            findSupplyId(supplyName) {
+                const supply = this.supplies.find(s => s.name === supplyName);
+                return supply ? supply.id : null;
             }
 
             populateDropdown() {
                 const select = document.getElementById('supply');
-                const agencies = {'NWC':'National Water Commission','PC':'Parish Council','PT':'Private','MOH':'Ministry of Health'};
 
-                Object.keys(agencies).forEach(code => {
-                    const supplies = this.supplies.filter(s => s.agency === code);
+                // Clear existing options except the default
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+
+                // Get unique agencies from the supplies
+                const agencyMap = {
+                    'NWC': 'National Water Commission',
+                    'PC': 'Parish Council',
+                    'PT': 'Private',
+                    'MOH': 'Ministry of Health',
+                    'HMC': 'Hanover Municipal Corporation',
+                    'Private': 'Private Sector'
+                };
+
+                // Group supplies by agency
+                const agenciesFound = [...new Set(this.supplies.map(s => s.agency))];
+
+                agenciesFound.forEach(agencyCode => {
+                    const supplies = this.supplies.filter(s => s.agency === agencyCode);
                     if (supplies.length) {
                         const group = document.createElement('optgroup');
-                        group.label = agencies[code];
+                        group.label = agencyMap[agencyCode] || agencyCode;
                         supplies.forEach(s => {
                             const opt = document.createElement('option');
                             opt.value = s.id;
-                            opt.textContent = `${s.name} (${s.type})`;
+                            opt.textContent = `${s.name} (${s.type || 'treated'})`;
                             group.appendChild(opt);
                         });
                         select.appendChild(group);
@@ -647,7 +837,7 @@
                 e.preventDefault();
 
                 // Find the database supply ID by name
-                const dbSupplyId = await this.findSupplyId(this.currentSupply.name);
+                const dbSupplyId = this.findSupplyId(this.currentSupply.name);
                 if (!dbSupplyId) {
                     this.showAlert('error', 'Could not find supply in database. Please try again.');
                     return;
@@ -744,9 +934,34 @@
             }
 
             showAlert(type, msg) {
-                const container = document.getElementById('alert-container');
-                container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-                setTimeout(() => container.innerHTML = '', 5000);
+                if (type === 'success') {
+                    // Use water modal for success messages
+                    this.showWaterModal(msg);
+                } else {
+                    // Use regular alert for errors
+                    const container = document.getElementById('alert-container');
+                    container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+                    setTimeout(() => container.innerHTML = '', 5000);
+                }
+            }
+
+            showWaterModal(message) {
+                const modal = document.getElementById('waterModal');
+                const messageElement = document.getElementById('waterModalMessage');
+
+                // Customize message based on supply
+                const supplyName = this.currentSupply ? this.currentSupply.name : 'this water supply';
+                const customMessage = `Water quality inspection for ${supplyName} has been successfully submitted!`;
+                messageElement.textContent = customMessage;
+
+                modal.style.display = 'block';
+
+                // Modal stays open until user clicks "Continue Inspecting"
+            }
+
+            closeWaterModal() {
+                const modal = document.getElementById('waterModal');
+                modal.style.display = 'none';
             }
 
             toggleTheme() {
@@ -758,16 +973,23 @@
             }
         }
 
+        let dashboardInstance = null;
+
         function incrementVisits() {
             const input = document.getElementById('visits');
             input.value = parseInt(input.value) + 1;
+        }
+
+        function closeWaterModal() {
+            const modal = document.getElementById('waterModal');
+            modal.style.display = 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-            new TrelawnyDashboard();
+            dashboardInstance = new TrelawnyDashboard();
         });
     </script>
 </body>

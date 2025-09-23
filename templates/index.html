@@ -953,9 +953,222 @@
         .filter-tab:hover:not(.active) {
             background: #f8f9fa;
         }
+
+        /* Water-themed Success Modal */
+        .water-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 123, 191, 0.15);
+            backdrop-filter: blur(3px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .water-modal-content {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin: 10% auto;
+            padding: 0;
+            border: none;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 123, 191, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        .water-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .water-modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: waterShimmer 3s ease-in-out infinite;
+        }
+
+        .water-modal-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: waterDrop 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        .water-modal-body {
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            position: relative;
+        }
+
+        .water-modal-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
+            animation: waterFlow 2s linear infinite;
+        }
+
+        .water-message {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .water-submessage {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .water-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .water-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .water-drops {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .water-drop {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+            border-radius: 50%;
+            animation: dropFall 3s linear infinite;
+        }
+
+        .water-drop:nth-child(1) { left: 10%; animation-delay: 0s; width: 8px; height: 8px; }
+        .water-drop:nth-child(2) { left: 30%; animation-delay: 0.5s; width: 12px; height: 12px; }
+        .water-drop:nth-child(3) { left: 50%; animation-delay: 1s; width: 6px; height: 6px; }
+        .water-drop:nth-child(4) { left: 70%; animation-delay: 1.5s; width: 10px; height: 10px; }
+        .water-drop:nth-child(5) { left: 90%; animation-delay: 2s; width: 8px; height: 8px; }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes waterDrop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes waterShimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes waterFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes dropFall {
+            0% {
+                top: -20px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Water-themed Success Modal -->
+    <div id="waterModal" class="water-modal">
+        <div class="water-modal-content">
+            <div class="water-modal-header">
+                <div class="water-drops">
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                    <div class="water-drop"></div>
+                </div>
+                <span class="water-icon">💧</span>
+                <h2>Thank You, Inspector!</h2>
+            </div>
+            <div class="water-modal-body">
+                <div class="water-message" id="waterModalMessage">
+                    Your water quality inspection has been successfully submitted!
+                </div>
+                <div class="water-submessage">
+                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work! 🌊
+                </div>
+                <button class="water-close-btn" onclick="closeWaterModal()">
+                    Continue Inspecting
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1>Westmoreland Inspector Dashboard</h1>
         <div class="user-info">
@@ -1959,22 +2172,32 @@
             }
 
             showAlert(type, message) {
-                const alertContainer = document.getElementById('alert-container');
-                const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+                if (type === 'success') {
+                    // Use water modal for success messages
+                    const waterModal = document.getElementById('waterModal');
+                    const waterModalMessage = document.getElementById('waterModalMessage');
+                    waterModalMessage.textContent = message;
+                    waterModal.style.display = 'flex';
+                    // Modal stays open until user clicks "Continue Inspecting"
+                } else {
+                    // Use regular alert for error messages
+                    const alertContainer = document.getElementById('alert-container');
+                    const alertClass = 'alert-error';
 
-                alertContainer.innerHTML = `
-                    <div class="alert ${alertClass}">
-                        ${message}
-                    </div>
-                `;
+                    alertContainer.innerHTML = `
+                        <div class="alert ${alertClass}">
+                            ${message}
+                        </div>
+                    `;
 
-                // Auto-hide alert after 5 seconds
-                setTimeout(() => {
-                    alertContainer.innerHTML = '';
-                }, 5000);
+                    // Auto-hide alert after 5 seconds
+                    setTimeout(() => {
+                        alertContainer.innerHTML = '';
+                    }, 5000);
 
-                // Scroll to top to show alert
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Scroll to top to show alert
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
 
             formatDateTime(dateString) {
@@ -2674,6 +2897,11 @@
 
         function closeTasksModal() {
             const modal = document.getElementById('tasksModal');
+            modal.style.display = 'none';
+        }
+
+        function closeWaterModal() {
+            const modal = document.getElementById('waterModal');
             modal.style.display = 'none';
         }
 

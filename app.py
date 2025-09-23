@@ -342,21 +342,28 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    # Redirect users to their parish-specific dashboard
+    # Route based on user role and parish
+    user_role = session.get('role')
     user_parish = session.get('parish', 'Westmoreland')
 
-    if user_parish == 'Trelawny':
-        return redirect(url_for('trelawny'))
-    elif user_parish == 'Hanover':
-        return redirect(url_for('hanover'))
-    elif user_parish == 'Westmoreland':
-        if session['role'] == 'inspector':
+    # All admins go to the same admin dashboard regardless of parish
+    if user_role == 'admin':
+        return render_template('admin.html')
+
+    # Inspectors go to their parish-specific dashboard
+    elif user_role == 'inspector':
+        if user_parish == 'Trelawny':
+            return render_template('trelawny.html')
+        elif user_parish == 'Hanover':
+            return render_template('hanover.html')
+        elif user_parish == 'Westmoreland':
             return render_template('index.html')
-        elif session['role'] == 'admin':
-            return render_template('admin.html')
-    else:
-        # Fallback for unsupported parishes
-        return redirect(url_for('login'))
+        else:
+            # Fallback for unsupported parishes
+            return redirect(url_for('login'))
+
+    # Fallback for unknown roles
+    return redirect(url_for('login'))
 
 @app.route('/inspector')
 def inspector():
@@ -375,9 +382,11 @@ def trelawny():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    # Only allow Trelawny users to access this dashboard
+    # Only allow Trelawny inspectors or any admin to access this dashboard
     user_parish = session.get('parish', 'Westmoreland')
-    if user_parish != 'Trelawny':
+    user_role = session.get('role')
+
+    if user_role != 'admin' and user_parish != 'Trelawny':
         return redirect(url_for('index'))
 
     return render_template('trelawny.html')
@@ -387,9 +396,11 @@ def hanover():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    # Only allow Hanover users to access this dashboard
+    # Only allow Hanover inspectors or any admin to access this dashboard
     user_parish = session.get('parish', 'Westmoreland')
-    if user_parish != 'Hanover':
+    user_role = session.get('role')
+
+    if user_role != 'admin' and user_parish != 'Hanover':
         return redirect(url_for('index'))
 
     return render_template('hanover.html')
@@ -889,11 +900,8 @@ def login():
 
                 const result = await response.json();
                 if (result.success) {
-                    if (result.role === 'inspector') {
-                        window.location.href = '/inspector';
-                    } else if (result.role === 'admin') {
-                        window.location.href = '/admin';
-                    }
+                    // Redirect to index route which will automatically route to correct dashboard
+                    window.location.href = '/';
                 } else {
                     document.getElementById('alert').style.display = 'block';
                     document.getElementById('alert').textContent = result.message;
