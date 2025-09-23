@@ -963,53 +963,108 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
-            backdrop-filter: blur(3px);
-            animation: modalFadeIn 0.3s ease-out;
+            background: radial-gradient(ellipse at center, rgba(6, 19, 35, 0.95) 0%, rgba(0, 5, 15, 0.98) 100%);
+            backdrop-filter: blur(12px);
+            animation: modalFadeIn 0.6s ease-out;
             overflow: hidden;
         }
 
         .water-modal-content {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            margin: 10% auto;
+            background: linear-gradient(135deg,
+                rgba(15, 30, 55, 0.95) 0%,
+                rgba(25, 40, 65, 0.9) 50%,
+                rgba(35, 50, 75, 0.95) 100%);
+            margin: 2% auto;
             padding: 0;
-            border: none;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 123, 191, 0.3);
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 30px;
+            width: 95%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow:
+                0 30px 60px rgba(0, 100, 200, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(0, 150, 255, 0.2);
             position: relative;
-            overflow: hidden;
-            animation: modalSlideIn 0.4s ease-out;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 150, 255, 0.5) transparent;
+            animation: modalSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .water-modal-content::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg,
+                transparent,
+                rgba(0, 150, 255, 0.5),
+                rgba(0, 200, 255, 0.7),
+                rgba(0, 150, 255, 0.5),
+                transparent);
+            border-radius: 30px;
+            animation: borderFlow 4s linear infinite;
+            z-index: -1;
         }
 
         .water-modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
+            background: linear-gradient(135deg,
+                rgba(0, 120, 255, 0.9) 0%,
+                rgba(0, 80, 200, 0.95) 50%,
+                rgba(0, 60, 150, 0.9) 100%);
+            padding: 3rem 2rem;
             text-align: center;
             position: relative;
             overflow: hidden;
+            border-bottom: 2px solid rgba(0, 150, 255, 0.3);
         }
 
         .water-modal-header::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: waterShimmer 3s ease-in-out infinite;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent);
+            animation: headerScan 5s ease-in-out infinite;
+        }
+
+        .water-modal-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(0, 200, 255, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 180, 255, 0.2) 0%, transparent 70%);
+            animation: particleFloat 8s ease-in-out infinite;
         }
 
         .water-modal-header h2 {
-            color: white;
+            color: #ffffff;
             margin: 0;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.4rem;
+            font-weight: 300;
+            text-shadow:
+                0 0 20px rgba(0, 150, 255, 0.6),
+                0 0 40px rgba(0, 200, 255, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.3);
             position: relative;
-            z-index: 2;
+            z-index: 3;
+            letter-spacing: 2px;
+            font-family: 'Segoe UI', sans-serif;
+            text-transform: uppercase;
         }
 
         .water-icon {
@@ -1022,10 +1077,14 @@
         }
 
         .water-modal-body {
-            padding: 2rem;
+            padding: 3rem 2.5rem;
             text-align: center;
-            background: white;
+            background: linear-gradient(135deg,
+                rgba(15, 25, 40, 0.95) 0%,
+                rgba(20, 30, 45, 0.9) 100%);
             position: relative;
+            color: #ffffff;
+            border-radius: 0 0 30px 30px;
         }
 
         .water-modal-body::before {
@@ -1034,36 +1093,302 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
-            animation: waterFlow 2s linear infinite;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 150, 255, 0.03) 2px,
+                    rgba(0, 150, 255, 0.03) 4px
+                );
+            animation: scanLines 3s linear infinite;
         }
 
         .water-message {
-            font-size: 1.2rem;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: #e8f4f8;
+            text-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
         }
 
         .water-submessage {
-            font-size: 1rem;
-            color: #7f8c8d;
-            margin-bottom: 2rem;
-            line-height: 1.5;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .analysis-item {
+            background: linear-gradient(135deg,
+                rgba(0, 150, 255, 0.15) 0%,
+                rgba(0, 100, 200, 0.1) 100%);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analysis-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                rgba(0, 150, 255, 0.1),
+                transparent
+            );
+            animation: hologramRotate 6s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .analysis-item:hover::before {
+            opacity: 1;
+        }
+
+        .analysis-item:hover {
+            border-color: rgba(0, 150, 255, 0.6);
+            box-shadow:
+                0 8px 25px rgba(0, 150, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .analysis-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #00e5ff;
+            text-shadow:
+                0 0 15px rgba(0, 229, 255, 0.5),
+                0 0 30px rgba(0, 200, 255, 0.3);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+            word-wrap: break-word;
+            text-align: center;
+        }
+
+        .status-success {
+            color: #00ff88 !important;
+            text-shadow:
+                0 0 15px rgba(0, 255, 136, 0.6),
+                0 0 30px rgba(0, 200, 100, 0.4) !important;
+        }
+
+        .status-verified {
+            color: #ffd700 !important;
+            text-shadow:
+                0 0 15px rgba(255, 215, 0, 0.6),
+                0 0 30px rgba(255, 193, 7, 0.4) !important;
+        }
+
+        .analysis-summary {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(10, 25, 45, 0.6);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.5rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .summary-value {
+            font-size: 0.9rem;
+            color: #00e5ff;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+        }
+
+        .header-particles .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00e5ff;
+            border-radius: 50%;
+            animation: particleFloat 4s infinite linear;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+        }
+
+        .header-particles .particle:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .header-particles .particle:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation-delay: 1s;
+        }
+
+        .header-particles .particle:nth-child(3) {
+            top: 40%;
+            left: 60%;
+            animation-delay: 2s;
+        }
+
+        .header-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+            animation: headerScan 3s infinite;
+        }
+
+        .header-status {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
+
+        .tech-button {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #00e5ff !important;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 150, 255, 0.4)) !important;
+            color: #ffffff !important;
+            padding: 1.2rem 2.5rem !important;
+            font-size: 1.1rem !important;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px !important;
+            margin-top: 1.5rem;
+            width: auto;
+            max-width: none;
+            display: inline-block;
+            z-index: 10;
+        }
+
+        .tech-button:hover {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(0, 150, 255, 0.6)) !important;
+            box-shadow:
+                0 0 25px rgba(0, 229, 255, 0.6),
+                inset 0 0 20px rgba(0, 229, 255, 0.2) !important;
+            transform: scale(1.05) translateY(-2px);
+            border-color: #00f5ff !important;
+        }
+
+        .button-text {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+            display: inline-block;
+        }
+
+        .button-scan {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
+            animation: scanLines 2s infinite;
+        }
+
+        .analysis-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            line-height: 1.2;
         }
 
         .water-close-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg,
+                rgba(0, 150, 255, 0.8) 0%,
+                rgba(0, 100, 200, 0.9) 100%);
+            border: 2px solid rgba(0, 150, 255, 0.5);
             color: white;
-            border: none;
-            padding: 12px 30px;
+            padding: 1rem 2.5rem;
             border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+            margin-top: 1.5rem;
+        }
+
+        .water-close-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent);
+            transition: left 0.5s ease;
+        }
+
+        .water-close-btn:hover::before {
+            left: 100%;
+        }
+
+        .water-close-btn:hover {
+            box-shadow:
+                0 5px 20px rgba(0, 150, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .water-close-btn:hover {
@@ -1130,6 +1455,46 @@
             100% { transform: translateX(100%); }
         }
 
+        @keyframes borderFlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: -100%; }
+        }
+
+        @keyframes particleFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translate(10px, -5px) scale(1.1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-5px, -10px) scale(0.9);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translate(-10px, 5px) scale(1.05);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes scanLines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        @keyframes hologramRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @keyframes bubbleRise {
             0% {
                 bottom: -30px;
@@ -1158,31 +1523,60 @@
     <div id="waterModal" class="water-modal">
         <div class="water-modal-content">
             <div class="water-modal-header">
-                <div class="ocean-bubbles">
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
+                <div class="header-particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
                 </div>
-                <span class="water-icon">🌊</span>
-                <h2>Thank You, Inspector!</h2>
+                <div class="header-scanline"></div>
+                <h2>WATER ANALYSIS COMPLETE</h2>
+                <div class="header-status">SYSTEM STATUS: OPERATIONAL</div>
             </div>
             <div class="water-modal-body">
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <div class="analysis-label">INSPECTION STATUS</div>
+                        <div class="analysis-value status-success">SUBMITTED</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">DATA INTEGRITY</div>
+                        <div class="analysis-value status-verified">VERIFIED</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">TIMESTAMP</div>
+                        <div class="analysis-value" id="analysis-timestamp">--:--:--</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-label">TRANSMISSION</div>
+                        <div class="analysis-value status-success">SUCCESSFUL</div>
+                    </div>
+                </div>
+
                 <div class="water-message" id="waterModalMessage">
-                    Your water quality inspection has been successfully submitted!
+                    INSPECTION DATA SUCCESSFULLY TRANSMITTED TO CENTRAL DATABASE
                 </div>
-                <div class="water-submessage">
-                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work! 🌊
+
+                <div class="analysis-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">CHLORINE ANALYSIS:</span>
+                        <span class="summary-value" id="chlorine-summary">PROCESSED</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">BACTERIOLOGICAL:</span>
+                        <span class="summary-value" id="bacteria-summary">PROCESSED</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">SUPPLY STATUS:</span>
+                        <span class="summary-value" id="supply-summary">MONITORED</span>
+                    </div>
                 </div>
-                <button class="water-close-btn" onclick="closeWaterModal()">
-                    Continue Inspecting
-                </button>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="water-close-btn tech-button" onclick="closeWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(0, 229, 255, 0.5) !important;">
+                        <span class="button-text">CONTINUE TO DASHBOARD</span>
+                        <div class="button-scan"></div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2189,14 +2583,65 @@
                 `).join('');
             }
 
+            showFuturisticWaterModal(message) {
+                const waterModal = document.getElementById('waterModal');
+                const waterModalMessage = document.getElementById('waterModalMessage');
+
+                // Set timestamp
+                const now = new Date();
+                const timestamp = now.toLocaleTimeString('en-US', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('analysis-timestamp').textContent = timestamp;
+
+                // Get form data for analysis summary
+                const chlorinePositive = parseInt(document.getElementById('chlorine-positive').value) || 0;
+                const chlorineNegative = parseInt(document.getElementById('chlorine-negative').value) || 0;
+                const bacteriaPositive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const bacteriaNegative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
+
+                // Update chlorine analysis summary
+                const chlorineTotal = chlorinePositive + chlorineNegative;
+                let chlorineSummary = 'NO DATA';
+                if (chlorineTotal > 0) {
+                    if (this.currentSupply && this.currentSupply.type === 'treated') {
+                        chlorineSummary = `${chlorineTotal} SAMPLES ANALYZED`;
+                    } else {
+                        chlorineSummary = 'N/A - UNTREATED SUPPLY';
+                    }
+                }
+                document.getElementById('chlorine-summary').textContent = chlorineSummary;
+
+                // Update bacteria analysis summary
+                const bacteriaTotal = bacteriaPositive + bacteriaNegative;
+                let bacteriaSummary = 'NO DATA';
+                if (bacteriaTotal > 0) {
+                    if (bacteriaPositive > 0) {
+                        bacteriaSummary = `${bacteriaTotal} SAMPLES - ${bacteriaPositive} POSITIVE DETECTED`;
+                    } else {
+                        bacteriaSummary = `${bacteriaTotal} SAMPLES - ALL NEGATIVE`;
+                    }
+                }
+                document.getElementById('bacteria-summary').textContent = bacteriaSummary;
+
+                // Update supply status
+                const supplyName = this.currentSupply ? this.currentSupply.name : 'UNKNOWN';
+                document.getElementById('supply-summary').textContent = `${supplyName} - ACTIVE`;
+
+                // Set main message
+                waterModalMessage.textContent = 'INSPECTION DATA SUCCESSFULLY TRANSMITTED TO CENTRAL DATABASE';
+
+                // Show modal
+                waterModal.style.display = 'flex';
+            }
+
             showAlert(type, message) {
                 if (type === 'success') {
-                    // Use water modal for success messages
-                    const waterModal = document.getElementById('waterModal');
-                    const waterModalMessage = document.getElementById('waterModalMessage');
-                    waterModalMessage.textContent = message;
-                    waterModal.style.display = 'flex';
-                    // Modal stays open until user clicks "Continue Inspecting"
+                    // Use water modal for success messages with futuristic data
+                    this.showFuturisticWaterModal(message);
                 } else {
                     // Use regular alert for error messages
                     const alertContainer = document.getElementById('alert-container');
@@ -2921,6 +3366,30 @@
         function closeWaterModal() {
             const modal = document.getElementById('waterModal');
             modal.style.display = 'none';
+        }
+
+        function closeWaterModalWithFade() {
+            const modal = document.getElementById('waterModal');
+            const container = document.querySelector('.container');
+
+            // Fade out modal
+            modal.style.transition = 'opacity 0.5s ease';
+            modal.style.opacity = '0';
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.style.opacity = '1';
+                modal.style.transition = '';
+
+                // Fade in dashboard
+                if (container) {
+                    container.style.opacity = '0.3';
+                    container.style.transition = 'opacity 0.8s ease';
+                    setTimeout(() => {
+                        container.style.opacity = '1';
+                    }, 100);
+                }
+            }, 500);
         }
 
         // Add event listener for the Assigned Tasks button

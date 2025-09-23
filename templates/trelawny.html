@@ -182,7 +182,7 @@
             border: 2px solid #444 !important;
         }
 
-        /* Water-themed Success Modal */
+        /* Futuristic Trelawny Water Modal */
         .water-modal {
             display: none;
             position: fixed;
@@ -191,85 +191,245 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
-            overflow: hidden;
-            backdrop-filter: blur(3px);
-            animation: modalFadeIn 0.3s ease-out;
+            background: radial-gradient(ellipse at center, rgba(35, 6, 45, 0.95) 0%, rgba(15, 0, 25, 0.98) 100%);
+            backdrop-filter: blur(12px);
+            animation: modalFadeIn 0.5s ease-out;
+            align-items: center;
+            justify-content: center;
         }
 
         .water-modal-content {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            margin: 10% auto;
-            padding: 0;
-            border: none;
-            border-radius: 20px;
+            background: linear-gradient(135deg,
+                rgba(55, 15, 75, 0.95) 0%,
+                rgba(65, 25, 85, 0.9) 50%,
+                rgba(75, 35, 95, 0.95) 100%);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: 15px;
             width: 90%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 123, 191, 0.3);
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
             position: relative;
-            overflow: hidden;
-            animation: modalSlideIn 0.4s ease-out;
+            animation: hologramRotate 3s ease-in-out infinite;
+            box-shadow:
+                0 0 50px rgba(147, 51, 234, 0.3),
+                inset 0 0 50px rgba(147, 51, 234, 0.1);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(147, 51, 234, 0.5) transparent;
+        }
+
+        .water-modal-content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.5), transparent);
+            border-radius: 15px;
+            z-index: -1;
+            animation: borderFlow 4s linear infinite;
         }
 
         .water-modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 2rem;
             text-align: center;
             position: relative;
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.8), rgba(147, 51, 234, 0.6));
+            border-bottom: 1px solid rgba(147, 51, 234, 0.3);
             overflow: hidden;
         }
 
-        .water-modal-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: waterShimmer 3s ease-in-out infinite;
-        }
-
         .water-modal-header h2 {
-            color: white;
+            color: #a855f7;
             margin: 0;
             font-size: 1.8rem;
             font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
             position: relative;
             z-index: 2;
-        }
-
-        .water-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-            animation: waterDrop 2s ease-in-out infinite;
-            position: relative;
-            z-index: 2;
+            letter-spacing: 2px;
         }
 
         .water-modal-body {
             padding: 2rem;
-            text-align: center;
-            background: white;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
             position: relative;
+            z-index: 2;
+            text-align: center;
         }
 
-        .water-modal-body::before {
+        .trelawny-analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .trelawny-analysis-item {
+            background: rgba(88, 28, 135, 0.4);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: 10px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .trelawny-analysis-item::before {
             content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.2), transparent);
+            animation: scanLines 3s infinite;
+        }
+
+        .trelawny-analysis-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #a855f7;
+            text-shadow:
+                0 0 15px rgba(168, 85, 247, 0.5),
+                0 0 30px rgba(147, 51, 234, 0.3);
+            margin-bottom: 0.3rem;
+            position: relative;
+            z-index: 2;
+            word-wrap: break-word;
+            text-align: center;
+            line-height: 1.2;
+            overflow-wrap: break-word;
+        }
+
+        .trelawny-status-success {
+            color: #f97316 !important;
+            text-shadow:
+                0 0 15px rgba(249, 115, 22, 0.6),
+                0 0 30px rgba(234, 88, 12, 0.4) !important;
+        }
+
+        .trelawny-status-verified {
+            color: #fbbf24 !important;
+            text-shadow:
+                0 0 15px rgba(251, 191, 36, 0.6),
+                0 0 30px rgba(245, 158, 11, 0.4) !important;
+        }
+
+        .trelawny-analysis-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 0.3rem;
+        }
+
+        .trelawny-header-particles .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #a855f7;
+            border-radius: 50%;
+            animation: particleFloat 4s infinite linear;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+        }
+
+        .trelawny-header-particles .particle:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .trelawny-header-particles .particle:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation-delay: 1s;
+        }
+
+        .trelawny-header-particles .particle:nth-child(3) {
+            top: 40%;
+            left: 60%;
+            animation-delay: 2s;
+        }
+
+        .trelawny-header-scanline {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 50%, #4facfe 100%);
-            animation: waterFlow 2s linear infinite;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #a855f7, transparent);
+            animation: headerScan 3s infinite;
+        }
+
+        .trelawny-tech-button {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #a855f7 !important;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.4)) !important;
+            color: #ffffff !important;
+            padding: 1.2rem 2.5rem !important;
+            font-size: 1.1rem !important;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px !important;
+            margin-top: 1.5rem;
+            width: auto;
+            max-width: none;
+            display: inline-block;
+            z-index: 10;
+        }
+
+        .trelawny-tech-button:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(147, 51, 234, 0.6)) !important;
+            box-shadow:
+                0 0 25px rgba(168, 85, 247, 0.6),
+                inset 0 0 20px rgba(168, 85, 247, 0.2) !important;
+            transform: scale(1.05) translateY(-2px);
+            border-color: #c084fc !important;
+        }
+
+        .trelawny-button-text {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+            display: inline-block;
+        }
+
+        .trelawny-button-scan {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+            animation: scanLines 2s infinite;
         }
 
         .water-message {
             font-size: 1.2rem;
-            color: #2c3e50;
+            color: #a855f7;
+            text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+            margin: 1rem 0;
             margin-bottom: 1rem;
             font-weight: 600;
         }
@@ -343,6 +503,36 @@
             }
         }
 
+        @keyframes borderFlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes headerScan {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            25% { transform: translateY(-20px) rotate(90deg); opacity: 0.8; }
+            50% { transform: translateY(-40px) rotate(180deg); opacity: 0.6; }
+            75% { transform: translateY(-20px) rotate(270deg); opacity: 0.8; }
+        }
+
+        @keyframes scanLines {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes hologramRotate {
+            0%, 100% { transform: perspective(800px) rotateY(0deg) rotateX(0deg); }
+            25% { transform: perspective(800px) rotateY(1deg) rotateX(0.5deg); }
+            50% { transform: perspective(800px) rotateY(0deg) rotateX(1deg); }
+            75% { transform: perspective(800px) rotateY(-1deg) rotateX(0.5deg); }
+        }
+
         @keyframes waterDrop {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -387,31 +577,48 @@
     <div id="waterModal" class="water-modal">
         <div class="water-modal-content">
             <div class="water-modal-header">
-                <div class="ocean-bubbles">
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
-                    <div class="bubble"></div>
+                <div class="trelawny-header-particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
                 </div>
-                <span class="water-icon">🌊</span>
+                <div class="trelawny-header-scanline"></div>
                 <h2>Thank You, Inspector!</h2>
             </div>
             <div class="water-modal-body">
+                <div class="trelawny-analysis-grid">
+                    <div class="trelawny-analysis-item">
+                        <div class="trelawny-analysis-label">INSPECTION STATUS</div>
+                        <div class="trelawny-analysis-value trelawny-status-success">SUBMITTED</div>
+                    </div>
+                    <div class="trelawny-analysis-item">
+                        <div class="trelawny-analysis-label">DATA INTEGRITY</div>
+                        <div class="trelawny-analysis-value trelawny-status-verified">VERIFIED</div>
+                    </div>
+                    <div class="trelawny-analysis-item">
+                        <div class="trelawny-analysis-label">TIMESTAMP</div>
+                        <div class="trelawny-analysis-value" id="trelawny-analysis-timestamp">--:--:--</div>
+                    </div>
+                    <div class="trelawny-analysis-item">
+                        <div class="trelawny-analysis-label">TRANSMISSION</div>
+                        <div class="trelawny-analysis-value trelawny-status-success">SUCCESSFUL</div>
+                    </div>
+                </div>
+
                 <div class="water-message" id="waterModalMessage">
-                    Your water quality inspection has been successfully submitted!
+                    Water quality inspection has been successfully submitted!
                 </div>
-                <div class="water-submessage">
-                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work! 🌊
+
+                <div class="water-submessage" style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin: 1rem 0; line-height: 1.6;">
+                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work!
                 </div>
-                <button class="water-close-btn" onclick="closeWaterModal()">
-                    Continue Inspecting
-                </button>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="trelawny-tech-button" onclick="closeTrelawnyWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(168, 85, 247, 0.5) !important;">
+                        <span class="trelawny-button-text">CONTINUE TO DASHBOARD</span>
+                        <div class="trelawny-button-scan"></div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -968,17 +1175,30 @@
             }
 
             showWaterModal(message) {
-                const modal = document.getElementById('waterModal');
-                const messageElement = document.getElementById('waterModalMessage');
+                this.showFuturisticTrelawnyModal(message);
+            }
 
-                // Customize message based on supply
+            showFuturisticTrelawnyModal(message) {
+                const waterModal = document.getElementById('waterModal');
+                const waterModalMessage = document.getElementById('waterModalMessage');
+
+                // Set timestamp
+                const now = new Date();
+                const timestamp = now.toLocaleTimeString('en-US', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('trelawny-analysis-timestamp').textContent = timestamp;
+
+                // Customize message based on supply with emojis removed
                 const supplyName = this.currentSupply ? this.currentSupply.name : 'this water supply';
                 const customMessage = `Water quality inspection for ${supplyName} has been successfully submitted!`;
-                messageElement.textContent = customMessage;
+                waterModalMessage.textContent = customMessage;
 
-                modal.style.display = 'block';
-
-                // Modal stays open until user clicks "Continue Inspecting"
+                // Show modal
+                waterModal.style.display = 'flex';
             }
 
             closeWaterModal() {
@@ -1005,6 +1225,30 @@
         function closeWaterModal() {
             const modal = document.getElementById('waterModal');
             modal.style.display = 'none';
+        }
+
+        function closeTrelawnyWaterModalWithFade() {
+            const modal = document.getElementById('waterModal');
+            const container = document.querySelector('.container');
+
+            // Fade out modal
+            modal.style.transition = 'opacity 0.5s ease';
+            modal.style.opacity = '0';
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.style.opacity = '1';
+                modal.style.transition = '';
+
+                // Fade in dashboard
+                if (container) {
+                    container.style.opacity = '0.3';
+                    container.style.transition = 'opacity 0.8s ease';
+                    setTimeout(() => {
+                        container.style.opacity = '1';
+                    }, 100);
+                }
+            }, 500);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
