@@ -51,13 +51,42 @@ def get_all_supplies():
         ('Bath Mtns.', 'untreated', 'PC', 'Bath Mountains', 'Westmoreland'),
 
         # Trelawny Supplies
-        # Add Trelawny water supplies here
+        # NWC Treated Supplies
         ('Rio Bueno', 'treated', 'NWC', 'Rio Bueno', 'Trelawny'),
         ('Duncans', 'treated', 'NWC', 'Duncans', 'Trelawny'),
         ('Falmouth', 'treated', 'NWC', 'Falmouth', 'Trelawny'),
+        ('Wakefield', 'treated', 'NWC', 'Wakefield', 'Trelawny'),
+        ('Bounty Hall', 'treated', 'NWC', 'Bounty Hall', 'Trelawny'),
+        ('Springvale', 'treated', 'NWC', 'Springvale', 'Trelawny'),
+
+        # PC Treated Supplies
+        ('Albert Town', 'treated', 'PC', 'Albert Town', 'Trelawny'),
+        ('Silver Sands', 'treated', 'PC', 'Silver Sands', 'Trelawny'),
+        ('Lorrimers', 'treated', 'PC', 'Lorrimers', 'Trelawny'),
+        ('Bengal', 'treated', 'PC', 'Bengal', 'Trelawny'),
+
+        # PC Untreated Supplies
         ('Martha Brae', 'untreated', 'PC', 'Martha Brae', 'Trelawny'),
         ('Clarks Town', 'untreated', 'PC', 'Clarks Town', 'Trelawny'),
         ('Wait-a-Bit', 'untreated', 'PC', 'Wait-a-Bit', 'Trelawny'),
+        ('Deeside', 'untreated', 'PC', 'Deeside', 'Trelawny'),
+        ('Sherwood Content', 'untreated', 'PC', 'Sherwood Content', 'Trelawny'),
+        ('Salem', 'untreated', 'PC', 'Salem', 'Trelawny'),
+        ('Refuge', 'untreated', 'PC', 'Refuge', 'Trelawny'),
+        ('Ulster Spring', 'untreated', 'PC', 'Ulster Spring', 'Trelawny'),
+        ('Good Hope', 'untreated', 'PC', 'Good Hope', 'Trelawny'),
+        ('Bunkers Hill', 'untreated', 'PC', 'Bunkers Hill', 'Trelawny'),
+        ('Kettering', 'untreated', 'PC', 'Kettering', 'Trelawny'),
+        ('Troy', 'untreated', 'PC', 'Troy', 'Trelawny'),
+        ('Granville', 'untreated', 'PC', 'Granville', 'Trelawny'),
+        ('Rock', 'untreated', 'PC', 'Rock', 'Trelawny'),
+        ('Garlands', 'untreated', 'PC', 'Garlands', 'Trelawny'),
+
+        # Private Supplies
+        ('Harmony Cove Resort', 'treated', 'Private', 'Harmony Cove', 'Trelawny'),
+        ('Grand Palladium Resort', 'treated', 'Private', 'Lucea', 'Trelawny'),
+        ('Trelawny Beach Hotel', 'treated', 'Private', 'Falmouth', 'Trelawny'),
+        ('Burwood Beach Resort', 'treated', 'Private', 'Burwood', 'Trelawny'),
 
         # Hanover Supplies
         # HMC Supplies (34 - All Untreated)
