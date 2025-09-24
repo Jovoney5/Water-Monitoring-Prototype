@@ -1434,27 +1434,133 @@ def get_supplies():
 
 @app.route('/api/sampling-points/<int:supply_id>')
 def get_sampling_points(supply_id):
-    conn = get_db_connection()
-    if USE_POSTGRESQL:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT sp.*, ws.name as supply_name
-            FROM sampling_points sp
-            JOIN water_supplies ws ON sp.supply_id = ws.id
-            WHERE sp.supply_id = %s
-            ORDER BY sp.name
-        ''', (supply_id,))
-        sampling_points = cursor.fetchall()
-    else:
-        sampling_points = conn.execute('''
-            SELECT sp.*, ws.name as supply_name
-            FROM sampling_points sp
-            JOIN water_supplies ws ON sp.supply_id = ws.id
-            WHERE sp.supply_id = ?
-            ORDER BY sp.name
-        ''', (supply_id,)).fetchall()
-    conn.close()
-    return jsonify([dict(point) for point in sampling_points])
+    try:
+        conn = get_db_connection()
+
+        # Ensure sampling_points table exists (for Render free tier)
+        try:
+            if USE_POSTGRESQL:
+                cursor = conn.cursor()
+                # Test if table exists
+                cursor.execute("SELECT 1 FROM sampling_points LIMIT 1")
+            else:
+                conn.execute("SELECT 1 FROM sampling_points LIMIT 1")
+        except Exception as table_error:
+            print(f"[SAMPLING-POINTS] Table missing, re-initializing database: {table_error}")
+            conn.close()
+            init_db()
+            add_sample_data()
+            conn = get_db_connection()
+
+        if USE_POSTGRESQL:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT sp.id, sp.name, sp.location, sp.description, ws.name as supply_name
+                FROM sampling_points sp
+                JOIN water_supplies ws ON sp.supply_id = ws.id
+                WHERE sp.supply_id = %s
+                ORDER BY sp.name
+            ''', (supply_id,))
+            sampling_points = cursor.fetchall()
+
+            # Convert to list of dicts for PostgreSQL
+            result = []
+            for point in sampling_points:
+                result.append({
+                    'id': point[0],
+                    'name': point[1],
+                    'location': point[2],
+                    'description': point[3],
+                    'supply_name': point[4]
+                })
+        else:
+            sampling_points = conn.execute('''
+                SELECT sp.id, sp.name, sp.location, sp.description, ws.name as supply_name
+                FROM sampling_points sp
+                JOIN water_supplies ws ON sp.supply_id = ws.id
+                WHERE sp.supply_id = ?
+                ORDER BY sp.name
+            ''', (supply_id,)).fetchall()
+            result = [dict(point) for point in sampling_points]
+
+        conn.close()
+        print(f"[SAMPLING-POINTS] Found {len(result)} sampling points for supply_id {supply_id}")
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"[SAMPLING-POINTS] Error getting sampling points for supply_id {supply_id}: {e}")
+        return jsonify({'error': 'Failed to load sampling points', 'details': str(e)}), 500
+
+@app.route('/api/debug/database-status')
+def debug_database_status():
+    """Debug endpoint to check database status - especially useful for Render free tier"""
+    try:
+        conn = get_db_connection()
+        status = {'database_connected': True, 'tables': {}, 'errors': []}
+
+        # Check each table
+        tables_to_check = ['water_supplies', 'sampling_points', 'users', 'inspection_submissions']
+
+        for table_name in tables_to_check:
+            try:
+                if USE_POSTGRESQL:
+                    cursor = conn.cursor()
+                    cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                    count = cursor.fetchone()[0]
+                else:
+                    count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+                status['tables'][table_name] = {'exists': True, 'count': count}
+            except Exception as table_error:
+                status['tables'][table_name] = {'exists': False, 'error': str(table_error)}
+                status['errors'].append(f"{table_name}: {table_error}")
+
+        # Check specific Trelawny data
+        try:
+            if USE_POSTGRESQL:
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM water_supplies WHERE parish = %s", ('Trelawny',))
+                trelawny_supplies = cursor.fetchone()[0]
+                cursor.execute('''
+                    SELECT COUNT(*)
+                    FROM sampling_points sp
+                    JOIN water_supplies ws ON sp.supply_id = ws.id
+                    WHERE ws.parish = %s
+                ''', ('Trelawny',))
+                trelawny_points = cursor.fetchone()[0]
+            else:
+                trelawny_supplies = conn.execute("SELECT COUNT(*) FROM water_supplies WHERE parish = ?", ('Trelawny',)).fetchone()[0]
+                trelawny_points = conn.execute('''
+                    SELECT COUNT(*)
+                    FROM sampling_points sp
+                    JOIN water_supplies ws ON sp.supply_id = ws.id
+                    WHERE ws.parish = ?
+                ''', ('Trelawny',)).fetchone()[0]
+
+            status['trelawny'] = {
+                'supplies': trelawny_supplies,
+                'sampling_points': trelawny_points
+            }
+        except Exception as trelawny_error:
+            status['trelawny'] = {'error': str(trelawny_error)}
+            status['errors'].append(f"Trelawny check: {trelawny_error}")
+
+        conn.close()
+        status['environment'] = {
+            'use_postgresql': USE_POSTGRESQL,
+            'database_path': DATABASE if not USE_POSTGRESQL else 'PostgreSQL'
+        }
+
+        return jsonify(status)
+
+    except Exception as e:
+        return jsonify({
+            'database_connected': False,
+            'error': str(e),
+            'environment': {
+                'use_postgresql': USE_POSTGRESQL,
+                'database_path': DATABASE if not USE_POSTGRESQL else 'PostgreSQL'
+            }
+        }), 500
 
 @app.route('/api/monthly-data')
 def get_monthly_data():

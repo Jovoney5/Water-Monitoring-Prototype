@@ -1476,14 +1476,43 @@
             }
 
             async loadSamplingPoints(supplyId) {
+                const loadingSpinner = document.getElementById('sampling-point-loading');
+                const samplingPointSelect = document.getElementById('sampling-point');
+
                 try {
+                    loadingSpinner.style.display = 'inline-block';
+                    samplingPointSelect.innerHTML = '<option value="">Loading sampling points...</option>';
+
                     const response = await fetch(`/api/sampling-points/${supplyId}`);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
                     const samplingPoints = await response.json();
-                    console.log(`Sampling points loaded for supply ${supplyId}:`, samplingPoints.length);
+                    console.log(`[TRELAWNY] Sampling points loaded for supply ${supplyId}:`, samplingPoints.length);
+
+                    if (samplingPoints.error) {
+                        throw new Error(samplingPoints.error + (samplingPoints.details ? `: ${samplingPoints.details}` : ''));
+                    }
+
                     this.populateSamplingPointsDropdown(samplingPoints);
+
                 } catch (error) {
-                    console.error('Error loading sampling points:', error);
-                    this.populateSamplingPointsDropdown([]); // Reset dropdown even if API fails
+                    console.error(`[TRELAWNY] Error loading sampling points for supply ${supplyId}:`, error);
+
+                    // Show error in dropdown
+                    samplingPointSelect.innerHTML = '<option value="">Error loading points - please try again</option>';
+
+                    // Show user-friendly error message
+                    this.showAlert('error', `Failed to load sampling points: ${error.message}. This may be due to server initialization. Please refresh and try again.`);
+
+                    // Reset to empty dropdown after a delay
+                    setTimeout(() => {
+                        this.populateSamplingPointsDropdown([]);
+                    }, 3000);
+                } finally {
+                    loadingSpinner.style.display = 'none';
                 }
             }
 
