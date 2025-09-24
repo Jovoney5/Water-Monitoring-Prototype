@@ -5,50 +5,22 @@ Water supplies data for all parishes
 def get_all_supplies():
     """Returns all water supplies with parish information"""
     return [
-        # Westmoreland Supplies
-        # Treated Supplies
-        ('Roaring River 1', 'treated', 'NWC', 'Savanna-la-Mar', 'Westmoreland'),
-        ('Roaring River 2', 'treated', 'NWC', 'Savanna-la-Mar', 'Westmoreland'),
-        ('Bulstrode', 'treated', 'NWC', 'Bulstrode', 'Westmoreland'),
-        ('Dantrout', 'treated', 'NWC', 'Dantrout', 'Westmoreland'),
-        ('Bluefield\'s', 'treated', 'NWC', 'Bluefields', 'Westmoreland'),
-        ('Negril/Logwood', 'treated', 'NWC', 'Negril', 'Westmoreland'),
+        # Westmoreland Supplies - 13 main source areas (47 monitoring locations)
+        # Major Water Sources
+        ('Roaring River I & II', 'treated', 'NWC', 'Savanna-la-Mar', 'Westmoreland'),
+        ('Bullstrode', 'treated', 'NWC', 'Bullstrode', 'Westmoreland'),
+        ('Dean\'s Valley', 'untreated', 'NWC', 'Dean\'s Valley', 'Westmoreland'),
+        ('Carawina', 'untreated', 'NWC', 'Carawina', 'Westmoreland'),
+        ('Williamsfield/Venture', 'untreated', 'NWC', 'Venture', 'Westmoreland'),
+        ('Bluefields', 'treated', 'NWC', 'Bluefields', 'Westmoreland'),
+        ('Jerusalem Mountains', 'untreated', 'PC', 'Jerusalem Mountains', 'Westmoreland'),
+        ('Cave', 'untreated', 'PC', 'Cave', 'Westmoreland'),
+        ('Friendship', 'untreated', 'PC', 'Friendship', 'Westmoreland'),
+        ('Negril–Logwood', 'treated', 'NWC', 'Negril', 'Westmoreland'),
         ('Bethel Town/Cambridge', 'treated', 'NWC', 'Bethel Town', 'Westmoreland'),
-        ('Venture-Williamsfield', 'treated', 'NWC', 'Venture', 'Westmoreland'),
-        ('Shettlewood', 'treated', 'NWC', 'Shettlewood', 'Westmoreland'),
-        ('Cave', 'treated', 'NWC', 'Cave', 'Westmoreland'),
-        ('Carawina', 'treated', 'NWC', 'Carawina', 'Westmoreland'),
-        ('Dean\'s Valley', 'treated', 'NWC', 'Dean\'s Valley', 'Westmoreland'),
-        ('New Works', 'treated', 'PC', 'New Works', 'Westmoreland'),
-        ('New Works-Steward Lands', 'treated', 'PC', 'New Works', 'Westmoreland'),
-        ('Castle Mountain', 'treated', 'PC', 'Castle Mountain', 'Westmoreland'),
-        ('Berkshire', 'treated', 'PC', 'Berkshire', 'Westmoreland'),
-        ('Amity Mountains', 'treated', 'PC', 'Amity', 'Westmoreland'),
-        ('Beeston Spring', 'treated', 'PC', 'Beeston Spring', 'Westmoreland'),
-        ('Spring Gardens', 'treated', 'Private', 'Spring Gardens', 'Westmoreland'),
-
-        # Untreated Supplies
-        ('Content', 'untreated', 'PC', 'Content', 'Westmoreland'),
-        ('Holly Hill', 'untreated', 'PC', 'Holly Hill', 'Westmoreland'),
-        ('Bunion (Bunyan)', 'untreated', 'PC', 'Bunion', 'Westmoreland'),
-        ('Lundi', 'untreated', 'PC', 'Lundi', 'Westmoreland'),
-        ('Pinnock Shafton', 'untreated', 'PC', 'Pinnock', 'Westmoreland'),
-        ('Orange Hill', 'untreated', 'PC', 'Orange Hill', 'Westmoreland'),
-        ('Cair Curran Cedar Valley', 'untreated', 'PC', 'Cedar Valley', 'Westmoreland'),
-        ('Leamington', 'untreated', 'PC', 'Leamington', 'Westmoreland'),
-        ('Charlie Mount', 'untreated', 'PC', 'Charlie Mount', 'Westmoreland'),
-        ('New Roads', 'untreated', 'PC', 'New Roads', 'Westmoreland'),
-        ('Belvedere', 'untreated', 'PC', 'Belvedere', 'Westmoreland'),
-        ('York Mountain', 'untreated', 'PC', 'York Mountain', 'Westmoreland'),
-        ('Ashton', 'untreated', 'PC', 'Ashton', 'Westmoreland'),
-        ('Kilmarnock', 'untreated', 'PC', 'Kilmarnock', 'Westmoreland'),
-        ('Bronti', 'untreated', 'PC', 'Bronti', 'Westmoreland'),
-        ('Argyle Mountain', 'untreated', 'PC', 'Argyle', 'Westmoreland'),
-        ('Bog', 'untreated', 'PC', 'Bog', 'Westmoreland'),
-        ('Porters Mountain', 'untreated', 'PC', 'Porters Mountain', 'Westmoreland'),
-        ('Ketto', 'untreated', 'Private', 'Ketto', 'Westmoreland'),
-        ('Lambs River', 'untreated', 'PC', 'Lambs River', 'Westmoreland'),
-        ('Bath Mtns.', 'untreated', 'PC', 'Bath Mountains', 'Westmoreland'),
+        ('Paradise Farm', 'untreated', 'Private', 'Paradise Farm', 'Westmoreland'),
+        ('Petersville', 'untreated', 'PC', 'Petersville', 'Westmoreland'),
+        ('Dantrout', 'treated', 'NWC', 'Dantrout', 'Westmoreland'),
 
         # Trelawny Supplies
         # NWC Treated Supplies

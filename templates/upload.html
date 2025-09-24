@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document - Tool Kit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="file"] {
+            padding: 0.75rem;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        button {
+            padding: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .documents-list {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .document-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .download-btn {
+            padding: 0.5rem 1rem;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Document to Tool Kit</h1>
+
+        <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select PDF Document:</label>
+                <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.txt" required>
+                <small>Allowed formats: PDF, DOC, DOCX, TXT (Max: 16MB)</small>
+            </div>
+
+            <button type="submit">Upload Document</button>
+        </form>
+
+        <div id="message"></div>
+
+        <div class="documents-list">
+            <h2>Uploaded Documents</h2>
+            <div id="documentsList">
+                Loading documents...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class UploadManager {
+            constructor() {
+                this.form = document.getElementById('uploadForm');
+                this.messageDiv = document.getElementById('message');
+                this.documentsList = document.getElementById('documentsList');
+
+                this.form.addEventListener('submit', this.handleSubmit.bind(this));
+                this.loadDocuments();
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                const fileInput = document.getElementById('file');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    this.showMessage('Please select a file', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/api/upload-document', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showMessage('Document uploaded successfully!', 'success');
+                        fileInput.value = '';
+                        this.loadDocuments(); // Refresh the list
+                    } else {
+                        this.showMessage(result.error || 'Upload failed', 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('Upload failed: ' + error.message, 'error');
+                }
+            }
+
+            async loadDocuments() {
+                try {
+                    const response = await fetch('/api/documents');
+                    const documents = await response.json();
+
+                    if (documents.length === 0) {
+                        this.documentsList.innerHTML = '<p>No documents uploaded yet.</p>';
+                        return;
+                    }
+
+                    this.documentsList.innerHTML = documents.map(doc => `
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-name">${doc.original_name}</div>
+                                <div class="document-meta">
+                                    Uploaded by ${doc.uploaded_by_name} on ${new Date(doc.upload_date).toLocaleDateString()}
+                                </div>
+                            </div>
+                            <a href="/api/documents/${doc.id}/download" class="download-btn">Download</a>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    this.documentsList.innerHTML = '<p>Failed to load documents.</p>';
+                }
+            }
+
+            showMessage(text, type) {
+                this.messageDiv.innerHTML = `<div class="alert ${type}">${text}</div>`;
+                setTimeout(() => {
+                    this.messageDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        new UploadManager();
+    </script>
+</body>
+</html>

@@ -738,6 +738,7 @@
         <div class="user-info">
             <span class="status-indicator status-online"></span>
             <span id="welcomeText">Welcome, Administrator</span>
+            <button id="toolkitBtn" class="nav-link" style="background: rgba(255, 255, 255, 0.3); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">🧰 Tool Kit</button>
             <button id="adminToolsButton" class="nav-link" style="background: rgba(255, 255, 255, 0.3); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">💧 Admin Tools</button>
             <div class="nav-button" style="position: relative; display: inline-block; margin-right: 10px;">
                 <button id="assignedTasksBtn" class="nav-link" style="background: rgba(255, 255, 255, 0.3); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer;">📋 My Tasks</button>
@@ -1814,6 +1815,62 @@
             window.adminDashboard = new AdminDashboard();
         });
     </script>
+
+    <!-- Tool Kit Modal for Admin -->
+    <div id="toolkitModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 0; border: none; border-radius: 10px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;">🧰 Tool Kit - Document Management</h2>
+                <span class="close" onclick="closeToolKit()" style="color: white; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+
+                <!-- Admin Upload Section -->
+                <div class="admin-upload-section" style="margin-bottom: 30px; padding: 20px; border: 2px dashed #ddd; border-radius: 10px; background: #f9f9f9;">
+                    <h3 style="margin-top: 0; color: #333;">📤 Upload New Document</h3>
+                    <form id="uploadForm" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <label for="file" style="display: block; margin-bottom: 5px; font-weight: 600;">Select Document:</label>
+                            <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.txt" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <small style="color: #666;">Allowed formats: PDF, DOC, DOCX, TXT (Max: 16MB)</small>
+                        </div>
+                        <button type="submit" style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px;">📤 Upload Document</button>
+                    </form>
+                    <div id="uploadMessage" style="margin-top: 15px;"></div>
+                </div>
+
+                <!-- Documents List -->
+                <div class="documents-section">
+                    <h3 style="color: #333; margin-bottom: 20px;">📋 Available Documents</h3>
+                    <div id="documentsList" style="display: grid; gap: 15px;">
+                        Loading documents...
+                    </div>
+                </div>
+
+                <!-- PDF Preview for Selected Document -->
+                <div id="pdfPreview" style="display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">
+                    <h3 style="color: #333;">📄 Document Preview</h3>
+                    <div class="pdf-preview" style="border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin: 1rem 0;">
+                        <iframe id="pdfViewer" style="width: 100%; height: 500px; border: none;"></iframe>
+                    </div>
+                    <div class="pdf-actions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 15px;">
+                        <a id="viewBtn" href="#" target="_blank" class="action-btn" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-flex; align-items: center; gap: 8px;">
+                            👁️ View Full Screen
+                        </a>
+                        <a id="downloadBtn" href="#" download class="action-btn" style="background: #48bb78; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-flex; align-items: center; gap: 8px;">
+                            📥 Download
+                        </a>
+                        <button onclick="printCurrentPDF()" class="action-btn" style="background: #ed8936; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                            🖨️ Print
+                        </button>
+                        <button id="deleteBtn" onclick="deleteCurrentDocument()" class="action-btn" style="background: #e53e3e; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Simple Chart Implementation -->
     <script>
@@ -4369,6 +4426,128 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // Tool Kit Management for Admin
+        let currentDocumentId = null;
+
+        // Add Tool Kit button event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('toolkitBtn').addEventListener('click', openToolKit);
+            document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+        });
+
+        function openToolKit() {
+            document.getElementById('toolkitModal').style.display = 'block';
+            loadDocuments();
+        }
+
+        function closeToolKit() {
+            document.getElementById('toolkitModal').style.display = 'none';
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+            const messageDiv = document.getElementById('uploadMessage');
+
+            if (!file) {
+                showMessage('Please select a file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload-document', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('Document uploaded successfully!', 'success');
+                    fileInput.value = '';
+                    loadDocuments(); // Refresh the list
+                } else {
+                    showMessage(result.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Upload failed: ' + error.message, 'error');
+            }
+        }
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents');
+                const documents = await response.json();
+
+                const documentsList = document.getElementById('documentsList');
+
+                if (documents.length === 0) {
+                    documentsList.innerHTML = '<p style="text-align: center; color: #666;">No documents uploaded yet.</p>';
+                    return;
+                }
+
+                documentsList.innerHTML = documents.map(doc => `
+                    <div class="document-item" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white; cursor: pointer; transition: all 0.3s;" onclick="previewDocument(${doc.id}, '${doc.filename}', '${doc.original_name}')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${doc.original_name}</div>
+                                <div style="font-size: 0.9rem; color: #666;">
+                                    Uploaded by ${doc.uploaded_by_name} on ${new Date(doc.upload_date).toLocaleDateString()}
+                                </div>
+                            </div>
+                            <div style="color: #667eea; font-size: 1.2rem;">📄</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('documentsList').innerHTML = '<p style="text-align: center; color: #e53e3e;">Failed to load documents.</p>';
+            }
+        }
+
+        function previewDocument(docId, filename, originalName) {
+            currentDocumentId = docId;
+            const pdfUrl = `/static/documents/${filename}`;
+
+            document.getElementById('pdfViewer').src = pdfUrl;
+            document.getElementById('viewBtn').href = pdfUrl;
+            document.getElementById('downloadBtn').href = pdfUrl;
+            document.getElementById('downloadBtn').download = originalName;
+
+            document.getElementById('pdfPreview').style.display = 'block';
+            document.getElementById('pdfPreview').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function printCurrentPDF() {
+            const iframe = document.getElementById('pdfViewer');
+            iframe.contentWindow.print();
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('uploadMessage');
+            const alertClass = type === 'success' ? 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 'background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;';
+
+            messageDiv.innerHTML = `<div style="padding: 10px; border-radius: 5px; margin: 10px 0; ${alertClass}">${text}</div>`;
+
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('toolkitModal');
+            if (event.target === modal) {
+                closeToolKit();
+            }
+        }
+    </script>
 
 </body>
 </html>

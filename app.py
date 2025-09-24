@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, session, redirect, url_for, render_template_string, render_template
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template_string, render_template, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from werkzeug.utils import secure_filename
 import sqlite3
 import hashlib
 from datetime import datetime, date, timedelta
@@ -14,6 +15,14 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'water-monitoring-secret-key-2024'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Sessions last 7 days
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['UPLOAD_FOLDER'] = 'static/documents'
+
+# Allowed file extensions for uploads
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt', 'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Database configuration
@@ -129,8 +138,12 @@ def init_db():
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
                     isolated_organism VARCHAR(255),
+                    ph_satisfactory INTEGER DEFAULT 0,
+                    ph_non_satisfactory INTEGER DEFAULT 0,
+                    ph_non_satisfactory_range VARCHAR(50),
                     remarks TEXT,
                     facility_type VARCHAR(100),
+                    water_source_type VARCHAR(100),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (inspector_id) REFERENCES users (id),
@@ -168,6 +181,19 @@ def init_db():
                     FOREIGN KEY (assigned_to_id) REFERENCES users (id),
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (created_by_id) REFERENCES users (id)
+                )
+            ''')
+
+            # Documents table for Tool Kit
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS documents (
+                    id SERIAL PRIMARY KEY,
+                    filename VARCHAR(255) NOT NULL,
+                    original_name VARCHAR(255) NOT NULL,
+                    file_path TEXT NOT NULL,
+                    uploaded_by INTEGER NOT NULL,
+                    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (uploaded_by) REFERENCES users (id)
                 )
             ''')
 
@@ -250,8 +276,12 @@ def init_db():
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
                     isolated_organism TEXT,
+                    ph_satisfactory INTEGER DEFAULT 0,
+                    ph_non_satisfactory INTEGER DEFAULT 0,
+                    ph_non_satisfactory_range TEXT,
                     remarks TEXT,
                     facility_type TEXT,
+                    water_source_type TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (inspector_id) REFERENCES users (id),
@@ -289,6 +319,19 @@ def init_db():
                     FOREIGN KEY (assigned_to_id) REFERENCES users (id),
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (created_by_id) REFERENCES users (id)
+                )
+            ''')
+
+            # Documents table for Tool Kit
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS documents (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    filename TEXT NOT NULL,
+                    original_name TEXT NOT NULL,
+                    file_path TEXT NOT NULL,
+                    uploaded_by INTEGER NOT NULL,
+                    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (uploaded_by) REFERENCES users (id)
                 )
             ''')
 
@@ -401,167 +444,250 @@ def _populate_initial_data(conn, cursor):
         result = cursor.fetchone()
         return result[0] if result else None
 
-    # Westmoreland - Roaring River sampling points
-    roaring_river_1_id = get_supply_id('Roaring River 1')
-    roaring_river_2_id = get_supply_id('Roaring River 2')
-
-    if roaring_river_1_id and roaring_river_2_id:
-            westmoreland_points = [
-                # Roaring River 1 sampling points
-                (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
-                (roaring_river_1_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
-                (roaring_river_1_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
-                (roaring_river_1_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
-                (roaring_river_1_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
-                (roaring_river_1_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
-                (roaring_river_1_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
-                (roaring_river_1_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
-                (roaring_river_1_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
-                (roaring_river_1_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
-                # Roaring River 2 sampling points (same locations)
-                (roaring_river_2_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
-                (roaring_river_2_id, 'tap@ Hospital Storage tank (old plant)', 'roaring river', 'Hospital storage tank from old plant'),
-                (roaring_river_2_id, 'standpipe@135 Dalling Street (old plant)', 'roaring river', 'Standpipe at 135 Dalling Street from old plant'),
-                (roaring_river_2_id, 'tap@ loading Bay, Petersfield (old plant)', 'roaring river', 'Loading Bay tap at Petersfield from old plant'),
-                (roaring_river_2_id, 'standpipe @ Lower Darliston (new plant)', 'roaring river', 'Standpipe at Lower Darliston from new plant'),
-                (roaring_river_2_id, 'standpipe@ Carawina Road (old plant)', 'roaring river', 'Standpipe at Carawina Road from old plant'),
-                (roaring_river_2_id, 'standpipe@ Roaring River District (old plant)', 'roaring river', 'Standpipe at Roaring River District from old plant'),
-                (roaring_river_2_id, 'tap@ shop, Michael Smith Ave (new plant)', 'roaring river', 'Shop tap at Michael Smith Ave from new plant'),
-                (roaring_river_2_id, 'tap@Dud\'s Bar, Whithorn (new plant)', 'roaring river', 'Dud\'s Bar tap at Whithorn from new plant'),
-                (roaring_river_2_id, 'standpipe@ Barneyside All age', 'roaring river', 'Standpipe at Barneyside All age'),
-            ]
-            sampling_points.extend(westmoreland_points)
-
-        # Hanover - HMC Supplies (34 supplies - all untreated, source sampling points)
-        hmc_supplies = [
-            'Claremont Catchment', 'Thompson Hill Catchment', 'Upper Rock Spring', 'Success Catchment',
-            'Bamboo Spring', 'Jericho Spring', 'Lethe Spring', 'Welcome Spring', 'Knockalva Catchment',
-            'Flamstead Spring', 'Pierces Village Catchment', 'Cold Spring', 'Rejion Tank', 'Rejoin Catchment',
-            'Chovey Hole', 'Content Catchment', 'St Simon Spring', 'Donalva Spring', 'Sawpit Spring',
-            'Patty Hill Spring', 'Woodsville Catchment', 'Dias Tank', 'Anderson Spring', 'Bamboo Roadside Overflow',
-            'Axe-and-Adze Catchment', 'Soja Spring', 'Castle Hyde Catchment', 'Medley Spring', 'Craig Nathan',
-            'Jabez Catchment', 'Rockfoot Reservoir', 'Burntside Spring', 'Old Cold Spring', 'Spring Georgia'
+    # Westmoreland - All water source sampling points (47 total locations)
+    westmoreland_sources = {
+        'Roaring River I & II': [
+            'Tap @ Health Department (old plant)',
+            'Tap @ Hospital Storage tank (old plant)',
+            'Standpipe @ 135 Dalling Street (old plant)',
+            'Tap @ Loading Bay, Petersfield (old plant)',
+            'Standpipe @ Lower Darliston (new plant)',
+            'Standpipe @ Carawina Road (old plant)',
+            'Standpipe @ Roaring River District (old plant)',
+            'Tap @ Shop, Michael Smith Ave (new plant)',
+            'Tap @ Dud\'s Bar, Whithorn (new plant)'
+        ],
+        'Bullstrode': [
+            'Standpipe @ Barneyside All Age',
+            'Standpipe @ Ridge Bridge, Broughton',
+            'Standpipe @ Delveland H/C',
+            'Standpipe @ Old Hope pump station',
+            'Tap @ Little London H/C',
+            'Tap @ Grange Hill H/C',
+            'Standpipe @ Camp Savanna, near Malcolm\'s Garage',
+            'Tap @ Ms. Daisy\'s Grocery, Big Bridge'
+        ],
+        'Dean\'s Valley': [
+            'Standpipe @ Dean\'s Valley main road',
+            'Standpipe @ Heavy Sands'
+        ],
+        'Carawina': [
+            'Tap @ Grace Food Processor, Administration area',
+            'Tap @ Weddy\'s Slaughter facility'
+        ],
+        'Williamsfield/Venture': [
+            'Standpipe @ Content main road',
+            'Standpipe @ Grange main road',
+            'Standpipe @ Kevin\'s Grocery, Fort William',
+            'Standpipe @ Williamsfield H/C',
+            'Standpipe @ Mayfield Fall',
+            'Tap @ Grange Square, Shop and Grocery'
+        ],
+        'Bluefields': [
+            'Standpipe @ Bluefields Beach Park',
+            'Standpipe @ Farm',
+            'Standpipe @ Culloden Square',
+            'Standpipe @ Whitehouse H/C'
+        ],
+        'Jerusalem Mountains': [
+            'Tap @ Side of SDA, Jerusalem Mountains',
+            'Tap @ Herring Piece, Anderson\'s Property'
+        ],
+        'Cave': [
+            'Tap @ Cave Square'
+        ],
+        'Friendship': [
+            'Standpipe @ Friendship main road',
+            'Standpipe @ SDA Church',
+            'Tap @ Main road, beside Strawberry School',
+            'Tap @ Braham',
+            'Tap @ Friendship School'
+        ],
+        'Negril–Logwood': [
+            'Standpipe @ Sheffield P.O',
+            'Tap @ Negril H/C',
+            'Standpipe @ Spring Garden (main road)',
+            'Standpipe @ Retreat Square'
+        ],
+        'Bethel Town/Cambridge': [
+            'Tap @ Bethel Town H/C',
+            'Tap @ Skepie\'s premises, Galloway'
+        ],
+        'Petersville': [
+            '1st standpipe from pumping station',
+            'Standpipe @ Long Hill, Near Culvert'
+        ],
+        'Dantrout': [
+            'Standpipe @ Marchmont Road Square',
+            'Tap @ St. Leonard\'s H/C',
+            'Standpipe @ Beside St. Leonard\'s H/C'
         ]
+    }
 
-        for supply_name in hmc_supplies:
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                sampling_points.append((supply_id, 'Source', supply_name.lower().replace(' ', '_'), f'Source sampling point for {supply_name}'))
-                # Special case for St Simon Spring - has additional sampling point
-                if supply_name == 'St Simon Spring':
-                    sampling_points.append((supply_id, 'St. Simon Community Tank', 'st_simon', 'St. Simon Community Tank sampling point'))
+    for source_name, sampling_points_list in westmoreland_sources.items():
+        supply_id = get_supply_id(source_name)
+        if supply_id:
+            for point_name in sampling_points_list:
+                location_key = source_name.lower().replace(' ', '_').replace('/', '_').replace('&', '').replace('–', '_')
+                sampling_points.append((supply_id, point_name, location_key, f'{point_name} sampling point for {source_name}'))
 
-        # Hanover - NWC Supplies (5 supplies - all treated)
-        nwc_hanover_supplies = {
-            'Logwood': ['D/T', 'Logwood H/C', 'Green Island H/C', 'Green Island S/P', 'Cave Valley H/C'],
-            'New Milns': ['D/T', 'New Milns S/P'],
-            'Kendal': ['D/T', 'Kendal Cross Road', 'Jehovah Witness S/P', 'Friendship S/P', 'Grange S/P', 'Neva Shop-Cessnock'],
-            'Shettlewood Hanover': ['D/T', 'Ramble H/C', 'Chester Castle H/C', 'Mt. Ward Primary', 'Knockalva Polythecnic', 'Miles Town S/P', 'Colhorn Enterprise', 'Brayhorn Enterprise', 'West Haven Chidren\'s Home', 'Arawak Restaurant', 'Border Jerk', 'Mt. Peto H/C'],
-            'Great River - St. James': ['Hopewell H/C', 'Sandy bay H/C', 'Kew Bridge', 'Hanover H/D', 'First Hill S/P', 'Noel Holmes Hospital (X3)', 'Copperwood Farms', 'Dorcey James Property', 'NWC Lucea Loading Bay', 'Hugh Garwood Premises', 'McQuaire/Woodland Relift Station']
-        }
+    # Hanover - HMC Supplies (34 supplies - all untreated, source sampling points)
+    hmc_supplies = [
+        'Claremont Catchment', 'Thompson Hill Catchment', 'Upper Rock Spring', 'Success Catchment',
+        'Bamboo Spring', 'Jericho Spring', 'Lethe Spring', 'Welcome Spring', 'Knockalva Catchment',
+        'Flamstead Spring', 'Pierces Village Catchment', 'Cold Spring', 'Rejion Tank', 'Rejoin Catchment',
+        'Chovey Hole', 'Content Catchment', 'St Simon Spring', 'Donalva Spring', 'Sawpit Spring',
+        'Patty Hill Spring', 'Woodsville Catchment', 'Dias Tank', 'Anderson Spring', 'Bamboo Roadside Overflow',
+        'Axe-and-Adze Catchment', 'Soja Spring', 'Castle Hyde Catchment', 'Medley Spring', 'Craig Nathan',
+        'Jabez Catchment', 'Rockfoot Reservoir', 'Burntside Spring', 'Old Cold Spring', 'Spring Georgia'
+    ]
 
-        for supply_name, sample_points in nwc_hanover_supplies.items():
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                for point in sample_points:
-                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+    for supply_name in hmc_supplies:
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            sampling_points.append((supply_id, 'Source', supply_name.lower().replace(' ', '_'), f'Source sampling point for {supply_name}'))
+            # Special case for St Simon Spring - has additional sampling point
+            if supply_name == 'St Simon Spring':
+                sampling_points.append((supply_id, 'St. Simon Community Tank', 'st_simon', 'St. Simon Community Tank sampling point'))
 
-        # Hanover - Private Supplies
-        private_hanover_supplies = {
-            'Tryall Club': ['D/T', 'Tryall Market'],
-            'Vivid Water Store': ['Alkaline tap'],
-            'Aquacity Water Store': ['Mineral Tap'],
-            'M&B Water Store': ['Alkaline Tap'],
-            'Quenched Water Store': ['Purified Tap'],
-            'Epic Blue': ['Alkaline Tap'],
-            'Dynasty Water Store': ['Alkaline Tap'],
-            'Valley Dew': ['Purified Tap'],
-            'Jus Chill': ['Closed (Not operational)'],
-            'Royalton Resorts': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3', 'Sample Point 4', 'Sample Point 5', 'Sample Point 6', 'Sample Point 7'],
-            'Sandals Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Couples Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Sunset At The Palms': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Azul Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Round Hill Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Hedonism II': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Riu Tropical Bay': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
-            'Riu Jamiecotel': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3']
-        }
+    # Hanover - NWC Supplies (5 supplies - all treated)
+    nwc_hanover_supplies = {
+        'Logwood': ['D/T', 'Logwood H/C', 'Green Island H/C', 'Green Island S/P', 'Cave Valley H/C'],
+        'New Milns': ['D/T', 'New Milns S/P'],
+        'Kendal': ['D/T', 'Kendal Cross Road', 'Jehovah Witness S/P', 'Friendship S/P', 'Grange S/P', 'Neva Shop-Cessnock'],
+        'Shettlewood Hanover': ['D/T', 'Ramble H/C', 'Chester Castle H/C', 'Mt. Ward Primary', 'Knockalva Polythecnic', 'Miles Town S/P', 'Colhorn Enterprise', 'Brayhorn Enterprise', 'West Haven Chidren\'s Home', 'Arawak Restaurant', 'Border Jerk', 'Mt. Peto H/C'],
+        'Great River - St. James': ['Hopewell H/C', 'Sandy bay H/C', 'Kew Bridge', 'Hanover H/D', 'First Hill S/P', 'Noel Holmes Hospital (X3)', 'Copperwood Farms', 'Dorcey James Property', 'NWC Lucea Loading Bay', 'Hugh Garwood Premises', 'McQuaire/Woodland Relift Station']
+    }
 
-        for supply_name, sample_points in private_hanover_supplies.items():
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                for point in sample_points:
-                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+    for supply_name, sample_points in nwc_hanover_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
-        # Trelawny - NWC Supplies (map to existing database names)
-        trelawny_nwc_supplies = {
-            'Rio Bueno': ['Tap @ Health Centre'],  # This will be the health centre
-            'Duncans': ['Plant'],
-            'Falmouth': ['Plant'],
-            'Wakefield': ['Plant'],
-            'Bounty Hall': ['Plant'],
-            'Springvale': ['Plant']
-        }
+    # Hanover - Private Supplies
+    private_hanover_supplies = {
+        'Tryall Club': ['D/T', 'Tryall Market'],
+        'Vivid Water Store': ['Alkaline tap'],
+        'Aquacity Water Store': ['Mineral Tap'],
+        'M&B Water Store': ['Alkaline Tap'],
+        'Quenched Water Store': ['Purified Tap'],
+        'Epic Blue': ['Alkaline Tap'],
+        'Dynasty Water Store': ['Alkaline Tap'],
+        'Valley Dew': ['Purified Tap'],
+        'Jus Chill': ['Closed (Not operational)'],
+        'Royalton Resorts': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3', 'Sample Point 4', 'Sample Point 5', 'Sample Point 6', 'Sample Point 7'],
+        'Sandals Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Couples Negril': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Sunset At The Palms': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Azul Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Round Hill Resort': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Hedonism II': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Riu Tropical Bay': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3'],
+        'Riu Jamiecotel': ['Sample Point 1', 'Sample Point 2', 'Sample Point 3']
+    }
 
-        for supply_name, sample_points in trelawny_nwc_supplies.items():
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                for point in sample_points:
-                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+    for supply_name, sample_points in private_hanover_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
-        # Trelawny - PC Supplies (map to existing database names)
-        trelawny_pc_supplies = {
-            'Albert Town': ['Tap @ Health Centre'],  # This is also a health centre
-            'Silver Sands': ['Plant'],
-            'Lorrimers': ['Plant (UNTREATED)'],  # This is the untreated one
-            'Bengal': ['Plant']
-        }
+    # Trelawny - NWC Supplies (match exact database names from current database)
+    trelawny_nwc_supplies = {
+        # Based on actual database contents
+        'New Martha Brae Plant #1': ['Plant'],
+        'New Martha Brae Plant #2': ['Plant'],
+        'Old Martha Brae': ['Stand pipe @ Coopers Pen'],
+        'Wakefield #1': ['Plant'],
+        'Wakefield #3': ['Plant'],
+        'Wakefield #4': ['Plant'],
+        'Sherwood Content': ['Plant'],  # NWC version (there's also an MOH health centre version)
+        'Clark\'s Town': ['Tap @ Mn. Rd. Kinloss'],
+        'Duanvale': ['Tap adj. Comm. Centre'],
+        'Barnstaple': ['Plant'],
+        'Dornoch': ['Stand pipe in Calabar'],
+        'Ettingdon': ['Tap @ Brian\'s Slaughterplace'],
+        'Ulster Spring/Freeman\'s Hall': ['Tap opp. Old Library'],
+        'Troy': ['Tap @ Troy Square'],  # NWC version
+        'Wilson\'s Run': ['Tap @ Base of Hill']
+    }
 
-        for supply_name, sample_points in trelawny_pc_supplies.items():
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                for point in sample_points:
-                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+    for supply_name, sample_points in trelawny_nwc_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
-        # Trelawny - Private Supplies (map to existing database names)
-        trelawny_private_supplies = {
-            'Harmony Cove Resort': ['Kitchen'],
-            'Grand Palladium Resort': ['Tap @ Bar'],
-            'Trelawny Beach Hotel': ['Tap @ Bar'],
-            'Burwood Beach Resort': ['Source']
-        }
+    # Trelawny - PC Treated Supplies (match exact database names from current database)
+    trelawny_pc_supplies = {
+        'Mahogany Hall': ['Plant'],
+        'Sawyers RWCT': ['Plant'],
+        'Burke RWCT': ['Plant'],
+        'Alps RWCT': ['Plant'],
+        'Lorrimer\'s RWCT': ['Plant (UNTREATED)'],  # This is the untreated one
+        'Wilson\'s Run RWCT': ['Plant'],
+        'Huie': ['Plant'],
+        'Stettin': ['Tap adj. Hardware Store'],
+        'John Daggie': ['Tap @ storage tank'],
+        'Campbell\'s Spring': ['Plant'],
+        'Gager/Spring Garden': ['Tap opp. Pingue\'s Place'],
+        'Freemans Hall': ['Plant'],  # Not specified in original data
+        'Stewart Town': ['Plant']   # Not specified in original data
+    }
 
-        for supply_name, sample_points in trelawny_private_supplies.items():
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                for point in sample_points:
-                    sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+    for supply_name, sample_points in trelawny_pc_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
-        # Trelawny - Handle untreated PC supplies from existing database
-        trelawny_untreated_pc = [
-            'Martha Brae', 'Clarks Town', 'Wait-a-Bit', 'Deeside', 'Sherwood Content',
-            'Salem', 'Refuge', 'Ulster Spring', 'Good Hope', 'Bunkers Hill',
-            'Kettering', 'Troy', 'Granville', 'Rock', 'Garlands'
-        ]
+    # Trelawny - Private Supplies (match exact database names from current database)
+    trelawny_private_supplies = {
+        'Lobster Bowl': ['Kitchen'],
+        'Rafters Village': ['Tap @ Bar'],
+        'Good Hope/Chukka': ['Tap @ Bar'],
+        'Tank-Weld': ['Tap @ Roundabout'],
+        'Braco Resort': ['Plant'],  # Not specified in original data
+        'Ocean Coral Spring Hotel': ['Plant'],  # Not specified in original data
+        'Bamboo Beach': ['Plant']   # Not specified in original data
+    }
 
-        for supply_name in trelawny_untreated_pc:
-            supply_id = get_supply_id(supply_name)
-            if supply_id:
-                sampling_points.append((supply_id, 'Source', supply_name.lower().replace(' ', '_'), f'Source sampling point for {supply_name}'))
+    for supply_name, sample_points in trelawny_private_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
 
-        # Insert all sampling points
-        if sampling_points:
-            if USE_POSTGRESQL:
-                cursor.executemany('''
-                    INSERT INTO sampling_points (supply_id, name, location, description)
-                    VALUES (%s, %s, %s, %s)
-                ''', sampling_points)
-            else:
-                cursor.executemany('''
-                    INSERT INTO sampling_points (supply_id, name, location, description)
-                    VALUES (?, ?, ?, ?)
-                ''', sampling_points)
+    # Trelawny - MOH Health Centres (match exact database names from current database)
+    trelawny_moh_supplies = {
+        'Rio Bueno Health Centre': ['Tap @ Health Centre'],
+        'Sherwood Content Health Centre': ['Tap @ Health Centre'],
+        'Ulster Spring': ['Tap @ Health Centre'],  # MOH version (there's also NWC version)
+        'Albert Town Health Centre': ['Tap @ Health Centre'],
+        'Rock Spring Health Centre': ['Tap @ Health Centre'],
+        'Warsop Health Centre': ['Tap @ Health Centre'],
+        'Wait-A-Bit Health Centre': ['Tap @ Health Centre']
+    }
+
+    for supply_name, sample_points in trelawny_moh_supplies.items():
+        supply_id = get_supply_id(supply_name)
+        if supply_id:
+            for point in sample_points:
+                sampling_points.append((supply_id, point, supply_name.lower().replace(' ', '_'), f'{point} sampling point for {supply_name}'))
+
+    # Insert all sampling points
+    if sampling_points:
+        if USE_POSTGRESQL:
+            cursor.executemany('''
+                INSERT INTO sampling_points (supply_id, name, location, description)
+                VALUES (%s, %s, %s, %s)
+            ''', sampling_points)
+        else:
+            cursor.executemany('''
+                INSERT INTO sampling_points (supply_id, name, location, description)
+                VALUES (?, ?, ?, ?)
+            ''', sampling_points)
 
 def get_db_connection():
     if USE_POSTGRESQL:
@@ -661,7 +787,12 @@ def add_sample_data():
                 random.randint(2, 8),   # bacteriological_negative
                 random.randint(0, 2),   # bacteriological_pending
                 '',  # isolated_organism
-                'Sample inspection data'  # remarks
+                random.randint(3, 8),   # ph_satisfactory
+                random.randint(0, 2),   # ph_non_satisfactory
+                '',  # ph_non_satisfactory_range
+                'Sample inspection data',  # remarks
+                '',  # facility_type
+                ''   # water_source_type
             ))
 
     cursor.executemany('''
@@ -669,8 +800,9 @@ def add_sample_data():
         (supply_id, inspector_id, sampling_point_id, submission_date, visits,
          chlorine_total, chlorine_positive, chlorine_negative, chlorine_positive_range,
          chlorine_negative_range, bacteriological_positive, bacteriological_negative,
-         bacteriological_pending, isolated_organism, remarks)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         bacteriological_pending, isolated_organism, ph_satisfactory, ph_non_satisfactory,
+         ph_non_satisfactory_range, remarks, facility_type, water_source_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', sample_data)
 
     conn.commit()
@@ -745,6 +877,20 @@ def hanover():
         return redirect(url_for('index'))
 
     return render_template('hanover.html')
+
+@app.route('/westmoreland')
+def westmoreland():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Only allow Westmoreland inspectors or any admin to access this dashboard
+    user_parish = session.get('parish', 'Westmoreland')
+    user_role = session.get('role')
+
+    if user_role != 'admin' and user_parish != 'Westmoreland':
+        return redirect(url_for('index'))
+
+    return render_template('westmoreland.html')
 
 @app.route('/report')
 def report():
@@ -1713,15 +1859,18 @@ def submit_inspection():
             INSERT INTO inspection_submissions
             (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
              chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
-             bacteriological_negative, bacteriological_pending, isolated_organism, remarks, facility_type)
-            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             bacteriological_negative, bacteriological_pending, isolated_organism, ph_satisfactory,
+             ph_non_satisfactory, ph_non_satisfactory_range, remarks, facility_type, water_source_type)
+            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['supply_id'], session['user_id'], data.get('sampling_point_id'),
             data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
             data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
             data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
             data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
-            data.get('isolated_organism', ''), data.get('remarks', ''), data.get('facility_type', '')
+            data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
+            data.get('ph_non_satisfactory', 0), data.get('ph_non_satisfactory_range', ''),
+            data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
         ))
 
         submission_id = cursor.lastrowid
@@ -1827,6 +1976,11 @@ def get_submission_details(submission_id):
         return jsonify({'error': 'Submission not found'}), 404
 
     return jsonify(dict(submission))
+
+@app.route('/api/submissions/<int:submission_id>')
+def get_submission_details_plural(submission_id):
+    """Alternative endpoint with plural 'submissions' for consistency"""
+    return get_submission_details(submission_id)
 
 @app.route('/api/submission/<int:submission_id>/download')
 def download_submission(submission_id):
@@ -2540,6 +2694,151 @@ def create_user():
         conn.close()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/upload-document', methods=['POST'])
+def upload_document():
+    """Upload a document to the Tool Kit"""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'File type not allowed'}), 400
+
+    try:
+        # Secure the filename
+        filename = secure_filename(file.filename)
+
+        # Create the upload directory if it doesn't exist
+        upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Save the file
+        filepath = os.path.join(upload_dir, filename)
+        file.save(filepath)
+
+        # Store document info in database (we'll create this table next)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO documents (filename, original_name, file_path, uploaded_by, upload_date)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (filename, file.filename, filepath, session['user_id'], datetime.now()))
+            conn.commit()
+            document_id = cursor.lastrowid
+        finally:
+            conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Document uploaded successfully',
+            'document_id': document_id,
+            'filename': filename
+        }), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/documents', methods=['GET'])
+def get_documents():
+    """Get list of available documents"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        documents = cursor.execute('''
+            SELECT id, filename, original_name, upload_date,
+                   (SELECT full_name FROM users WHERE id = documents.uploaded_by) as uploaded_by_name
+            FROM documents
+            ORDER BY upload_date DESC
+        ''').fetchall()
+        conn.close()
+
+        return jsonify([dict(doc) for doc in documents])
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/documents/<int:doc_id>/download')
+def download_document(doc_id):
+    """Download a specific document"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        doc = cursor.execute('''
+            SELECT filename, original_name, file_path
+            FROM documents
+            WHERE id = ?
+        ''', (doc_id,)).fetchone()
+        conn.close()
+
+        if not doc:
+            return jsonify({'error': 'Document not found'}), 404
+
+        return send_file(doc['file_path'], as_attachment=True, download_name=doc['original_name'])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/documents/<int:doc_id>', methods=['DELETE'])
+def delete_document(doc_id):
+    """Delete a specific document (admin only)"""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Get document info before deletion
+        doc = cursor.execute('''
+            SELECT filename, file_path
+            FROM documents
+            WHERE id = ?
+        ''', (doc_id,)).fetchone()
+
+        if not doc:
+            conn.close()
+            return jsonify({'error': 'Document not found'}), 404
+
+        # Delete from database
+        cursor.execute('DELETE FROM documents WHERE id = ?', (doc_id,))
+        conn.commit()
+        conn.close()
+
+        # Delete physical file
+        try:
+            if os.path.exists(doc['file_path']):
+                os.remove(doc['file_path'])
+        except OSError:
+            pass  # Continue even if file deletion fails
+
+        return jsonify({'success': True, 'message': 'Document deleted successfully'})
+
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/upload')
+def upload_page():
+    """Temporary upload page for documents"""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+    return render_template('upload.html')
+
 # WebSocket Events
 @socketio.on('join')
 def on_join(data):
@@ -2556,10 +2855,65 @@ def on_leave(data):
 # Initialize database on module import (for production)
 init_db()
 
+def migrate_database():
+    """Add missing columns to existing databases"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Check if pH columns exist, add them if they don't
+        if USE_POSTGRESQL:
+            # PostgreSQL migration
+            cursor.execute('''
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'inspection_submissions' AND column_name = 'ph_satisfactory'
+            ''')
+            if not cursor.fetchone():
+                print("Adding missing pH columns to PostgreSQL database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_satisfactory INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_non_satisfactory INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_non_satisfactory_range VARCHAR(50)')
+
+            # Check for water_source_type column
+            cursor.execute('''
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'inspection_submissions' AND column_name = 'water_source_type'
+            ''')
+            if not cursor.fetchone():
+                print("Adding water_source_type column to PostgreSQL database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN water_source_type VARCHAR(100)')
+        else:
+            # SQLite migration
+            cursor.execute('PRAGMA table_info(inspection_submissions)')
+            columns = [column[1] for column in cursor.fetchall()]
+
+            if 'ph_satisfactory' not in columns:
+                print("Adding missing pH columns to SQLite database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_satisfactory INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_non_satisfactory INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN ph_non_satisfactory_range TEXT')
+
+            if 'water_source_type' not in columns:
+                print("Adding water_source_type column to SQLite database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN water_source_type TEXT')
+
+        conn.commit()
+        print("Database migration completed successfully")
+    except Exception as e:
+        print(f"Migration error: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5004))
     debug = os.environ.get('FLASK_ENV', 'development') == 'development'
+
+    # Run database migration first
+    migrate_database()
 
     # Add sample data for testing
     add_sample_data()

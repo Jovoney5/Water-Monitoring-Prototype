@@ -581,6 +581,83 @@
                 transform: translateX(5px) scale(0.9);
             }
         }
+
+        /* Loading spinner for async fetch */
+        .loading-spinner {
+            display: none;
+            border: 4px solid var(--input-border);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 5px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tool Kit Modal Styles */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .download-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .print-btn {
+            background: #ed8936;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #dd7724;
+            transform: translateY(-2px);
+        }
+
+        .edit-btn {
+            background: #9f7aea;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #8b5bc3;
+            transform: translateY(-2px);
+        }
+
+        .toolkit-container h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -638,6 +715,7 @@
         <h1>Trelawny Inspector Dashboard</h1>
         <div>
             <span id="welcomeText">Welcome, Inspector</span>
+            <button id="toolkitBtn" class="logout-btn">🧰 Tool Kit</button>
             <button onclick="window.open('https://www.wrha.gov.jm/', '_blank')" class="logout-btn">🌐 Connect on WRHA Hub</button>
             <button id="darkModeToggle" class="logout-btn">🌙 Dark Mode</button>
             <a href="/logout" class="logout-btn">Logout</a>
@@ -677,6 +755,7 @@
                             <select id="sampling-point" name="sampling_point_id">
                                 <option value="">Select a sampling point (optional)...</option>
                             </select>
+                            <div id="sampling-point-loading" class="loading-spinner"></div>
                             <small class="form-text">Location: <span id="sampling-point-location"></span></small>
                         </div>
                         <div class="form-group">
@@ -841,6 +920,52 @@
                         </div>
                     </div>
 
+                    <div class="test-section">
+                        <h3>pH Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="ph-satisfactory">Satisfactory</label>
+                                <input type="number" id="ph-satisfactory" name="ph_satisfactory" min="0" value="0" class="positive-field count-input">
+                                <div id="ph-satisfactory-ideal" class="ideal-range" style="display: none;">pH within acceptable range (6.5-8.5)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ph-non-satisfactory">Non Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="ph-non-satisfactory" name="ph_non_satisfactory" min="0" value="0" class="negative-field count-input">
+                                    <select id="ph-non-satisfactory-range" name="ph_non_satisfactory_range" class="range-dropdown" style="display: none;">
+                                        <option value="">Range</option>
+                                        <option value="6.5">6.5</option>
+                                        <option value="6.6">6.6</option>
+                                        <option value="6.7">6.7</option>
+                                        <option value="6.8">6.8</option>
+                                        <option value="6.9">6.9</option>
+                                        <option value="7.0">7.0</option>
+                                        <option value="7.1">7.1</option>
+                                        <option value="7.2">7.2</option>
+                                        <option value="7.3">7.3</option>
+                                        <option value="7.4">7.4</option>
+                                        <option value="7.5">7.5</option>
+                                        <option value="7.6">7.6</option>
+                                        <option value="7.7">7.7</option>
+                                        <option value="7.8">7.8</option>
+                                        <option value="7.9">7.9</option>
+                                        <option value="8.0">8.0</option>
+                                        <option value="8.1">8.1</option>
+                                        <option value="8.2">8.2</option>
+                                        <option value="8.3">8.3</option>
+                                        <option value="8.4">8.4</option>
+                                        <option value="8.5">8.5</option>
+                                        <option value="<6.5">&lt;6.5</option>
+                                        <option value=">8.5">&gt;8.5</option>
+                                    </select>
+                                </div>
+                                <div id="ph-non-satisfactory-warning" class="warning-text" style="display: none;">pH outside acceptable range</div>
+                                <div id="ph-non-satisfactory-low" class="high-level" style="display: none;">pH too low (acidic)</div>
+                                <div id="ph-non-satisfactory-high" class="high-level" style="display: none;">pH too high (alkaline)</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="remarks">Remarks</label>
                         <textarea id="remarks" rows="3" placeholder="Enter any observations..."></textarea>
@@ -853,19 +978,141 @@
 
         <div class="form-container">
             <h2>Recent Submissions</h2>
+
+            <!-- Search and Filter Controls -->
+            <div style="background: var(--container-bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ddd;">
+                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; margin-bottom: 1rem; align-items: center;">
+                    <div style="position: relative;">
+                        <input type="text" id="search-input" placeholder="Search by water supply, agency, or sampling point..."
+                               style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+                        <div id="search-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; display: none; z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <button id="clear-search" style="padding: 0.75rem 1rem; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Clear
+                    </button>
+                    <button id="advanced-filters-toggle" style="padding: 0.75rem 1rem; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Filters ▼
+                    </button>
+                </div>
+
+                <!-- Advanced Filters Panel -->
+                <div id="advanced-filters" style="display: none; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Time Period:</label>
+                            <select id="time-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Supply Type:</label>
+                            <select id="type-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Types</option>
+                                <option value="treated">Treated</option>
+                                <option value="untreated">Untreated</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Agency:</label>
+                            <select id="agency-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Agencies</option>
+                                <option value="NWC">NWC</option>
+                                <option value="MOH">MOH</option>
+                                <option value="WRHA">WRHA</option>
+                                <option value="Other Government Agency">Other Gov</option>
+                            </select>
+                        </div>
+                        <div id="custom-date-range" style="display: none; grid-column: 1 / -1;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">From:</label>
+                                    <input type="date" id="date-from" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">To:</label>
+                                    <input type="date" id="date-to" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button id="apply-filters" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; margin-right: 0.5rem;">
+                            Apply Filters
+                        </button>
+                        <button id="reset-filters" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div id="recent-submissions-list">
                 <p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>
             </div>
         </div>
     </div>
 
-    <script>
+    <!-- Tool Kit Modal - Compact Design -->
+    <div id="toolkitModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px; max-height: 80vh;">
+            <div class="modal-header">
+                <h2>🧰 Tool Kit - Inspector Resources</h2>
+                <span class="close" onclick="closeToolKit()">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1rem;">
+                <div id="documentsList" style="min-height: 50px;">
+                    <!-- Documents will be loaded here dynamically -->
+                </div>
 
+                <!-- Expandable Document Preview -->
+                <div id="documentPreview" style="display: none; margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 id="previewTitle" style="margin: 0;">Document Preview</h4>
+                        <button onclick="closeDocumentPreview()" style="background: #6c757d; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">
+                            Close Preview
+                        </button>
+                    </div>
+                    <div style="border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                        <iframe id="documentViewer"
+                                style="width: 100%; height: 400px; border: none;">
+                        </iframe>
+                    </div>
+                    <div id="documentActions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                        <!-- Action buttons will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Details Modal -->
+    <div id="submissionDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 95vw; max-height: 95vh;">
+            <div class="modal-header">
+                <h2>📋 Inspection Details</h2>
+                <span class="close" onclick="window.dashboardInstance.closeSubmissionDetails()">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1rem;">
+                <div id="submissionDetailsContent">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
         class TrelawnyDashboard {
             constructor() {
                 this.supplies = [];
                 this.currentSupply = null;
                 this.submissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+                this.allSubmissions = [];
+                this.filteredSubmissions = [];
+                this.searchTimeout = null;
                 this.init();
             }
 
@@ -945,6 +1192,7 @@
                 document.getElementById('supply').addEventListener('change', () => this.selectSupply());
                 document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
                 document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
+                document.getElementById('toolkitBtn').addEventListener('click', () => this.openToolKit());
                 // Auto-calculate chlorine totals and handle range warnings
                 ['chlorine-positive', 'chlorine-negative'].forEach(id => {
                     document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
@@ -957,15 +1205,28 @@
 
                 // Handle bacteriological positive input for urgent warnings
                 document.getElementById('bacteriological-positive').addEventListener('input', () => this.handleBacteriologicalChange());
+
+                // Handle pH test inputs and range changes
+                document.getElementById('ph-non-satisfactory').addEventListener('input', this.handlePhChange.bind(this));
+                document.getElementById('ph-non-satisfactory-range').addEventListener('change', this.handlePhRangeChange.bind(this));
+
+                // Search and filter event listeners
+                document.getElementById('search-input').addEventListener('input', (e) => this.handleSearch(e.target.value));
+                document.getElementById('clear-search').addEventListener('click', () => this.clearSearch());
+                document.getElementById('advanced-filters-toggle').addEventListener('click', () => this.toggleFilters());
+                document.getElementById('time-filter').addEventListener('change', (e) => this.handleTimeFilterChange(e.target.value));
+                document.getElementById('apply-filters').addEventListener('click', () => this.applyFilters());
+                document.getElementById('reset-filters').addEventListener('click', () => this.resetFilters());
             }
 
             setToday() {
                 document.getElementById('submission-date').value = new Date().toISOString().split('T')[0];
             }
 
-            selectSupply() {
+            async selectSupply() {
                 const supplyValue = document.getElementById('supply').value;
                 const facilityTypeGroup = document.getElementById('facility-type-group');
+                const samplingPointLoading = document.getElementById('sampling-point-loading');
 
                 if (!supplyValue) {
                     document.getElementById('submission-form-section').classList.add('hidden');
@@ -973,6 +1234,9 @@
                     this.hideSamplingPoints();
                     return;
                 }
+
+                // Show loading spinner
+                samplingPointLoading.style.display = 'inline-block';
 
                 // Handle "Other Governments" option
                 if (supplyValue === 'other-governments') {
@@ -984,17 +1248,21 @@
                     };
                     document.getElementById('selected-supply-name').textContent = 'Other Governments';
                     document.getElementById('selected-supply-info').textContent = 'Other Government Agency • Treated';
+                    this.hideSamplingPoints();
+                    samplingPointLoading.style.display = 'none';
+                    document.getElementById('submission-form-section').classList.remove('hidden');
                 } else {
                     const id = parseInt(supplyValue);
                     this.currentSupply = this.supplies.find(s => s.id === id);
                     document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
                     document.getElementById('selected-supply-info').textContent =
                         `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
-                }
 
-                // Always show sampling points section when a supply is selected
-                this.showSamplingPoints();
-                this.loadSamplingPoints(supplyValue);
+                    // Load sampling points and show section
+                    await this.loadSamplingPoints(id);
+                    samplingPointLoading.style.display = 'none';
+                    this.showSamplingPoints();
+                }
 
                 // Show/hide facility type dropdown for MOH supplies
                 if (this.currentSupply.agency === 'MOH') {
@@ -1104,6 +1372,57 @@
                 }
             }
 
+            handlePhChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('ph-non-satisfactory').value) || 0;
+                const rangeDropdown = document.getElementById('ph-non-satisfactory-range');
+
+                if (nonSatisfactoryValue > 0) {
+                    rangeDropdown.style.display = 'inline';
+                } else {
+                    rangeDropdown.style.display = 'none';
+                    rangeDropdown.value = '';
+                    this.hidePhWarnings();
+                }
+            }
+
+            handlePhRangeChange() {
+                const rangeValue = document.getElementById('ph-non-satisfactory-range').value;
+                this.updatePhStatusForRange(rangeValue);
+            }
+
+            updatePhStatusForRange(rangeValue) {
+                const elements = {
+                    warning: document.getElementById('ph-non-satisfactory-warning'),
+                    low: document.getElementById('ph-non-satisfactory-low'),
+                    high: document.getElementById('ph-non-satisfactory-high')
+                };
+
+                // Hide all indicators first
+                this.hidePhWarnings();
+
+                if (!rangeValue) return;
+
+                if (rangeValue === '<6.5' || parseFloat(rangeValue) < 6.5) {
+                    elements.low.style.display = 'block';
+                } else if (rangeValue === '>8.5' || parseFloat(rangeValue) > 8.5) {
+                    elements.high.style.display = 'block';
+                } else {
+                    // pH is within range but marked as non-satisfactory (might be edge case)
+                    elements.warning.style.display = 'block';
+                }
+            }
+
+            hidePhWarnings() {
+                const elements = [
+                    'ph-non-satisfactory-warning',
+                    'ph-non-satisfactory-low',
+                    'ph-non-satisfactory-high'
+                ];
+                elements.forEach(id => {
+                    document.getElementById(id).style.display = 'none';
+                });
+            }
+
             async submit(e) {
                 e.preventDefault();
 
@@ -1128,6 +1447,9 @@
                     bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
                     bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
                     isolated_organism: document.getElementById('isolated-organism').value || '',
+                    ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
+                    ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
+                    ph_non_satisfactory_range: document.getElementById('ph-non-satisfactory-range').value || '',
                     remarks: document.getElementById('remarks').value || '',
                     facility_type: document.getElementById('facility-type').value || ''
                 };
@@ -1156,20 +1478,12 @@
             async loadSamplingPoints(supplyId) {
                 try {
                     const response = await fetch(`/api/sampling-points/${supplyId}`);
-                    if (response.ok) {
-                        const samplingPoints = await response.json();
-                        if (samplingPoints.length > 0) {
-                            this.populateSamplingPointsDropdown(samplingPoints);
-                            this.showSamplingPoints();
-                        } else {
-                            this.hideSamplingPoints();
-                        }
-                    } else {
-                        this.hideSamplingPoints();
-                    }
+                    const samplingPoints = await response.json();
+                    console.log(`Sampling points loaded for supply ${supplyId}:`, samplingPoints.length);
+                    this.populateSamplingPointsDropdown(samplingPoints);
                 } catch (error) {
                     console.error('Error loading sampling points:', error);
-                    this.hideSamplingPoints();
+                    this.populateSamplingPointsDropdown([]); // Reset dropdown even if API fails
                 }
             }
 
@@ -1226,11 +1540,134 @@
                 try {
                     const response = await fetch('/api/my-submissions');
                     const submissions = await response.json();
-                    this.displaySubmissions(submissions);
+                    this.allSubmissions = submissions;
+                    this.filteredSubmissions = [...submissions];
+                    this.displaySubmissions(this.filteredSubmissions);
                 } catch (error) {
                     console.error('Failed to load submissions:', error);
+                    this.allSubmissions = [];
+                    this.filteredSubmissions = [];
                     this.displaySubmissions([]);
                 }
+            }
+
+            handleSearch(query) {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.performSearch(query);
+                }, 300);
+            }
+
+            performSearch(query) {
+                if (!query.trim()) {
+                    this.filteredSubmissions = [...this.allSubmissions];
+                } else {
+                    const searchTerm = query.toLowerCase();
+                    this.filteredSubmissions = this.allSubmissions.filter(submission =>
+                        submission.supply_name.toLowerCase().includes(searchTerm) ||
+                        submission.agency.toLowerCase().includes(searchTerm) ||
+                        (submission.sampling_point_name && submission.sampling_point_name.toLowerCase().includes(searchTerm)) ||
+                        (submission.facility_type && submission.facility_type.toLowerCase().includes(searchTerm)) ||
+                        (submission.remarks && submission.remarks.toLowerCase().includes(searchTerm))
+                    );
+                }
+                this.applyCurrentFilters();
+            }
+
+            clearSearch() {
+                document.getElementById('search-input').value = '';
+                this.filteredSubmissions = [...this.allSubmissions];
+                this.applyCurrentFilters();
+            }
+
+            toggleFilters() {
+                const filtersPanel = document.getElementById('advanced-filters');
+                const toggleBtn = document.getElementById('advanced-filters-toggle');
+
+                if (filtersPanel.style.display === 'none') {
+                    filtersPanel.style.display = 'block';
+                    toggleBtn.textContent = 'Filters ▲';
+                } else {
+                    filtersPanel.style.display = 'none';
+                    toggleBtn.textContent = 'Filters ▼';
+                }
+            }
+
+            handleTimeFilterChange(value) {
+                const customRange = document.getElementById('custom-date-range');
+                if (value === 'custom') {
+                    customRange.style.display = 'block';
+                } else {
+                    customRange.style.display = 'none';
+                }
+            }
+
+            applyFilters() {
+                this.applyCurrentFilters();
+            }
+
+            applyCurrentFilters() {
+                let filtered = [...this.filteredSubmissions];
+
+                // Time filter
+                const timeFilter = document.getElementById('time-filter').value;
+                if (timeFilter !== 'all') {
+                    const now = new Date();
+                    let cutoffDate;
+
+                    switch (timeFilter) {
+                        case 'today':
+                            cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                            break;
+                        case 'week':
+                            cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            break;
+                        case 'month':
+                            cutoffDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                            break;
+                        case 'custom':
+                            const fromDate = document.getElementById('date-from').value;
+                            const toDate = document.getElementById('date-to').value;
+                            if (fromDate && toDate) {
+                                filtered = filtered.filter(s => {
+                                    const submissionDate = new Date(s.created_at);
+                                    return submissionDate >= new Date(fromDate) && submissionDate <= new Date(toDate + 'T23:59:59');
+                                });
+                            }
+                            break;
+                    }
+
+                    if (timeFilter !== 'custom') {
+                        filtered = filtered.filter(s => new Date(s.created_at) >= cutoffDate);
+                    }
+                }
+
+                // Type filter
+                const typeFilter = document.getElementById('type-filter').value;
+                if (typeFilter !== 'all') {
+                    filtered = filtered.filter(s => s.type === typeFilter);
+                }
+
+                // Agency filter
+                const agencyFilter = document.getElementById('agency-filter').value;
+                if (agencyFilter !== 'all') {
+                    filtered = filtered.filter(s => s.agency === agencyFilter);
+                }
+
+                this.displaySubmissions(filtered);
+            }
+
+            resetFilters() {
+                document.getElementById('search-input').value = '';
+                document.getElementById('time-filter').value = 'all';
+                document.getElementById('type-filter').value = 'all';
+                document.getElementById('agency-filter').value = 'all';
+                document.getElementById('date-from').value = '';
+                document.getElementById('date-to').value = '';
+                document.getElementById('custom-date-range').style.display = 'none';
+
+                this.filteredSubmissions = [...this.allSubmissions];
+                this.displaySubmissions(this.filteredSubmissions);
             }
 
             displaySubmissions(submissions = []) {
@@ -1242,9 +1679,15 @@
 
                 container.innerHTML = submissions.slice(0, 10).map(s => `
                     <div class="submission-card">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
                             <strong>${s.supply_name}</strong>
-                            <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
+                            <div style="display:flex;gap:10px;align-items:center;">
+                                <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
+                                <button onclick="window.dashboardInstance.viewSubmission(${s.id})"
+                                        style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:3px;font-size:12px;cursor:pointer;">
+                                    View
+                                </button>
+                            </div>
                         </div>
                         <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
                             ${s.agency}${s.facility_type ? ` (${s.facility_type})` : ''} • ${s.visits} visit(s) • ${s.type}
@@ -1260,6 +1703,11 @@
                             <div style="color:var(--positive-color);">B+: ${s.bacteriological_positive}${s.isolated_organism ? ` (${s.isolated_organism})` : ''}</div>
                             <div style="color:var(--negative-color);">B-: ${s.bacteriological_negative}</div>
                             <div style="color:#ffc107;">B Pending: ${s.bacteriological_pending}</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;margin-top:0.5rem;">
+                            <div style="color:var(--positive-color);">pH+: ${s.ph_satisfactory || 0}</div>
+                            <div style="color:var(--negative-color);">pH-: ${s.ph_non_satisfactory || 0}</div>
+                            ${s.ph_non_satisfactory_range ? `<div style="color:#ffc107;">Range: ${s.ph_non_satisfactory_range}</div>` : '<div></div>'}
                         </div>
                         ${s.remarks ? `<p style="margin-top:0.5rem;font-size:13px;color:#666;"><strong>Remarks:</strong> ${s.remarks}</p>` : ''}
                     </div>
@@ -1313,6 +1761,199 @@
                 modal.style.display = 'none';
             }
 
+            openToolKit() {
+                document.getElementById('toolkitModal').style.display = 'block';
+                this.loadDocuments();
+            }
+
+            async loadDocuments() {
+                try {
+                    const response = await fetch('/api/documents');
+                    const documents = await response.json();
+                    const documentsList = document.getElementById('documentsList');
+
+                    if (documents.length === 0) {
+                        documentsList.innerHTML = '<p style="text-align: center; color: #666; margin: 20px 0;">No documents available</p>';
+                        return;
+                    }
+
+                    documentsList.innerHTML = `
+                        <h4 style="margin-bottom: 1rem; color: #333;">Available Documents</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            ${documents.map(doc => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef;">
+                                    <div>
+                                        <span style="font-weight: 500; color: #333;">📄 ${doc.original_name}</span>
+                                        <div style="font-size: 12px; color: #666; margin-top: 0.25rem;">
+                                            Uploaded: ${new Date(doc.created_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button onclick="showDocumentPreview('${doc.filename}', '${doc.original_name}')"
+                                                style="background: #007bff; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 3px; cursor: pointer; font-size: 13px;">
+                                            👁️ View
+                                        </button>
+                                        <a href="/static/documents/${doc.filename}" download="${doc.original_name}"
+                                           style="background: #28a745; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 3px; cursor: pointer; font-size: 13px; text-decoration: none;">
+                                            📥 Download
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error loading documents:', error);
+                    document.getElementById('documentsList').innerHTML = '<p style="color: red;">Error loading documents</p>';
+                }
+            }
+
+            async viewSubmission(submissionId) {
+                try {
+                    const response = await fetch(`/api/submission/${submissionId}`);
+                    if (response.ok) {
+                        const submission = await response.json();
+                        this.showSubmissionDetails(submission);
+                    } else {
+                        console.error('Failed to fetch submission details');
+                    }
+                } catch (error) {
+                    console.error('Error viewing submission:', error);
+                }
+            }
+
+            formatDateTime(dateString) {
+                return new Date(dateString).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+
+            showSubmissionDetails(submission) {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                `;
+
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    border-radius: 10px;
+                    max-width: 800px;
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                `;
+
+                content.innerHTML = `
+                    <div style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
+                            <h2 style="color: #333; margin: 0;">Water Quality Inspection Details</h2>
+                            <button onclick="this.closest('.modal').remove()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Close</button>
+                        </div>
+
+                        <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem; border-left: 4px solid #667eea;">
+                            <h3 style="color: #333; font-size: 18px; margin-bottom: 0.5rem;">${submission.supply_name}</h3>
+                            <p style="color: #666; margin: 0;">${submission.agency} • ${submission.type.charAt(0).toUpperCase() + submission.type.slice(1)} Supply</p>
+                            ${submission.sampling_point_name ? `<p style="color: #666; margin: 0;"><strong>Sampling Point:</strong> ${submission.sampling_point_name} ${submission.sampling_point_location ? `(${submission.sampling_point_location})` : ''}</p>` : ''}
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Submission Date</label>
+                                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; color: #000; font-weight: bold;">${submission.submission_date}</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Number of Visits</label>
+                                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; color: #000; font-weight: bold;">${submission.visits}</div>
+                            </div>
+                        </div>
+
+                        ${submission.type === 'treated' ? `
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <h3 style="color: #333; margin-bottom: 1rem; font-size: 16px;">Chlorine Residual Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Total Tests</label>
+                                    <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa; color: #000; font-weight: bold;">${submission.chlorine_total}</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Positive</label>
+                                    <div style="padding: 10px; border: 1px solid #28a745; border-radius: 5px; background: #d4edda; color: #000; font-weight: bold;">${submission.chlorine_positive}</div>
+                                    ${submission.chlorine_positive_range ? `<small style="color: #28a745; font-weight: bold;">Range: ${submission.chlorine_positive_range}</small>` : ''}
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Negative</label>
+                                    <div style="padding: 10px; border: 1px solid #dc3545; border-radius: 5px; background: #f8d7da; color: #000; font-weight: bold;">${submission.chlorine_negative}</div>
+                                    ${submission.chlorine_negative_range ? `<small style="color: #dc3545; font-weight: bold;">Range: ${submission.chlorine_negative_range}</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <h3 style="color: #333; margin-bottom: 1rem; font-size: 16px;">Bacteriological Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Positive</label>
+                                    <div style="padding: 10px; border: 1px solid #28a745; border-radius: 5px; background: #d4edda; color: #000; font-weight: bold;">${submission.bacteriological_positive}</div>
+                                    ${submission.isolated_organism ? `<small style="color: #28a745; font-weight: bold;">Organism: ${submission.isolated_organism}</small>` : ''}
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Negative</label>
+                                    <div style="padding: 10px; border: 1px solid #dc3545; border-radius: 5px; background: #f8d7da; color: #000; font-weight: bold;">${submission.bacteriological_negative}</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Result Pending</label>
+                                    <div style="padding: 10px; border: 1px solid #ffc107; border-radius: 5px; background: #fff3cd; color: #000; font-weight: bold;">${submission.bacteriological_pending}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${submission.remarks ? `
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 600;">Remarks</label>
+                            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white; min-height: 60px; color: #000; font-weight: bold;">${submission.remarks}</div>
+                        </div>
+                        ` : ''}
+
+                        <div style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                            <small style="color: #666;">Submitted on ${this.formatDateTime(submission.created_at)}</small>
+                        </div>
+                    </div>
+                `;
+
+                modal.className = 'modal';
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            closeSubmissionDetails() {
+                document.getElementById('submissionDetailsModal').style.display = 'none';
+            }
+
             toggleTheme() {
                 const current = document.documentElement.getAttribute('data-theme') || 'light';
                 const next = current === 'light' ? 'dark' : 'light';
@@ -1327,6 +1968,70 @@
         function incrementVisits() {
             const input = document.getElementById('visits');
             input.value = parseInt(input.value) + 1;
+        }
+
+        // Tool Kit Functions
+        function closeToolKit() {
+            document.getElementById('toolkitModal').style.display = 'none';
+            closeDocumentPreview(); // Also close any open preview
+        }
+
+        function showDocumentPreview(filename, originalName) {
+            const preview = document.getElementById('documentPreview');
+            const viewer = document.getElementById('documentViewer');
+            const title = document.getElementById('previewTitle');
+            const actions = document.getElementById('documentActions');
+
+            // Set up the preview
+            title.textContent = originalName;
+            viewer.src = `/static/documents/${filename}`;
+
+            // Set up action buttons
+            actions.innerHTML = `
+                <a href="/static/documents/${filename}" target="_blank"
+                   style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; text-decoration: none; font-size: 13px;">
+                    🔍 Full Screen
+                </a>
+                <a href="/static/documents/${filename}" download="${originalName}"
+                   style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; text-decoration: none; font-size: 13px;">
+                    📥 Download
+                </a>
+                <button onclick="printDocument('${filename}')"
+                        style="background: #ffc107; color: #212529; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; font-size: 13px;">
+                    🖨️ Print
+                </button>
+                <button onclick="openForEditing('${filename}', '${originalName}')"
+                        style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; font-size: 13px;">
+                    ✏️ Fill Form
+                </button>
+            `;
+
+            // Show the preview section
+            preview.style.display = 'block';
+
+            // Scroll to preview if needed
+            preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeDocumentPreview() {
+            document.getElementById('documentPreview').style.display = 'none';
+        }
+
+        function printDocument(filename) {
+            window.open(`/static/documents/${filename}`, '_blank');
+        }
+
+        function openForEditing(filename, originalName) {
+            window.open(`/static/documents/${filename}`, '_blank');
+            alert('💡 Tip: You can fill out the PDF form using your browser\'s built-in PDF tools or download it to edit with Adobe Acrobat.');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('toolkitModal');
+            if (event.target === modal) {
+                closeToolKit();
+            }
         }
 
         function closeWaterModal() {
@@ -1360,6 +2065,7 @@
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
             dashboardInstance = new TrelawnyDashboard();
+            window.dashboardInstance = dashboardInstance;
         });
     </script>
 </body>
