@@ -992,7 +992,8 @@
                         `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
                 }
 
-                // Load sampling points for this supply
+                // Always show sampling points section when a supply is selected
+                this.showSamplingPoints();
                 this.loadSamplingPoints(supplyValue);
 
                 // Show/hide facility type dropdown for MOH supplies

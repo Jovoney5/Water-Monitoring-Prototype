@@ -2059,7 +2059,8 @@
                     document.getElementById('chlorine-negative-range').disabled = false;
                 }
 
-                // Load sampling points for this supply
+                // Always show sampling points section when a supply is selected
+                this.showSamplingPoints();
                 this.loadSamplingPoints(supplyId);
 
                 // Show the form

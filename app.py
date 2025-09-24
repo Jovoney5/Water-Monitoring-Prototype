@@ -382,31 +382,30 @@ def _populate_initial_data(conn, cursor):
                 VALUES (?, ?, ?, ?, ?)
             ''', supplies)
 
-    # Insert sampling points for all water supplies
+    # Insert sampling points for all water supplies (always recreate)
+    # First, clear existing sampling points
     if USE_POSTGRESQL:
-        cursor.execute("SELECT COUNT(*) FROM sampling_points")
-        point_count = cursor.fetchone()[0]
+        cursor.execute("DELETE FROM sampling_points")
     else:
-        cursor.execute("SELECT COUNT(*) FROM sampling_points")
-        point_count = cursor.fetchone()[0]
+        cursor.execute("DELETE FROM sampling_points")
 
-    if point_count == 0:
-        sampling_points = []
+    # Always insert sampling points
+    sampling_points = []
 
-        # Helper function to get supply ID
-        def get_supply_id(name):
-            if USE_POSTGRESQL:
-                cursor.execute('SELECT id FROM water_supplies WHERE name = %s', (name,))
-            else:
-                cursor.execute('SELECT id FROM water_supplies WHERE name = ?', (name,))
-            result = cursor.fetchone()
-            return result[0] if result else None
+    # Helper function to get supply ID
+    def get_supply_id(name):
+        if USE_POSTGRESQL:
+            cursor.execute('SELECT id FROM water_supplies WHERE name = %s', (name,))
+        else:
+            cursor.execute('SELECT id FROM water_supplies WHERE name = ?', (name,))
+        result = cursor.fetchone()
+        return result[0] if result else None
 
-        # Westmoreland - Roaring River sampling points
-        roaring_river_1_id = get_supply_id('Roaring River 1')
-        roaring_river_2_id = get_supply_id('Roaring River 2')
+    # Westmoreland - Roaring River sampling points
+    roaring_river_1_id = get_supply_id('Roaring River 1')
+    roaring_river_2_id = get_supply_id('Roaring River 2')
 
-        if roaring_river_1_id and roaring_river_2_id:
+    if roaring_river_1_id and roaring_river_2_id:
             westmoreland_points = [
                 # Roaring River 1 sampling points
                 (roaring_river_1_id, 'tap@ Health Department (old plant)', 'roaring river', 'Health Department tap from old plant'),
