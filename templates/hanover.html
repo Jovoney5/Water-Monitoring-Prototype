@@ -175,6 +175,41 @@
         .high-level { color: #dc3545; font-weight: bold; font-size: 12px; margin-top: 5px; }
         .very-high-level { color: #721c24; font-weight: bold; font-size: 12px; margin-top: 5px; }
 
+        .selected-parameters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .parameter-tag {
+            background: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 2px solid #dc3545;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        .parameter-tag .remove-param {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .parameter-tag .remove-param:hover {
+            color: #ffcccc;
+        }
+
         .submit-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -208,11 +243,49 @@
             border: 2px solid #444 !important;
         }
 
-        /* Water-themed Success Modal - same as other parishes */
-        .water-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(6, 19, 35, 0.95) 0%, rgba(0, 5, 15, 0.98) 100%); backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.4s ease-out; overflow: hidden; align-items: center; justify-content: center; }
-        .water-modal.show { opacity: 1; }
-        .water-modal-content { background: linear-gradient(135deg, rgba(15, 30, 55, 0.95) 0%, rgba(25, 40, 65, 0.9) 50%, rgba(35, 50, 75, 0.95) 100%); margin: 2% auto; padding: 0; border: 2px solid rgba(0, 150, 255, 0.4); border-radius: 30px; width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 30px 60px rgba(0, 100, 200, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(0, 150, 255, 0.2); position: relative; scrollbar-width: thin; scrollbar-color: rgba(0, 150, 255, 0.5) transparent; transform: scale(0.8) translateY(-20px); transition: transform 0.4s ease-out, opacity 0.4s ease-out; }
-        .water-modal.show .water-modal-content { transform: scale(1) translateY(0); }
+        /* Futuristic Water-themed Success Modal */
+        .water-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(6, 19, 35, 0.95) 0%, rgba(0, 5, 15, 0.98) 100%);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+        }
+        .water-modal.show {
+            opacity: 1;
+        }
+        .water-modal-content {
+            background: linear-gradient(135deg, rgba(15, 30, 55, 0.95) 0%, rgba(25, 40, 65, 0.9) 50%, rgba(35, 50, 75, 0.95) 100%);
+            margin: 2% auto;
+            padding: 0;
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 30px;
+            width: 95%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 30px 60px rgba(0, 100, 200, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(0, 150, 255, 0.2);
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 150, 255, 0.5) transparent;
+            transform: scale(0.3) translateY(-50px) rotateX(15deg);
+            transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            filter: blur(8px);
+        }
+        .water-modal.show .water-modal-content {
+            transform: scale(1) translateY(0) rotateX(0deg);
+            filter: blur(0px);
+        }
         .water-modal-content::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; background: linear-gradient(45deg, transparent, rgba(0, 150, 255, 0.5), rgba(0, 200, 255, 0.7), rgba(0, 150, 255, 0.5), transparent); border-radius: 30px; animation: borderFlow 4s linear infinite; z-index: -1; }
         .water-modal-header { background: linear-gradient(135deg, rgba(0, 120, 255, 0.9) 0%, rgba(0, 80, 200, 0.95) 50%, rgba(0, 60, 150, 0.9) 100%); padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden; border-bottom: 2px solid rgba(0, 150, 255, 0.3); }
         .water-modal-header::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); animation: headerScan 5s ease-in-out infinite; }
@@ -474,33 +547,21 @@
                                 <label for="ph-non-satisfactory">Non Satisfactory</label>
                                 <div class="input-with-dropdown">
                                     <input type="number" id="ph-non-satisfactory" name="ph_non_satisfactory" min="0" value="0" class="negative-field count-input">
-                                    <select id="ph-non-satisfactory-range" name="ph_non_satisfactory_range" class="range-dropdown" style="display: none;">
-                                        <option value="">Range</option>
-                                        <option value="6.5">6.5</option>
-                                        <option value="6.6">6.6</option>
-                                        <option value="6.7">6.7</option>
-                                        <option value="6.8">6.8</option>
-                                        <option value="6.9">6.9</option>
-                                        <option value="7.0">7.0</option>
-                                        <option value="7.1">7.1</option>
-                                        <option value="7.2">7.2</option>
-                                        <option value="7.3">7.3</option>
-                                        <option value="7.4">7.4</option>
-                                        <option value="7.5">7.5</option>
-                                        <option value="7.6">7.6</option>
-                                        <option value="7.7">7.7</option>
-                                        <option value="7.8">7.8</option>
-                                        <option value="7.9">7.9</option>
-                                        <option value="8.0">8.0</option>
-                                        <option value="8.1">8.1</option>
-                                        <option value="8.2">8.2</option>
-                                        <option value="8.3">8.3</option>
-                                        <option value="8.4">8.4</option>
-                                        <option value="8.5">8.5</option>
-                                        <option value="<6.5">&lt;6.5</option>
-                                        <option value=">8.5">&gt;8.5</option>
+                                    <select id="ph-non-satisfactory-range" name="ph_non_satisfactory_range" class="range-dropdown">
+                                        <option value="">Parameters</option>
+                                        <option value="Cond">Cond</option>
+                                        <option value="TDS">TDS</option>
+                                        <option value="Alk">Alk</option>
+                                        <option value="Har">Har</option>
+                                        <option value="PO3/4-R">PO₃/₄-R</option>
+                                        <option value="NO3-N">NO₃-N</option>
+                                        <option value="cHLD">cHLD</option>
+                                        <option value="SO4">SO₄</option>
+                                        <option value="Turb">Turb</option>
+                                        <option value="Sal">Sal</option>
                                     </select>
                                 </div>
+                                <div id="ph-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
                                 <div id="ph-non-satisfactory-warning" class="warning-text" style="display: none;">pH outside acceptable range</div>
                                 <div id="ph-non-satisfactory-low" class="high-level" style="display: none;">pH too low (acidic)</div>
                                 <div id="ph-non-satisfactory-high" class="high-level" style="display: none;">pH too high (alkaline)</div>
@@ -619,6 +680,8 @@
             constructor() {
                 this.supplies = [];
                 this.currentSupply = null;
+                this.selectedParameters = [];
+                this.allParameters = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'Turb', 'Sal'];
                 this.init();
             }
 
@@ -692,7 +755,7 @@
 
                 // Handle pH test inputs and range changes
                 document.getElementById('ph-non-satisfactory').addEventListener('input', this.handlePhChange.bind(this));
-                document.getElementById('ph-non-satisfactory-range').addEventListener('change', this.handlePhRangeChange.bind(this));
+                document.getElementById('ph-non-satisfactory-range').addEventListener('change', this.handleParameterSelection.bind(this));
 
                 // Handle Tool Kit button
                 document.getElementById('toolkitBtn').addEventListener('click', () => this.openToolKit());
@@ -887,15 +950,83 @@
 
             handlePhChange() {
                 const nonSatisfactoryValue = parseInt(document.getElementById('ph-non-satisfactory').value) || 0;
-                const rangeDropdown = document.getElementById('ph-non-satisfactory-range');
 
-                if (nonSatisfactoryValue > 0) {
-                    rangeDropdown.style.display = 'inline';
-                } else {
-                    rangeDropdown.style.display = 'none';
-                    rangeDropdown.value = '';
+                if (nonSatisfactoryValue <= 0) {
+                    // Clear all parameter selections when value is 0
+                    this.selectedParameters = [];
+                    this.renderParameterTags();
+                    this.updateParameterDropdown();
                     this.hidePhWarnings();
                 }
+            }
+
+            handleParameterSelection() {
+                const dropdown = document.getElementById('ph-non-satisfactory-range');
+                const selectedValue = dropdown.value;
+
+                if (selectedValue && !this.selectedParameters.includes(selectedValue)) {
+                    this.selectedParameters.push(selectedValue);
+                    this.renderParameterTags();
+                    this.updateParameterDropdown();
+                }
+
+                // Reset dropdown to default
+                dropdown.value = '';
+            }
+
+            updateParameterDropdown() {
+                const dropdown = document.getElementById('ph-non-satisfactory-range');
+                const availableParameters = this.allParameters.filter(param => !this.selectedParameters.includes(param));
+
+                // Clear current options except the first one
+                dropdown.innerHTML = '<option value="">Parameters</option>';
+
+                // Add available parameters with proper subscripts
+                availableParameters.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param;
+
+                    // Add proper subscripts for display
+                    if (param === 'PO3/4-R') {
+                        option.textContent = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        option.textContent = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        option.textContent = 'SO₄';
+                    } else {
+                        option.textContent = param;
+                    }
+
+                    dropdown.appendChild(option);
+                });
+            }
+
+            renderParameterTags() {
+                const container = document.getElementById('ph-selected-parameters');
+                container.innerHTML = this.selectedParameters.map(param => {
+                    // Display with proper subscripts
+                    let displayParam = param;
+                    if (param === 'PO3/4-R') {
+                        displayParam = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        displayParam = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        displayParam = 'SO₄';
+                    }
+
+                    return `
+                        <div class="parameter-tag">
+                            ${displayParam}
+                            <button type="button" class="remove-param" onclick="dashboard.removeParameter('${param}')">×</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            removeParameter(param) {
+                this.selectedParameters = this.selectedParameters.filter(p => p !== param);
+                this.renderParameterTags();
+                this.updateParameterDropdown();
             }
 
             handlePhRangeChange() {
@@ -982,7 +1113,7 @@
                     isolated_organism: document.getElementById('isolated-organism').value || '',
                     ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
                     ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
-                    ph_non_satisfactory_range: document.getElementById('ph-non-satisfactory-range').value || '',
+                    ph_non_satisfactory_range: this.selectedParameters.join(', '),
                     remarks: document.getElementById('remarks').value || '',
                     facility_type: document.getElementById('facility-type').value || ''
                 };
@@ -1014,6 +1145,9 @@
                 document.getElementById('facility-type').value = '';
                 document.getElementById('submission-form-section').classList.add('hidden');
                 document.getElementById('facility-type-group').classList.add('hidden');
+                this.selectedParameters = [];
+                this.renderParameterTags();
+                this.updateParameterDropdown();
                 this.hideSamplingPoints();
                 this.setToday();
             }
@@ -1118,11 +1252,14 @@
                 // Set main message
                 waterModalMessage.textContent = 'INSPECTION DATA SUCCESSFULLY TRANSMITTED TO CENTRAL DATABASE';
 
-                // Show modal with smooth fade-in animation
+                // Show modal with futuristic zoom-in fade animation
                 waterModal.style.display = 'flex';
-                setTimeout(() => {
-                    waterModal.classList.add('show');
-                }, 10);
+                // Small delay to ensure display change is processed
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        waterModal.classList.add('show');
+                    });
+                });
             }
 
             showAlert(type, message) {
@@ -1391,11 +1528,13 @@
             }, 400);
         }
 
+        let dashboard;
+
         document.addEventListener('DOMContentLoaded', () => {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-            new HanoverDashboard();
+            dashboard = new HanoverDashboard();
         });
     </script>
 </body>
