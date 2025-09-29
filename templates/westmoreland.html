@@ -902,7 +902,33 @@
                         <div class="test-inputs">
                             <div class="form-group">
                                 <label for="ph-satisfactory">Satisfactory</label>
-                                <input type="number" id="ph-satisfactory" name="ph_satisfactory" min="0" value="0" class="positive-field count-input">
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="ph-satisfactory" name="ph_satisfactory" min="0" value="0" class="positive-field count-input">
+                                    <select id="ph-satisfactory-range" name="ph_satisfactory_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="6.5">6.5</option>
+                                        <option value="6.6">6.6</option>
+                                        <option value="6.7">6.7</option>
+                                        <option value="6.8">6.8</option>
+                                        <option value="6.9">6.9</option>
+                                        <option value="7.0">7.0</option>
+                                        <option value="7.1">7.1</option>
+                                        <option value="7.2">7.2</option>
+                                        <option value="7.3">7.3</option>
+                                        <option value="7.4">7.4</option>
+                                        <option value="7.5">7.5</option>
+                                        <option value="7.6">7.6</option>
+                                        <option value="7.7">7.7</option>
+                                        <option value="7.8">7.8</option>
+                                        <option value="7.9">7.9</option>
+                                        <option value="8.0">8.0</option>
+                                        <option value="8.1">8.1</option>
+                                        <option value="8.2">8.2</option>
+                                        <option value="8.3">8.3</option>
+                                        <option value="8.4">8.4</option>
+                                        <option value="8.5">8.5</option>
+                                    </select>
+                                </div>
                                 <div id="ph-satisfactory-ideal" class="ideal-range" style="display: none;">pH within acceptable range (6.5-8.5)</div>
                             </div>
                             <div class="form-group">
@@ -927,6 +953,116 @@
                                 <div id="ph-non-satisfactory-warning" class="warning-text" style="display: none;">pH outside acceptable range</div>
                                 <div id="ph-non-satisfactory-low" class="high-level" style="display: none;">pH too low (acidic)</div>
                                 <div id="ph-non-satisfactory-high" class="high-level" style="display: none;">pH too high (alkaline)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
+                        <h3>Turbidity Tests (NTU)</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="turbidity-satisfactory">Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="turbidity-satisfactory" name="turbidity_satisfactory" min="0" value="0" class="positive-field count-input">
+                                    <select id="turbidity-satisfactory-range" name="turbidity_satisfactory_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="0.1">0.1</option>
+                                        <option value="0.2">0.2</option>
+                                        <option value="0.3">0.3</option>
+                                        <option value="0.4">0.4</option>
+                                        <option value="0.5">0.5</option>
+                                        <option value="0.6">0.6</option>
+                                        <option value="0.7">0.7</option>
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0">1.0</option>
+                                        <option value="1.5">1.5</option>
+                                        <option value="2.0">2.0</option>
+                                        <option value="2.5">2.5</option>
+                                        <option value="3.0">3.0</option>
+                                        <option value="3.5">3.5</option>
+                                        <option value="4.0">4.0</option>
+                                    </select>
+                                </div>
+                                <div id="turbidity-satisfactory-ideal" class="ideal-range" style="display: none;">Turbidity within acceptable range (≤4.0 NTU)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="turbidity-non-satisfactory">Non Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="turbidity-non-satisfactory" name="turbidity_non_satisfactory" min="0" value="0" class="negative-field count-input">
+                                    <select id="turbidity-non-satisfactory-range" name="turbidity_non_satisfactory_range" class="range-dropdown">
+                                        <option value="">Parameters</option>
+                                        <option value="Cond">Cond</option>
+                                        <option value="TDS">TDS</option>
+                                        <option value="Alk">Alk</option>
+                                        <option value="Har">Har</option>
+                                        <option value="PO3/4-R">PO₃/₄-R</option>
+                                        <option value="NO3-N">NO₃-N</option>
+                                        <option value="cHLD">cHLD</option>
+                                        <option value="SO4">SO₄</option>
+                                        <option value="pH">pH</option>
+                                        <option value="Sal">Sal</option>
+                                    </select>
+                                </div>
+                                <div id="turbidity-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <div id="turbidity-non-satisfactory-warning" class="warning-text" style="display: none;">Turbidity outside acceptable range</div>
+                                <div id="turbidity-non-satisfactory-high" class="high-level" style="display: none;">Turbidity too high (>4.0 NTU)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
+                        <h3>Temperature Tests (°C)</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="temperature-satisfactory">Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="temperature-satisfactory" name="temperature_satisfactory" min="0" value="0" class="positive-field count-input">
+                                    <select id="temperature-satisfactory-range" name="temperature_satisfactory_range" class="range-dropdown">
+                                        <option value="">Range</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                        <option value="22">22</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>
+                                    </select>
+                                </div>
+                                <div id="temperature-satisfactory-ideal" class="ideal-range" style="display: none;">Temperature within acceptable range (15-30°C)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature-non-satisfactory">Non Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="temperature-non-satisfactory" name="temperature_non_satisfactory" min="0" value="0" class="negative-field count-input">
+                                    <select id="temperature-non-satisfactory-range" name="temperature_non_satisfactory_range" class="range-dropdown">
+                                        <option value="">Parameters</option>
+                                        <option value="Cond">Cond</option>
+                                        <option value="TDS">TDS</option>
+                                        <option value="Alk">Alk</option>
+                                        <option value="Har">Har</option>
+                                        <option value="PO3/4-R">PO₃/₄-R</option>
+                                        <option value="NO3-N">NO₃-N</option>
+                                        <option value="cHLD">cHLD</option>
+                                        <option value="SO4">SO₄</option>
+                                        <option value="pH">pH</option>
+                                        <option value="Turb">Turb</option>
+                                        <option value="Sal">Sal</option>
+                                    </select>
+                                </div>
+                                <div id="temperature-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <div id="temperature-non-satisfactory-warning" class="warning-text" style="display: none;">Temperature outside acceptable range</div>
+                                <div id="temperature-non-satisfactory-low" class="high-level" style="display: none;">Temperature too low (<15°C)</div>
+                                <div id="temperature-non-satisfactory-high" class="high-level" style="display: none;">Temperature too high (>30°C)</div>
                             </div>
                         </div>
                     </div>
@@ -1043,7 +1179,10 @@
                 this.supplies = [];
                 this.currentSupply = null;
                 this.selectedParameters = [];
+                this.turbiditySelectedParameters = [];
+                this.temperatureSelectedParameters = [];
                 this.allParameters = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'Turb', 'Sal'];
+                this.allParametersWithPH = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'pH', 'Turb', 'Sal'];
                 this.init();
             }
 
@@ -1116,6 +1255,12 @@
 
                 document.getElementById('ph-non-satisfactory').addEventListener('input', this.handlePhChange.bind(this));
                 document.getElementById('ph-non-satisfactory-range').addEventListener('change', this.handleParameterSelection.bind(this));
+
+                document.getElementById('turbidity-non-satisfactory').addEventListener('input', this.handleTurbidityChange.bind(this));
+                document.getElementById('turbidity-non-satisfactory-range').addEventListener('change', this.handleTurbidityParameterSelection.bind(this));
+
+                document.getElementById('temperature-non-satisfactory').addEventListener('input', this.handleTemperatureChange.bind(this));
+                document.getElementById('temperature-non-satisfactory-range').addEventListener('change', this.handleTemperatureParameterSelection.bind(this));
 
                 document.getElementById('toolkitBtn').addEventListener('click', () => this.openToolKit());
             }
@@ -1387,6 +1532,156 @@
                 this.updateParameterDropdown();
             }
 
+            // Turbidity handlers
+            handleTurbidityChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0;
+
+                if (nonSatisfactoryValue <= 0) {
+                    this.turbiditySelectedParameters = [];
+                    this.renderTurbidityParameterTags();
+                    this.updateTurbidityParameterDropdown();
+                }
+            }
+
+            handleTurbidityParameterSelection() {
+                const dropdown = document.getElementById('turbidity-non-satisfactory-range');
+                const selectedValue = dropdown.value;
+
+                if (selectedValue && !this.turbiditySelectedParameters.includes(selectedValue)) {
+                    this.turbiditySelectedParameters.push(selectedValue);
+                    this.renderTurbidityParameterTags();
+                    this.updateTurbidityParameterDropdown();
+                }
+
+                dropdown.value = '';
+            }
+
+            updateTurbidityParameterDropdown() {
+                const dropdown = document.getElementById('turbidity-non-satisfactory-range');
+                const availableParameters = this.allParametersWithPH.filter(param => !this.turbiditySelectedParameters.includes(param));
+
+                dropdown.innerHTML = '<option value="">Parameters</option>';
+
+                availableParameters.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param;
+
+                    if (param === 'PO3/4-R') {
+                        option.textContent = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        option.textContent = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        option.textContent = 'SO₄';
+                    } else {
+                        option.textContent = param;
+                    }
+
+                    dropdown.appendChild(option);
+                });
+            }
+
+            renderTurbidityParameterTags() {
+                const container = document.getElementById('turbidity-selected-parameters');
+                container.innerHTML = this.turbiditySelectedParameters.map(param => {
+                    let displayParam = param;
+                    if (param === 'PO3/4-R') {
+                        displayParam = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        displayParam = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        displayParam = 'SO₄';
+                    }
+
+                    return `
+                        <div class="parameter-tag">
+                            ${displayParam}
+                            <button type="button" class="remove-param" onclick="dashboard.removeTurbidityParameter('${param}')">×</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            removeTurbidityParameter(param) {
+                this.turbiditySelectedParameters = this.turbiditySelectedParameters.filter(p => p !== param);
+                this.renderTurbidityParameterTags();
+                this.updateTurbidityParameterDropdown();
+            }
+
+            // Temperature handlers
+            handleTemperatureChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('temperature-non-satisfactory').value) || 0;
+
+                if (nonSatisfactoryValue <= 0) {
+                    this.temperatureSelectedParameters = [];
+                    this.renderTemperatureParameterTags();
+                    this.updateTemperatureParameterDropdown();
+                }
+            }
+
+            handleTemperatureParameterSelection() {
+                const dropdown = document.getElementById('temperature-non-satisfactory-range');
+                const selectedValue = dropdown.value;
+
+                if (selectedValue && !this.temperatureSelectedParameters.includes(selectedValue)) {
+                    this.temperatureSelectedParameters.push(selectedValue);
+                    this.renderTemperatureParameterTags();
+                    this.updateTemperatureParameterDropdown();
+                }
+
+                dropdown.value = '';
+            }
+
+            updateTemperatureParameterDropdown() {
+                const dropdown = document.getElementById('temperature-non-satisfactory-range');
+                const availableParameters = this.allParametersWithPH.filter(param => param !== 'Turb').filter(param => !this.temperatureSelectedParameters.includes(param));
+
+                dropdown.innerHTML = '<option value="">Parameters</option>';
+
+                availableParameters.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param;
+
+                    if (param === 'PO3/4-R') {
+                        option.textContent = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        option.textContent = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        option.textContent = 'SO₄';
+                    } else {
+                        option.textContent = param;
+                    }
+
+                    dropdown.appendChild(option);
+                });
+            }
+
+            renderTemperatureParameterTags() {
+                const container = document.getElementById('temperature-selected-parameters');
+                container.innerHTML = this.temperatureSelectedParameters.map(param => {
+                    let displayParam = param;
+                    if (param === 'PO3/4-R') {
+                        displayParam = 'PO₃/₄-R';
+                    } else if (param === 'NO3-N') {
+                        displayParam = 'NO₃-N';
+                    } else if (param === 'SO4') {
+                        displayParam = 'SO₄';
+                    }
+
+                    return `
+                        <div class="parameter-tag">
+                            ${displayParam}
+                            <button type="button" class="remove-param" onclick="dashboard.removeTemperatureParameter('${param}')">×</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            removeTemperatureParameter(param) {
+                this.temperatureSelectedParameters = this.temperatureSelectedParameters.filter(p => p !== param);
+                this.renderTemperatureParameterTags();
+                this.updateTemperatureParameterDropdown();
+            }
+
             handlePhRangeChange() {
                 // Legacy function - now handled by handleParameterSelection
             }
@@ -1473,8 +1768,17 @@
                     bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
                     isolated_organism: document.getElementById('isolated-organism').value || '',
                     ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
+                    ph_satisfactory_range: document.getElementById('ph-satisfactory-range').value || '',
                     ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
                     ph_non_satisfactory_range: this.selectedParameters.join(', '),
+                    turbidity_satisfactory: parseInt(document.getElementById('turbidity-satisfactory').value) || 0,
+                    turbidity_satisfactory_range: document.getElementById('turbidity-satisfactory-range').value || '',
+                    turbidity_non_satisfactory: parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0,
+                    turbidity_non_satisfactory_range: this.turbiditySelectedParameters.join(', '),
+                    temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
+                    temperature_satisfactory_range: document.getElementById('temperature-satisfactory-range').value || '',
+                    temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
+                    temperature_non_satisfactory_range: this.temperatureSelectedParameters.join(', '),
                     remarks: document.getElementById('remarks').value || '',
                     facility_type: document.getElementById('facility-type').value || ''
                 };
@@ -1507,8 +1811,14 @@
                 document.getElementById('submission-form-section').classList.add('hidden');
                 document.getElementById('facility-type-group').classList.add('hidden');
                 this.selectedParameters = [];
+                this.turbiditySelectedParameters = [];
+                this.temperatureSelectedParameters = [];
                 this.renderParameterTags();
                 this.updateParameterDropdown();
+                this.renderTurbidityParameterTags();
+                this.updateTurbidityParameterDropdown();
+                this.renderTemperatureParameterTags();
+                this.updateTemperatureParameterDropdown();
                 this.hideSamplingPoints();
                 this.setToday();
             }
