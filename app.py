@@ -390,6 +390,12 @@ def _populate_initial_data(conn, cursor):
             ('hanover3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'Hanover Inspector C', 'Hanover'),
             # Hanover Admin (password: admin123)
             ('hanover_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'Hanover Administrator', 'Hanover'),
+            # St. James Inspectors (password: inspector123)
+            ('stjames1', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'St. James Inspector A', 'St. James'),
+            ('stjames2', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'St. James Inspector B', 'St. James'),
+            ('stjames3', hashlib.sha256('inspector123'.encode()).hexdigest(), 'inspector', 'St. James Inspector C', 'St. James'),
+            # St. James Admin (password: admin123)
+            ('stjames_admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin', 'St. James Administrator', 'St. James'),
         ]
 
         if USE_POSTGRESQL:
@@ -829,6 +835,8 @@ def index():
             return render_template('trelawny.html')
         elif user_parish == 'Hanover':
             return render_template('hanover.html')
+        elif user_parish == 'St. James':
+            return render_template('st_james.html')
         elif user_parish == 'Westmoreland':
             return render_template('index.html')
         else:
@@ -892,6 +900,20 @@ def westmoreland():
 
     return render_template('westmoreland.html')
 
+@app.route('/st_james')
+def st_james():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Only allow St. James inspectors or any admin to access this dashboard
+    user_parish = session.get('parish', 'Westmoreland')
+    user_role = session.get('role')
+
+    if user_role != 'admin' and user_parish != 'St. James':
+        return redirect(url_for('index'))
+
+    return render_template('st_james.html')
+
 @app.route('/report')
 def report():
     if 'user_id' not in session:
@@ -924,7 +946,7 @@ def login():
                 conn.close()
 
             # Allow users from supported parishes
-            supported_parishes = ['Westmoreland', 'Trelawny', 'Hanover']
+            supported_parishes = ['Westmoreland', 'Trelawny', 'Hanover', 'St. James']
             if user_parish not in supported_parishes:
                 return jsonify({
                     'success': False,

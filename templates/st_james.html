@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trelawny Inspector Dashboard - Water Quality Monitoring</title>
+    <title>St. James Inspector Dashboard - Water Quality Monitoring</title>
     <style>
         :root {
             --bg-color: #f5f5f5;
@@ -309,7 +309,7 @@
             text-align: center;
         }
 
-        .trelawny-analysis-grid {
+        .st_james-analysis-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 0.8rem;
@@ -318,7 +318,7 @@
             z-index: 2;
         }
 
-        .trelawny-analysis-item {
+        .st_james-analysis-item {
             background: rgba(88, 28, 135, 0.4);
             border: 1px solid rgba(147, 51, 234, 0.3);
             border-radius: 10px;
@@ -333,7 +333,7 @@
             justify-content: center;
         }
 
-        .trelawny-analysis-item::before {
+        .st_james-analysis-item::before {
             content: '';
             position: absolute;
             top: 0;
@@ -344,7 +344,7 @@
             animation: scanLines 3s infinite;
         }
 
-        .trelawny-analysis-value {
+        .st_james-analysis-value {
             font-size: 1.1rem;
             font-weight: bold;
             color: #a855f7;
@@ -360,21 +360,21 @@
             overflow-wrap: break-word;
         }
 
-        .trelawny-status-success {
+        .st_james-status-success {
             color: #f97316 !important;
             text-shadow:
                 0 0 15px rgba(249, 115, 22, 0.6),
                 0 0 30px rgba(234, 88, 12, 0.4) !important;
         }
 
-        .trelawny-status-verified {
+        .st_james-status-verified {
             color: #fbbf24 !important;
             text-shadow:
                 0 0 15px rgba(251, 191, 36, 0.6),
                 0 0 30px rgba(245, 158, 11, 0.4) !important;
         }
 
-        .trelawny-analysis-label {
+        .st_james-analysis-label {
             font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.7);
             margin-top: 0.3rem;
@@ -387,7 +387,7 @@
             margin-bottom: 0.3rem;
         }
 
-        .trelawny-header-particles .particle {
+        .st_james-header-particles .particle {
             position: absolute;
             width: 4px;
             height: 4px;
@@ -397,25 +397,25 @@
             box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
         }
 
-        .trelawny-header-particles .particle:nth-child(1) {
+        .st_james-header-particles .particle:nth-child(1) {
             top: 20%;
             left: 20%;
             animation-delay: 0s;
         }
 
-        .trelawny-header-particles .particle:nth-child(2) {
+        .st_james-header-particles .particle:nth-child(2) {
             top: 60%;
             left: 80%;
             animation-delay: 1s;
         }
 
-        .trelawny-header-particles .particle:nth-child(3) {
+        .st_james-header-particles .particle:nth-child(3) {
             top: 40%;
             left: 60%;
             animation-delay: 2s;
         }
 
-        .trelawny-header-scanline {
+        .st_james-header-scanline {
             position: absolute;
             top: 0;
             left: 0;
@@ -425,7 +425,7 @@
             animation: headerScan 3s infinite;
         }
 
-        .trelawny-tech-button {
+        .st_james-tech-button {
             position: relative;
             overflow: hidden;
             border: 2px solid #a855f7 !important;
@@ -445,7 +445,7 @@
             z-index: 10;
         }
 
-        .trelawny-tech-button:hover {
+        .st_james-tech-button:hover {
             background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(147, 51, 234, 0.6)) !important;
             box-shadow:
                 0 0 25px rgba(168, 85, 247, 0.6),
@@ -454,7 +454,7 @@
             border-color: #c084fc !important;
         }
 
-        .trelawny-button-text {
+        .st_james-button-text {
             position: relative;
             z-index: 2;
             font-weight: bold;
@@ -463,7 +463,7 @@
             display: inline-block;
         }
 
-        .trelawny-button-scan {
+        .st_james-button-scan {
             position: absolute;
             top: 0;
             left: -100%;
@@ -702,31 +702,31 @@
     <div id="waterModal" class="water-modal">
         <div class="water-modal-content">
             <div class="water-modal-header">
-                <div class="trelawny-header-particles">
+                <div class="st_james-header-particles">
                     <div class="particle"></div>
                     <div class="particle"></div>
                     <div class="particle"></div>
                 </div>
-                <div class="trelawny-header-scanline"></div>
+                <div class="st_james-header-scanline"></div>
                 <h2>Thank You, Inspector!</h2>
             </div>
             <div class="water-modal-body">
-                <div class="trelawny-analysis-grid">
-                    <div class="trelawny-analysis-item">
-                        <div class="trelawny-analysis-label">INSPECTION STATUS</div>
-                        <div class="trelawny-analysis-value trelawny-status-success">SUBMITTED</div>
+                <div class="st_james-analysis-grid">
+                    <div class="st_james-analysis-item">
+                        <div class="st_james-analysis-label">INSPECTION STATUS</div>
+                        <div class="st_james-analysis-value st_james-status-success">SUBMITTED</div>
                     </div>
-                    <div class="trelawny-analysis-item">
-                        <div class="trelawny-analysis-label">DATA INTEGRITY</div>
-                        <div class="trelawny-analysis-value trelawny-status-verified">VERIFIED</div>
+                    <div class="st_james-analysis-item">
+                        <div class="st_james-analysis-label">DATA INTEGRITY</div>
+                        <div class="st_james-analysis-value st_james-status-verified">VERIFIED</div>
                     </div>
-                    <div class="trelawny-analysis-item">
-                        <div class="trelawny-analysis-label">TIMESTAMP</div>
-                        <div class="trelawny-analysis-value" id="trelawny-analysis-timestamp">--:--:--</div>
+                    <div class="st_james-analysis-item">
+                        <div class="st_james-analysis-label">TIMESTAMP</div>
+                        <div class="st_james-analysis-value" id="st_james-analysis-timestamp">--:--:--</div>
                     </div>
-                    <div class="trelawny-analysis-item">
-                        <div class="trelawny-analysis-label">TRANSMISSION</div>
-                        <div class="trelawny-analysis-value trelawny-status-success">SUCCESSFUL</div>
+                    <div class="st_james-analysis-item">
+                        <div class="st_james-analysis-label">TRANSMISSION</div>
+                        <div class="st_james-analysis-value st_james-status-success">SUCCESSFUL</div>
                     </div>
                 </div>
 
@@ -739,9 +739,9 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 2rem;">
-                    <button class="trelawny-tech-button" onclick="closeTrelawnyWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(168, 85, 247, 0.5) !important;">
-                        <span class="trelawny-button-text">CONTINUE TO DASHBOARD</span>
-                        <div class="trelawny-button-scan"></div>
+                    <button class="st_james-tech-button" onclick="closeSt. JamesWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(168, 85, 247, 0.5) !important;">
+                        <span class="st_james-button-text">CONTINUE TO DASHBOARD</span>
+                        <div class="st_james-button-scan"></div>
                     </button>
                 </div>
             </div>
@@ -749,7 +749,7 @@
     </div>
 
     <div class="header">
-        <h1>Trelawny Inspector Dashboard</h1>
+        <h1>St. James Inspector Dashboard</h1>
         <div>
             <span id="welcomeText">Welcome, Inspector</span>
             <button id="toolkitBtn" class="logout-btn">🧰 Tool Kit</button>
@@ -761,7 +761,7 @@
 
     <div class="container">
         <div class="form-container">
-            <h2>New Water Quality Submission - Trelawny Parish</h2>
+            <h2>New Water Quality Submission - St. James Parish</h2>
             <div id="alert-container"></div>
 
             <div class="form-group">
@@ -1198,7 +1198,7 @@
     </div>
 
     <script>
-        class TrelawnyDashboard {
+        class St. JamesDashboard {
             constructor() {
                 this.supplies = [];
                 this.currentSupply = null;
@@ -1206,7 +1206,7 @@
                 this.chemicalParameters = [];
                 this.allParameters = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'Turb', 'Sal'];
                 this.allChemicalParameters = ['Nitrate', 'Nitrite', 'Iron', 'Manganese', 'Lead', 'Arsenic'];
-                this.submissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+                this.submissions = JSON.parse(localStorage.getItem('st_james_submissions') || '[]');
                 this.allSubmissions = [];
                 this.filteredSubmissions = [];
                 this.searchTimeout = null;
@@ -1225,8 +1225,8 @@
                 try {
                     const response = await fetch('/api/supplies');
                     const allSupplies = await response.json();
-                    this.supplies = allSupplies.filter(s => s.parish === 'Trelawny');
-                    console.log('Loaded Trelawny supplies:', this.supplies.length);
+                    this.supplies = allSupplies.filter(s => s.parish === 'St. James');
+                    console.log('Loaded St. James supplies:', this.supplies.length);
                 } catch (error) {
                     console.error('Failed to load supplies:', error);
                     this.supplies = [];
@@ -1688,7 +1688,7 @@
                 });
                 if (response.ok) {
                     this.submissions.push(formData);
-                    localStorage.setItem('trelawny_submissions', JSON.stringify(this.submissions));
+                    localStorage.setItem('st_james_submissions', JSON.stringify(this.submissions));
                     this.showAlert('success', 'Submission successful!');
                     this.showWaterModal();
                     this.resetForm();
@@ -1736,7 +1736,7 @@
             modal.style.display = 'flex';
             setTimeout(() => {
                 modal.classList.add('show');
-                document.getElementById('trelawny-analysis-timestamp').textContent = new Date().toLocaleTimeString();
+                document.getElementById('st_james-analysis-timestamp').textContent = new Date().toLocaleTimeString();
             }, 10);
         }
 
@@ -1747,7 +1747,7 @@
         }
 
         loadSubmissions() {
-            this.allSubmissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+            this.allSubmissions = JSON.parse(localStorage.getItem('st_james_submissions') || '[]');
             this.filteredSubmissions = [...this.allSubmissions];
             this.renderSubmissions();
         }
@@ -2272,10 +2272,10 @@
         }
     }
 
-    const dashboard = new TrelawnyDashboard();
+    const dashboard = new St. JamesDashboard();
     window.dashboardInstance = dashboard;
 
-    function closeTrelawnyWaterModalWithFade() {
+    function closeSt. JamesWaterModalWithFade() {
         dashboard.closeWaterModal();
     }
 

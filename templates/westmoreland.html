@@ -898,6 +898,36 @@
                     </div>
 
                     <div class="test-section">
+                        <h3>Chemical Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="chemical-satisfactory">Satisfactory</label>
+                                <input type="number" id="chemical-satisfactory" name="chemical_satisfactory" min="0" value="0" class="positive-field count-input">
+                                <div id="chemical-satisfactory-ideal" class="ideal-range" style="display: none;">Chemical levels within acceptable range</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chemical-non-satisfactory">Non Satisfactory</label>
+                                <div class="input-with-dropdown">
+                                    <input type="number" id="chemical-non-satisfactory" name="chemical_non_satisfactory" min="0" value="0" class="negative-field count-input">
+                                    <select id="chemical-non-satisfactory-range" name="chemical_non_satisfactory_range" class="range-dropdown">
+                                        <option value="">Parameters</option>
+                                        <option value="Nitrate">Nitrate</option>
+                                        <option value="Sulfate">Sulfate</option>
+                                        <option value="Iron">Iron</option>
+                                        <option value="Manganese">Manganese</option>
+                                        <option value="Lead">Lead</option>
+                                        <option value="Fluoride">Fluoride</option>
+                                        <option value="Arsenic">Arsenic</option>
+                                        <option value="Copper">Copper</option>
+                                    </select>
+                                </div>
+                                <div id="chemical-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <div id="chemical-non-satisfactory-warning" class="warning-text" style="display: none;">Chemical levels exceed safe limits</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
                         <h3>pH Tests</h3>
                         <div class="test-inputs">
                             <div class="form-group">
@@ -1079,8 +1109,35 @@
 
         <div class="form-container">
             <h2>Recent Submissions</h2>
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="submission-search" placeholder="🔍 Search by water supply, sampling point, or location..."
+                    style="width: 100%; padding: 12px; border: 2px solid var(--input-border); border-radius: 8px; font-size: 14px; background: var(--input-bg); color: var(--text-color);">
+            </div>
             <div id="recent-submissions-list">
                 <p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Details Modal -->
+    <div id="submissionDetailsModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 0;">
+        <div class="modal-content" style="max-width: 900px; width: 90%; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); position: relative; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="padding: 1.5rem; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <h2 style="margin: 0; font-size: 20px; color: #333;">📋 Inspection Details</h2>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button onclick="dashboard.printReport()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        🖨️ Print
+                    </button>
+                    <button onclick="dashboard.downloadReport()" style="background: #48bb78; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        📥 Download
+                    </button>
+                    <span class="close" onclick="closeSubmissionDetails()" style="font-size: 32px; font-weight: bold; color: #666; cursor: pointer; line-height: 1;">&times;</span>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto; flex: 1;">
+                <div id="submissionDetailsContent" style="padding: 1.5rem;">
+                    <!-- Content populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -1767,6 +1824,9 @@
                     bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
                     bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
                     isolated_organism: document.getElementById('isolated-organism').value || '',
+                    chemical_satisfactory: parseInt(document.getElementById('chemical-satisfactory').value) || 0,
+                    chemical_non_satisfactory: parseInt(document.getElementById('chemical-non-satisfactory').value) || 0,
+                    chemical_non_satisfactory_range: document.getElementById('chemical-non-satisfactory-range').value || '',
                     ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
                     ph_satisfactory_range: document.getElementById('ph-satisfactory-range').value || '',
                     ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
@@ -1779,6 +1839,7 @@
                     temperature_satisfactory_range: document.getElementById('temperature-satisfactory-range').value || '',
                     temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
                     temperature_non_satisfactory_range: this.temperatureSelectedParameters.join(', '),
+                    submission_date: document.getElementById('submission-date').value || '',
                     remarks: document.getElementById('remarks').value || '',
                     facility_type: document.getElementById('facility-type').value || ''
                 };
@@ -1792,7 +1853,7 @@
 
                     const result = await response.json();
                     if (result.success) {
-                        this.showAlert('success', `Submission for ${this.currentSupply.name} recorded successfully!`);
+                        this.showFuturisticWaterModal(`Inspection data for ${this.currentSupply.name} recorded successfully!`);
                         this.reset();
                         this.loadSubmissions();
                     } else {
@@ -1834,6 +1895,21 @@
                 }
             }
 
+            getTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const seconds = Math.floor((now - date) / 1000);
+
+                if (seconds < 60) return 'Just now';
+                if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+                if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+                if (seconds < 172800) return 'Yesterday';
+                if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+                if (seconds < 2592000) return `${Math.floor(seconds / 604800)} weeks ago`;
+                if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
+                return `${Math.floor(seconds / 31536000)} years ago`;
+            }
+
             displaySubmissions(submissions = []) {
                 const container = document.getElementById('recent-submissions-list');
                 if (!submissions.length) {
@@ -1841,31 +1917,309 @@
                     return;
                 }
 
-                container.innerHTML = submissions.slice(0, 10).map(s => `
-                    <div class="submission-card">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-                            <strong>${s.supply_name}</strong>
-                            <span style="font-size:12px;color:#666;">${new Date(s.created_at).toLocaleString()}</span>
+                // Store all submissions for search and viewing
+                this.allSubmissions = submissions;
+
+                // Setup search functionality
+                const searchInput = document.getElementById('submission-search');
+                searchInput.oninput = (e) => this.filterSubmissions(e.target.value);
+
+                container.innerHTML = submissions.slice(0, 20).map((s, index) => this.generateSubmissionCard(s, index)).join('');
+
+                // Add CSS animations if not already present
+                if (!document.getElementById('ai-card-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'ai-card-animations';
+                    style.textContent = `
+                        @keyframes holographicShift {
+                            0% { background-position: 0% 50%; }
+                            100% { background-position: 200% 50%; }
+                        }
+                        @keyframes pulse {
+                            0%, 100% { opacity: 1; transform: scale(1); }
+                            50% { opacity: 0.7; transform: scale(1.1); }
+                        }
+                        @keyframes shimmer {
+                            0% { left: -100%; }
+                            100% { left: 200%; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            generateSubmissionCard(s, actualIndex) {
+                return `
+                    <div class="submission-card"
+                         style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                                background:linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
+                                border:1px solid rgba(102,126,234,0.2);border-radius:12px;overflow:hidden;
+                                box-shadow:0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1);"
+                         onclick="dashboard.viewSubmissionDetails(${actualIndex})"
+                         onmouseenter="this.style.transform='translateY(-4px) scale(1.01)';this.style.boxShadow='0 12px 40px rgba(102,126,234,0.25), inset 0 1px 0 rgba(255,255,255,0.2)';this.style.borderColor='rgba(102,126,234,0.5)';"
+                         onmouseleave="this.style.transform='translateY(0) scale(1)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)';this.style.borderColor='rgba(102,126,234,0.2)';">
+
+                        <!-- Holographic Border Effect -->
+                        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#4facfe,#667eea);background-size:200% 100%;animation:holographicShift 3s linear infinite;"></div>
+
+                        <!-- Status Indicator -->
+                        <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:${s.type === 'treated' ? '#4ade80' : '#60a5fa'};box-shadow:0 0 12px ${s.type === 'treated' ? '#4ade80' : '#60a5fa'};animation:pulse 2s ease-in-out infinite;"></div>
+
+                        <div style="padding:1.2rem;">
+                            <!-- Header Section -->
+                            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+                                <div style="flex:1;">
+                                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                                        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(102,126,234,0.4);">
+                                            ${s.type === 'treated' ? '💧' : '🌊'}
+                                        </div>
+                                        <div>
+                                            <div style="font-size:17px;font-weight:700;color:var(--text-color);letter-spacing:-0.02em;line-height:1.3;">${s.supply_name}</div>
+                                            <div style="font-size:11px;color:#667eea;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">ID: INS-${String(s.id || actualIndex).padStart(6, '0')}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Time Badge with AI Glow -->
+                                <div style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));backdrop-filter:blur(10px);border:1px solid rgba(102,126,234,0.3);padding:6px 14px;border-radius:20px;box-shadow:0 2px 10px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.2);">
+                                    <div style="font-size:10px;font-weight:700;color:#667eea;text-transform:uppercase;letter-spacing:0.08em;">${this.getTimeAgo(s.created_at)}</div>
+                                </div>
+                            </div>
+
+                            <!-- Sampling Point Section -->
+                            ${s.sampling_point_name ? `
+                            <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:1px solid rgba(102,126,234,0.15);border-radius:8px;padding:10px 12px;margin-bottom:0.8rem;position:relative;overflow:hidden;">
+                                <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(102,126,234,0.1),transparent);border-radius:50%;"></div>
+                                <div style="display:flex;align-items:center;gap:8px;position:relative;">
+                                    <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">📍</div>
+                                    <div style="flex:1;">
+                                        <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Sampling Point</div>
+                                        <div style="font-size:13px;font-weight:600;color:var(--text-color);">${s.sampling_point_name}</div>
+                                        ${s.sampling_point_location ? `<div style="font-size:11px;color:#999;margin-top:2px;">${s.sampling_point_location}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <!-- Info Grid -->
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem;">
+                                <div style="background:rgba(102,126,234,0.05);border:1px solid rgba(102,126,234,0.1);border-radius:6px;padding:8px;text-align:center;">
+                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Agency</div>
+                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.agency}</div>
+                                </div>
+                                ${s.water_source_type ? `
+                                <div style="background:rgba(77,222,128,0.05);border:1px solid rgba(77,222,128,0.2);border-radius:6px;padding:8px;text-align:center;">
+                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Source</div>
+                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);text-transform:capitalize;">${s.water_source_type}</div>
+                                </div>
+                                ` : ''}
+                                <div style="background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:8px;text-align:center;">
+                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Visits</div>
+                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.visits || 0}</div>
+                                </div>
+                            </div>
+
+                            <!-- Test Summary Bar -->
+                            <div style="background:linear-gradient(90deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border-radius:8px;padding:10px;margin-bottom:1rem;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <div style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;"></div>
+                                        <span style="font-size:11px;font-weight:600;color:var(--text-color);">Tests: ${s.chlorine_total || 0} Chlorine, ${s.bacteriological_positive + s.bacteriological_negative + s.bacteriological_pending || 0} Bacterio</span>
+                                    </div>
+                                    <div style="font-size:10px;color:#888;font-weight:600;">${s.type === 'treated' ? 'TREATED SUPPLY' : 'UNTREATED SUPPLY'}</div>
+                                </div>
+                            </div>
+
+                            <!-- View Details Button -->
+                            <button onclick="event.stopPropagation(); dashboard.viewSubmissionDetails(${actualIndex});"
+                                    style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;"
+                                    onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5), inset 0 1px 0 rgba(255,255,255,0.3)';"
+                                    onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';">
+                                <span style="position:relative;z-index:1;">View Full Report →</span>
+                                <div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite;"></div>
+                            </button>
                         </div>
-                        <p style="font-size:14px;color:#666;margin-bottom:0.5rem;">
-                            ${s.agency}${s.facility_type ? ` (${s.facility_type})` : ''} • ${s.visits} visit(s) • ${s.type}
-                            ${s.sampling_point_name ? `<br><strong>Sampling Point:</strong> ${s.sampling_point_name}` : ''}
-                        </p>
-                        ${s.type === 'treated' ? `
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;">
-                            <div>Total: ${s.chlorine_total}</div>
-                            <div style="color:var(--positive-color);">Positive: ${s.chlorine_positive}</div>
-                            <div style="color:var(--negative-color);">Negative: ${s.chlorine_negative}</div>
-                        </div>
-                        ` : '<div style="font-style:italic;color:#666;">Untreated supply - no chlorine testing</div>'}
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:13px;margin-top:0.5rem;">
-                            <div style="color:var(--positive-color);">B+: ${s.bacteriological_positive}${s.isolated_organism ? ` (${s.isolated_organism})` : ''}</div>
-                            <div style="color:var(--negative-color);">B-: ${s.bacteriological_negative}</div>
-                            <div style="color:#ffc107;">B Pending: ${s.bacteriological_pending}</div>
-                        </div>
-                        ${s.remarks ? `<p style="margin-top:0.5rem;font-size:13px;color:#666;"><strong>Remarks:</strong> ${s.remarks}</p>` : ''}
                     </div>
-                `).join('');
+                `;
+            }
+
+            filterSubmissions(query) {
+                if (!this.allSubmissions) return;
+
+                const filtered = this.allSubmissions.filter(s => {
+                    const searchText = query.toLowerCase();
+                    return s.supply_name.toLowerCase().includes(searchText) ||
+                           (s.sampling_point_name && s.sampling_point_name.toLowerCase().includes(searchText)) ||
+                           (s.sampling_point_location && s.sampling_point_location.toLowerCase().includes(searchText)) ||
+                           (s.water_source_type && s.water_source_type.toLowerCase().includes(searchText)) ||
+                           (s.agency && s.agency.toLowerCase().includes(searchText));
+                });
+
+                const container = document.getElementById('recent-submissions-list');
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:#666;padding:2rem;">No submissions match your search</p>';
+                    return;
+                }
+
+                container.innerHTML = filtered.slice(0, 20).map(s => this.generateSubmissionCard(s, this.allSubmissions.indexOf(s))).join('');
+            }
+
+            viewSubmissionDetails(index) {
+                const s = this.allSubmissions[index];
+                const modal = document.getElementById('submissionDetailsModal');
+                const content = document.getElementById('submissionDetailsContent');
+
+                content.innerHTML = `
+                    <div style="max-width: 1200px; margin: 0 auto;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px 12px 0 0; margin: -1rem -1rem 1.5rem -1rem;">
+                            <h2 style="margin: 0 0 1rem 0; font-size: 24px;">Inspection Report #INS-${String(s.id || index + 1).padStart(6, '0')}</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 14px;">
+                                <div><strong>Water Supply:</strong> ${s.supply_name}</div>
+                                <div><strong>Agency:</strong> ${s.agency}</div>
+                                <div><strong>Type:</strong> ${s.type === 'treated' ? 'Treated' : 'Untreated'}</div>
+                                <div><strong>Submitted:</strong> ${new Date(s.created_at).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">📋 Basic Information</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                ${s.facility_type ? `<div><strong>Facility Type:</strong> ${s.facility_type}</div>` : ''}
+                                ${s.sampling_point_name ? `<div><strong>Sampling Point:</strong> ${s.sampling_point_name}</div>` : ''}
+                                ${s.water_source_type ? `<div><strong>Water Source Type:</strong> ${s.water_source_type}</div>` : ''}
+                                <div><strong>Visits:</strong> ${s.visits || 0}</div>
+                                ${s.submission_date ? `<div><strong>Inspection Date:</strong> ${s.submission_date}</div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Chlorine Tests Section -->
+                        ${s.type === 'treated' ? `
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #e3f2fd; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 0.5rem;">🧪 Chlorine Residual Tests (mg/L)</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Total Tests</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #1976d2;">${s.chlorine_total || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.chlorine_positive || 0}</div>
+                                    ${s.chlorine_positive_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.chlorine_positive_range} mg/L</div>` : ''}
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.chlorine_negative || 0}</div>
+                                    ${s.chlorine_negative_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.chlorine_negative_range} mg/L</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Bacteriological Tests Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">🦠 Bacteriological Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.bacteriological_positive || 0}</div>
+                                    ${s.isolated_organism ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Organism: ${s.isolated_organism}</div>` : ''}
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.bacteriological_negative || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Result Pending</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${s.bacteriological_pending || 0}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- pH Tests Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #e8f5e9; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 0.5rem;">⚗️ pH Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.ph_satisfactory || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.ph_non_satisfactory || 0}</div>
+                                    ${s.ph_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${s.ph_non_satisfactory_range}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chemical Tests Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #ede7f6; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #5e35b1; border-bottom: 2px solid #5e35b1; padding-bottom: 0.5rem;">🧬 Chemical Tests</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.chemical_satisfactory || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.chemical_non_satisfactory || 0}</div>
+                                    ${s.chemical_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${s.chemical_non_satisfactory_range}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Turbidity Tests Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #f3e5f5; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 0.5rem;">🌫️ Turbidity Tests (NTU)</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.turbidity_satisfactory || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.turbidity_non_satisfactory || 0}</div>
+                                    ${s.turbidity_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.turbidity_non_satisfactory_range} NTU</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Temperature Tests Section -->
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fce4ec; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin-top: 0; color: #c2185b; border-bottom: 2px solid #c2185b; padding-bottom: 0.5rem;">🌡️ Temperature Tests (°C)</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.temperature_satisfactory || 0}</div>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.temperature_non_satisfactory || 0}</div>
+                                    ${s.temperature_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.temperature_non_satisfactory_range}°C</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remarks Section -->
+                        ${s.remarks ? `
+                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fff8e1; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <h3 style="margin-top: 0; color: #f57c00; border-bottom: 2px solid #f57c00; padding-bottom: 0.5rem;">📝 Remarks</h3>
+                            <p style="margin: 0; line-height: 1.6;">${s.remarks}</p>
+                        </div>
+                        ` : ''}
+
+                        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
+                            <strong>Submission Time:</strong> ${new Date(s.created_at).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+
+                modal.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        modal.classList.add('show');
+                    });
+                });
             }
 
             showFuturisticWaterModal(message) {
@@ -1961,6 +2315,60 @@
                 document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
                 localStorage.setItem('theme', next);
             }
+
+            printReport() {
+                const content = document.getElementById('submissionDetailsContent').innerHTML;
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Inspection Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .test-section { margin-bottom: 20px; page-break-inside: avoid; }
+                            @media print {
+                                body { margin: 0; }
+                                .test-section { page-break-inside: avoid; }
+                            }
+                        </style>
+                    </head>
+                    <body>${content}</body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            }
+
+            downloadReport() {
+                const content = document.getElementById('submissionDetailsContent').innerHTML;
+                const blob = new Blob([`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Inspection Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .test-section { margin-bottom: 20px; }
+                        </style>
+                    </head>
+                    <body>${content}</body>
+                    </html>
+                `], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Inspection_Report_${new Date().toISOString().split('T')[0]}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
         }
 
         function incrementVisits() {
@@ -1971,6 +2379,13 @@
         function closeToolKit() {
             document.getElementById('toolkitModal').style.display = 'none';
         }
+
+        function closeSubmissionDetails() {
+            const modal = document.getElementById('submissionDetailsModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
 
         function previewDocument(filename, originalName) {
             const pdfUrl = `/static/documents/${filename}`;
@@ -1986,9 +2401,14 @@
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('toolkitModal');
-            if (event.target === modal) {
+            const toolkitModal = document.getElementById('toolkitModal');
+            const submissionModal = document.getElementById('submissionDetailsModal');
+
+            if (event.target === toolkitModal) {
                 closeToolKit();
+            }
+            if (event.target === submissionModal) {
+                closeSubmissionDetails();
             }
         }
 
