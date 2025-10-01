@@ -137,6 +137,11 @@ def init_db():
                     bacteriological_positive INTEGER DEFAULT 0,
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
+                    bacteriological_rejected INTEGER DEFAULT 0,
+                    bacteriological_broken INTEGER DEFAULT 0,
+                    bacteriological_rejected_reason TEXT,
+                    bacteriological_broken_reason TEXT,
+                    bacteriological_status VARCHAR(20) DEFAULT 'pending',
                     isolated_organism VARCHAR(255),
                     ph_satisfactory INTEGER DEFAULT 0,
                     ph_non_satisfactory INTEGER DEFAULT 0,
@@ -148,6 +153,20 @@ def init_db():
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (inspector_id) REFERENCES users (id),
                     FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
+                )
+            ''')
+
+            # Inspector signatures table for tracking multiple inspectors per submission
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspector_signatures (
+                    id SERIAL PRIMARY KEY,
+                    submission_id INTEGER NOT NULL,
+                    inspector_id INTEGER NOT NULL,
+                    action_type VARCHAR(50) NOT NULL,
+                    signature_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    notes TEXT,
+                    FOREIGN KEY (submission_id) REFERENCES inspection_submissions (id),
+                    FOREIGN KEY (inspector_id) REFERENCES users (id)
                 )
             ''')
 
@@ -275,6 +294,11 @@ def init_db():
                     bacteriological_positive INTEGER DEFAULT 0,
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
+                    bacteriological_rejected INTEGER DEFAULT 0,
+                    bacteriological_broken INTEGER DEFAULT 0,
+                    bacteriological_rejected_reason TEXT,
+                    bacteriological_broken_reason TEXT,
+                    bacteriological_status TEXT DEFAULT 'pending',
                     isolated_organism TEXT,
                     ph_satisfactory INTEGER DEFAULT 0,
                     ph_non_satisfactory INTEGER DEFAULT 0,
@@ -286,6 +310,20 @@ def init_db():
                     FOREIGN KEY (supply_id) REFERENCES water_supplies (id),
                     FOREIGN KEY (inspector_id) REFERENCES users (id),
                     FOREIGN KEY (sampling_point_id) REFERENCES sampling_points (id)
+                )
+            ''')
+
+            # Inspector signatures table for tracking multiple inspectors per submission
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspector_signatures (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    submission_id INTEGER NOT NULL,
+                    inspector_id INTEGER NOT NULL,
+                    action_type TEXT NOT NULL,
+                    signature_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    notes TEXT,
+                    FOREIGN KEY (submission_id) REFERENCES inspection_submissions (id),
+                    FOREIGN KEY (inspector_id) REFERENCES users (id)
                 )
             ''')
 
@@ -838,7 +876,7 @@ def index():
         elif user_parish == 'St. James':
             return render_template('st_james.html')
         elif user_parish == 'Westmoreland':
-            return render_template('index.html')
+            return render_template('westmoreland.html')
         else:
             # Fallback for unsupported parishes
             return redirect(url_for('login'))
@@ -850,7 +888,16 @@ def index():
 def inspector():
     if 'user_id' not in session or session['role'] != 'inspector':
         return redirect(url_for('login'))
-    return render_template('index.html')
+    # Route to parish-specific dashboard based on user's parish
+    user_parish = session.get('parish', 'Westmoreland')
+    if user_parish == 'Trelawny':
+        return render_template('trelawny.html')
+    elif user_parish == 'Hanover':
+        return render_template('hanover.html')
+    elif user_parish == 'St. James':
+        return render_template('st_james.html')
+    else:
+        return render_template('westmoreland.html')
 
 @app.route('/admin')
 def admin():
@@ -1983,25 +2030,43 @@ def submit_inspection():
 
     try:
         # Insert new inspection submission
+        # Determine bacteriological status
+        bacteriological_total = (data.get('bacteriological_positive', 0) + data.get('bacteriological_negative', 0) +
+                                 data.get('bacteriological_pending', 0) + data.get('bacteriological_rejected', 0) +
+                                 data.get('bacteriological_broken', 0))
+        bacteriological_results_entered = data.get('bacteriological_positive', 0) + data.get('bacteriological_negative', 0)
+        bacteriological_status = 'complete' if bacteriological_results_entered > 0 else 'pending'
+
         cursor.execute('''
             INSERT INTO inspection_submissions
             (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
              chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
-             bacteriological_negative, bacteriological_pending, isolated_organism, ph_satisfactory,
-             ph_non_satisfactory, ph_non_satisfactory_range, remarks, facility_type, water_source_type)
-            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
+             bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
+             isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_range,
+             remarks, facility_type, water_source_type)
+            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['supply_id'], session['user_id'], data.get('sampling_point_id'),
             data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
             data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
             data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
             data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
+            data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
+            data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
+            bacteriological_status,
             data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
             data.get('ph_non_satisfactory', 0), data.get('ph_non_satisfactory_range', ''),
             data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
         ))
 
         submission_id = cursor.lastrowid
+
+        # Add inspector signature for initial submission
+        cursor.execute('''
+            INSERT INTO inspector_signatures (submission_id, inspector_id, action_type, notes)
+            VALUES (?, ?, ?, ?)
+        ''', (submission_id, session['user_id'], 'Initial Submission', 'Created inspection report'))
 
         # Get the submission with supply info
         submission_data = cursor.execute('''
@@ -2032,16 +2097,18 @@ def get_my_submissions():
         return jsonify({'error': 'Not authenticated'}), 401
 
     conn = get_db_connection()
+    # Changed to show ALL submissions across all parishes, not just current inspector's
     submissions = conn.execute('''
-        SELECT s.*, ws.name as supply_name, ws.type, ws.agency,
-               sp.name as sampling_point_name, sp.location as sampling_point_location
+        SELECT s.*, ws.name as supply_name, ws.type, ws.agency, ws.parish,
+               sp.name as sampling_point_name, sp.location as sampling_point_location,
+               u.full_name as primary_inspector_name
         FROM inspection_submissions s
         JOIN water_supplies ws ON s.supply_id = ws.id
         LEFT JOIN sampling_points sp ON s.sampling_point_id = sp.id
-        WHERE s.inspector_id = ?
+        JOIN users u ON s.inspector_id = u.id
         ORDER BY s.created_at DESC
-        LIMIT 10
-    ''', (session['user_id'],)).fetchall()
+        LIMIT 50
+    ''').fetchall()
     conn.close()
 
     return jsonify([dict(submission) for submission in submissions])
@@ -2752,6 +2819,25 @@ def get_inspectors():
     conn.close()
 
     return jsonify([dict(user) for user in users])
+
+@app.route('/api/current-user', methods=['GET'])
+def get_current_user():
+    """Get current logged in user's information"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    conn = get_db_connection()
+    user = conn.execute('''
+        SELECT id, username, full_name, role, COALESCE(parish, 'Westmoreland') as parish
+        FROM users
+        WHERE id = ?
+    ''', (session['user_id'],)).fetchone()
+    conn.close()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    return jsonify(dict(user))
 
 @app.route('/api/users', methods=['GET'])
 def get_all_users():

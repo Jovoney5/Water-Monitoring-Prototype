@@ -60,7 +60,6 @@
             cursor: pointer;
             transition: background 0.3s;
             margin-left: 10px;
-            text-decoration: none;
         }
 
         .logout-btn:hover { background: rgba(255, 255, 255, 0.3); }
@@ -94,14 +93,6 @@
             font-size: 14px;
         }
 
-        .form-text {
-            display: block;
-            margin-top: 5px;
-            font-size: 12px;
-            color: #666;
-            font-style: italic;
-        }
-
         .selected-supply {
             background: var(--supply-selected-bg);
             padding: 1rem;
@@ -119,23 +110,6 @@
 
         .input-with-button { display: flex; gap: 10px; align-items: center; }
         .input-with-button input { flex: 1; }
-
-        .input-with-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .count-input {
-            width: 120px !important;
-            flex: none;
-        }
-
-        .range-dropdown {
-            width: 80px !important;
-            flex: none;
-            min-width: 80px;
-        }
 
         .increment-btn {
             background: #28a745;
@@ -243,7 +217,6 @@
             border: 2px solid #444 !important;
         }
 
-        /* Water-themed Success Modal */
         .water-modal {
             display: none;
             position: fixed;
@@ -252,11 +225,10 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, rgba(6, 19, 35, 0.95) 0%, rgba(0, 5, 15, 0.98) 100%);
+            background: radial-gradient(ellipse at center, rgba(35, 6, 45, 0.95) 0%, rgba(15, 0, 25, 0.98) 100%);
             backdrop-filter: blur(12px);
             opacity: 0;
             transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            overflow: hidden;
             align-items: center;
             justify-content: center;
         }
@@ -267,25 +239,23 @@
 
         .water-modal-content {
             background: linear-gradient(135deg,
-                rgba(15, 30, 55, 0.95) 0%,
-                rgba(25, 40, 65, 0.9) 50%,
-                rgba(35, 50, 75, 0.95) 100%);
-            margin: 2% auto;
-            padding: 0;
-            border: 2px solid rgba(0, 150, 255, 0.4);
-            border-radius: 30px;
-            width: 95%;
-            max-width: 700px;
+                rgba(55, 15, 75, 0.95) 0%,
+                rgba(65, 25, 85, 0.9) 50%,
+                rgba(75, 35, 95, 0.95) 100%);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
             overflow-x: hidden;
-            box-shadow:
-                0 30px 60px rgba(0, 100, 200, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 0 1px rgba(0, 150, 255, 0.2);
             position: relative;
+            animation: hologramRotate 3s ease-in-out infinite;
+            box-shadow:
+                0 0 50px rgba(147, 51, 234, 0.3),
+                inset 0 0 50px rgba(147, 51, 234, 0.1);
             scrollbar-width: thin;
-            scrollbar-color: rgba(0, 150, 255, 0.5) transparent;
+            scrollbar-color: rgba(147, 51, 234, 0.5) transparent;
             transform: scale(0.3) translateY(-50px) rotateX(15deg);
             transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1),
                         opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -300,346 +270,285 @@
         .water-modal-content::before {
             content: '';
             position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            background: linear-gradient(45deg,
-                transparent,
-                rgba(0, 150, 255, 0.5),
-                rgba(0, 200, 255, 0.7),
-                rgba(0, 150, 255, 0.5),
-                transparent);
-            border-radius: 30px;
-            animation: borderFlow 4s linear infinite;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.5), transparent);
+            border-radius: 15px;
             z-index: -1;
+            animation: borderFlow 4s linear infinite;
         }
 
         .water-modal-header {
-            background: linear-gradient(135deg,
-                rgba(0, 120, 255, 0.9) 0%,
-                rgba(0, 80, 200, 0.95) 50%,
-                rgba(0, 60, 150, 0.9) 100%);
-            padding: 3rem 2rem;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.8), rgba(147, 51, 234, 0.6));
+            border-bottom: 1px solid rgba(147, 51, 234, 0.3);
+            overflow: hidden;
+        }
+
+        .water-modal-header h2 {
+            color: #a855f7;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+            position: relative;
+            z-index: 2;
+            letter-spacing: 2px;
+        }
+
+        .water-modal-body {
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .westmoreland-analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .westmoreland-analysis-item {
+            background: rgba(88, 28, 135, 0.4);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: 10px;
+            padding: 1rem 0.5rem;
             text-align: center;
             position: relative;
             overflow: hidden;
-            border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .water-modal-header::before {
+        .westmoreland-analysis-item::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent);
-            animation: headerScan 5s ease-in-out infinite;
+            background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.2), transparent);
+            animation: scanLines 3s infinite;
         }
 
-        .water-modal-header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(circle at 20% 20%, rgba(0, 200, 255, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(0, 180, 255, 0.2) 0%, transparent 70%);
-            animation: particleFloat 8s ease-in-out infinite;
-        }
-
-        .water-modal-header h2 {
-            color: #ffffff;
-            margin: 0;
-            font-size: 2.4rem;
-            font-weight: 300;
-            text-shadow:
-                0 0 20px rgba(0, 150, 255, 0.6),
-                0 0 40px rgba(0, 200, 255, 0.3),
-                0 2px 4px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 3;
-            letter-spacing: 2px;
-            font-family: 'Segoe UI', sans-serif;
-            text-transform: uppercase;
-        }
-
-        .water-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-            animation: waterDrop 2s ease-in-out infinite;
-            position: relative;
-            z-index: 2;
-        }
-
-        .water-modal-body {
-            padding: 3rem 2.5rem;
-            text-align: center;
-            background: linear-gradient(135deg,
-                rgba(15, 25, 40, 0.95) 0%,
-                rgba(20, 30, 45, 0.9) 100%);
-            position: relative;
-            color: #ffffff;
-            border-radius: 0 0 30px 30px;
-        }
-
-        .water-modal-body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 150, 255, 0.03) 2px,
-                    rgba(0, 150, 255, 0.03) 4px
-                );
-            animation: scanLines 3s linear infinite;
-        }
-
-        .water-message {
-            font-size: 1.6rem;
-            font-weight: 300;
-            margin-bottom: 2rem;
-            color: #e8f4f8;
-            text-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
-            line-height: 1.6;
-            position: relative;
-            z-index: 2;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-            position: relative;
-            z-index: 2;
-        }
-
-        .analysis-item {
-            background: linear-gradient(135deg,
-                rgba(0, 150, 255, 0.15) 0%,
-                rgba(0, 100, 200, 0.1) 100%);
-            border: 1px solid rgba(0, 150, 255, 0.3);
-            border-radius: 15px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .analysis-item::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                from 0deg,
-                transparent,
-                rgba(0, 150, 255, 0.1),
-                transparent
-            );
-            animation: hologramRotate 6s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .analysis-item:hover::before {
-            opacity: 1;
-        }
-
-        .analysis-item:hover {
-            border-color: rgba(0, 150, 255, 0.6);
-            box-shadow:
-                0 8px 25px rgba(0, 150, 255, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transform: translateY(-5px) scale(1.02);
-        }
-
-        .analysis-label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            position: relative;
-            z-index: 2;
-        }
-
-        .analysis-value {
-            font-size: 1.4rem;
+        .westmoreland-analysis-value {
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #00e5ff;
+            color: #a855f7;
             text-shadow:
-                0 0 15px rgba(0, 229, 255, 0.5),
-                0 0 30px rgba(0, 200, 255, 0.3);
-            margin-bottom: 0.5rem;
+                0 0 15px rgba(168, 85, 247, 0.5),
+                0 0 30px rgba(147, 51, 234, 0.3);
+            margin-bottom: 0.3rem;
             position: relative;
             z-index: 2;
             word-wrap: break-word;
             text-align: center;
+            line-height: 1.2;
+            overflow-wrap: break-word;
         }
 
-        .status-success {
-            color: #00ff88 !important;
+        .westmoreland-status-success {
+            color: #f97316 !important;
             text-shadow:
-                0 0 15px rgba(0, 255, 136, 0.6),
-                0 0 30px rgba(0, 200, 100, 0.4) !important;
+                0 0 15px rgba(249, 115, 22, 0.6),
+                0 0 30px rgba(234, 88, 12, 0.4) !important;
         }
 
-        .status-verified {
-            color: #ffd700 !important;
+        .westmoreland-status-verified {
+            color: #fbbf24 !important;
             text-shadow:
-                0 0 15px rgba(255, 215, 0, 0.6),
-                0 0 30px rgba(255, 193, 7, 0.4) !important;
+                0 0 15px rgba(251, 191, 36, 0.6),
+                0 0 30px rgba(245, 158, 11, 0.4) !important;
         }
 
-        .analysis-summary {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(10, 25, 45, 0.6);
-            border: 1px solid rgba(0, 150, 255, 0.3);
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
+        .westmoreland-analysis-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 0.3rem;
         }
 
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0.5rem 0;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-        }
-
-        .summary-label {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .summary-value {
-            font-size: 0.9rem;
-            color: #00e5ff;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
-        }
-
-        .header-particles .particle {
+        .westmoreland-header-particles .particle {
             position: absolute;
             width: 4px;
             height: 4px;
-            background: #00e5ff;
+            background: #a855f7;
             border-radius: 50%;
             animation: particleFloat 4s infinite linear;
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
         }
 
-        .header-particles .particle:nth-child(1) {
+        .westmoreland-header-particles .particle:nth-child(1) {
             top: 20%;
             left: 20%;
             animation-delay: 0s;
         }
 
-        .header-particles .particle:nth-child(2) {
+        .westmoreland-header-particles .particle:nth-child(2) {
             top: 60%;
             left: 80%;
             animation-delay: 1s;
         }
 
-        .header-particles .particle:nth-child(3) {
+        .westmoreland-header-particles .particle:nth-child(3) {
             top: 40%;
             left: 60%;
             animation-delay: 2s;
         }
 
-        .header-scanline {
+        .westmoreland-header-scanline {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+            background: linear-gradient(90deg, transparent, #a855f7, transparent);
             animation: headerScan 3s infinite;
         }
 
-        .header-status {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 1px;
-            margin-top: 0.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .water-close-btn {
-            background: linear-gradient(135deg, #0078ff 0%, #004ccc 100%) !important;
-            color: white !important;
-            border: 2px solid rgba(0, 150, 255, 0.5) !important;
-            padding: 15px 30px !important;
-            border-radius: 25px !important;
-            font-size: 1rem !important;
-            font-weight: bold !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            position: relative !important;
-            overflow: hidden !important;
-        }
-
-        .water-close-btn:hover {
-            background: linear-gradient(135deg, #0099ff 0%, #0066ff 100%) !important;
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.7) !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .tech-button {
+        .westmoreland-tech-button {
             position: relative;
             overflow: hidden;
+            border: 2px solid #a855f7 !important;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.4)) !important;
+            color: #ffffff !important;
+            padding: 1.2rem 2.5rem !important;
+            font-size: 1.1rem !important;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px !important;
+            margin-top: 1.5rem;
+            width: auto;
+            max-width: none;
+            display: inline-block;
+            z-index: 10;
         }
 
-        .button-scan {
+        .westmoreland-tech-button:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(147, 51, 234, 0.6)) !important;
+            box-shadow:
+                0 0 25px rgba(168, 85, 247, 0.6),
+                inset 0 0 20px rgba(168, 85, 247, 0.2) !important;
+            transform: scale(1.05) translateY(-2px);
+            border-color: #c084fc !important;
+        }
+
+        .westmoreland-button-text {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+            display: inline-block;
+        }
+
+        .westmoreland-button-scan {
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: buttonScan 2s infinite;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+            animation: scanLines 2s infinite;
         }
 
-        .button-text {
-            position: relative;
-            z-index: 2;
+        .water-message {
+            font-size: 1.2rem;
+            color: #a855f7;
+            text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+            margin: 1rem 0;
+            margin-bottom: 1rem;
+            font-weight: 600;
         }
 
-        /* Animations */
-        @keyframes waterDrop {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .water-submessage {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .water-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .water-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .ocean-bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0.1) 100%);
+            border-radius: 50%;
+            animation: bubbleRise 4s ease-in-out infinite;
+            opacity: 0.8;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .bubble:nth-child(1) { left: 15%; animation-delay: 0s; width: 20px; height: 20px; animation-duration: 3.5s; }
+        .bubble:nth-child(2) { left: 35%; animation-delay: 0.8s; width: 15px; height: 15px; animation-duration: 4.2s; }
+        .bubble:nth-child(3) { left: 60%; animation-delay: 1.5s; width: 25px; height: 25px; animation-duration: 3.8s; }
+        .bubble:nth-child(4) { left: 80%; animation-delay: 2.2s; width: 12px; height: 12px; animation-duration: 4.5s; }
+        .bubble:nth-child(5) { left: 25%; animation-delay: 3s; width: 18px; height: 18px; animation-duration: 3.2s; }
+        .bubble:nth-child(6) { left: 45%; animation-delay: 0.3s; width: 10px; height: 10px; animation-duration: 4.8s; }
+        .bubble:nth-child(7) { left: 70%; animation-delay: 1.8s; width: 22px; height: 22px; animation-duration: 3.6s; }
+        .bubble:nth-child(8) { left: 90%; animation-delay: 2.5s; width: 14px; height: 14px; animation-duration: 4.1s; }
+        .bubble:nth-child(9) { left: 5%; animation-delay: 1.2s; width: 16px; height: 16px; animation-duration: 4.3s; }
+        .bubble:nth-child(10) { left: 85%; animation-delay: 0.7s; width: 8px; height: 8px; animation-duration: 3.9s; }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         @keyframes borderFlow {
@@ -648,47 +557,197 @@
         }
 
         @keyframes headerScan {
-            0% { left: -100%; }
-            50% { left: 100%; }
-            100% { left: -100%; }
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
         }
 
         @keyframes particleFloat {
-            0%, 100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 0.3;
-            }
-            25% {
-                transform: translate(10px, -15px) scale(1.1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translate(-5px, -25px) scale(0.9);
-                opacity: 0.6;
-            }
-            75% {
-                transform: translate(-15px, -10px) scale(1.05);
-                opacity: 0.7;
-            }
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            25% { transform: translateY(-20px) rotate(90deg); opacity: 0.8; }
+            50% { transform: translateY(-40px) rotate(180deg); opacity: 0.6; }
+            75% { transform: translateY(-20px) rotate(270deg); opacity: 0.8; }
         }
 
         @keyframes scanLines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         @keyframes hologramRotate {
+            0%, 100% { transform: perspective(800px) rotateY(0deg) rotateX(0deg); }
+            25% { transform: perspective(800px) rotateY(1deg) rotateX(0.5deg); }
+            50% { transform: perspective(800px) rotateY(0deg) rotateX(1deg); }
+            75% { transform: perspective(800px) rotateY(-1deg) rotateX(0.5deg); }
+        }
+
+        @keyframes waterDrop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes waterShimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes waterFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes bubbleRise {
+            0% {
+                bottom: -30px;
+                opacity: 0;
+                transform: translateX(0) scale(0.8);
+            }
+            20% {
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(15px) scale(1);
+            }
+            80% {
+                opacity: 0.8;
+                transform: translateX(-10px) scale(1.1);
+            }
+            100% {
+                bottom: 100%;
+                opacity: 0;
+                transform: translateX(5px) scale(0.9);
+            }
+        }
+
+        /* Loading spinner for async fetch */
+        .loading-spinner {
+            display: none;
+            border: 4px solid var(--input-border);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 5px 0;
+        }
+
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes buttonScan {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        /* Tool Kit Modal Styles */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .download-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .print-btn {
+            background: #ed8936;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #dd7724;
+            transform: translateY(-2px);
+        }
+
+        .edit-btn {
+            background: #9f7aea;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #8b5bc3;
+            transform: translateY(-2px);
+        }
+
+        .toolkit-container h3 {
+            color: #333;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
+    <!-- Water-themed Success Modal -->
+    <div id="waterModal" class="water-modal">
+        <div class="water-modal-content">
+            <div class="water-modal-header">
+                <div class="westmoreland-header-particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+                <div class="westmoreland-header-scanline"></div>
+                <h2>Thank You, Inspector!</h2>
+            </div>
+            <div class="water-modal-body">
+                <div class="westmoreland-analysis-grid">
+                    <div class="westmoreland-analysis-item">
+                        <div class="westmoreland-analysis-label">INSPECTION STATUS</div>
+                        <div class="westmoreland-analysis-value westmoreland-status-success">SUBMITTED</div>
+                    </div>
+                    <div class="westmoreland-analysis-item">
+                        <div class="westmoreland-analysis-label">DATA INTEGRITY</div>
+                        <div class="westmoreland-analysis-value westmoreland-status-verified">VERIFIED</div>
+                    </div>
+                    <div class="westmoreland-analysis-item">
+                        <div class="westmoreland-analysis-label">TIMESTAMP</div>
+                        <div class="westmoreland-analysis-value" id="westmoreland-analysis-timestamp">--:--:--</div>
+                    </div>
+                    <div class="westmoreland-analysis-item">
+                        <div class="westmoreland-analysis-label">TRANSMISSION</div>
+                        <div class="westmoreland-analysis-value westmoreland-status-success">SUCCESSFUL</div>
+                    </div>
+                </div>
+
+                <div class="water-message" id="waterModalMessage">
+                    Water quality inspection has been successfully submitted!
+                </div>
+
+                <div class="water-submessage" style="color: rgba(255, 255, 255, 0.8); font-size: 1rem; margin: 1rem 0; line-height: 1.6;">
+                    Your dedication to ensuring safe, clean water for the community is making a real difference. Keep up the excellent work!
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="westmoreland-tech-button" onclick="closeWestmorelandWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(168, 85, 247, 0.5) !important;">
+                        <span class="westmoreland-button-text">CONTINUE TO DASHBOARD</span>
+                        <div class="westmoreland-button-scan"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1>Westmoreland Inspector Dashboard</h1>
         <div>
@@ -733,6 +792,7 @@
                             <select id="sampling-point" name="sampling_point_id">
                                 <option value="">Select a sampling point (optional)...</option>
                             </select>
+                            <div id="sampling-point-loading" class="loading-spinner"></div>
                             <small class="form-text">Location: <span id="sampling-point-location"></span></small>
                         </div>
                         <div class="form-group">
@@ -755,6 +815,11 @@
                 </div>
 
                 <form id="submission-form">
+                    <div class="form-group" style="background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); border: 1px solid rgba(102,126,234,0.2); border-radius: 8px; padding: 16px; margin-bottom: 1.5rem;">
+                        <label for="primary-inspector" style="font-weight: 700; color: #667eea; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">👤 Primary Inspector</label>
+                        <input type="text" id="primary-inspector" readonly style="background-color: #f8f9fa; cursor: not-allowed; font-weight: 600; color: #333; border: 1px solid rgba(102,126,234,0.3);">
+                    </div>
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="visits">Number of Visits</label>
@@ -826,36 +891,7 @@
                                     <input type="number" id="chlorine-negative" name="chlorine_negative" min="0" value="0" class="negative-field count-input">
                                     <select id="chlorine-negative-range" name="chlorine_negative_range" class="range-dropdown">
                                         <option value="">Range</option>
-                                        <option value="0.1">0.1</option>
-                                        <option value="0.2">0.2</option>
-                                        <option value="0.3">0.3</option>
-                                        <option value="0.4">0.4</option>
-                                        <option value="0.5">0.5</option>
-                                        <option value="0.6">0.6</option>
-                                        <option value="0.7">0.7</option>
-                                        <option value="0.8">0.8</option>
-                                        <option value="0.9">0.9</option>
-                                        <option value="1.0">1.0</option>
-                                        <option value="1.1">1.1</option>
-                                        <option value="1.2">1.2</option>
-                                        <option value="1.3">1.3</option>
-                                        <option value="1.4">1.4</option>
-                                        <option value="1.5">1.5</option>
-                                        <option value="1.6">1.6</option>
-                                        <option value="1.7">1.7</option>
-                                        <option value="1.8">1.8</option>
-                                        <option value="1.9">1.9</option>
-                                        <option value="2.0">2.0</option>
-                                        <option value="2.1">2.1</option>
-                                        <option value="2.2">2.2</option>
-                                        <option value="2.3">2.3</option>
-                                        <option value="2.4">2.4</option>
-                                        <option value="2.5">2.5</option>
-                                        <option value="2.6">2.6</option>
-                                        <option value="2.7">2.7</option>
-                                        <option value="2.8">2.8</option>
-                                        <option value="2.9">2.9</option>
-                                        <option value="3.0">3.0</option>
+                                        <option value="0">0</option>
                                     </select>
                                 </div>
                                 <div id="chlorine-negative-warning" class="warning-text" style="display: none;">Low chlorine level - action needed</div>
@@ -871,9 +907,13 @@
                         <h3>Bacteriological Tests</h3>
                         <div class="test-inputs">
                             <div class="form-group">
+                                <label for="bacteriological-total">Total Tests</label>
+                                <input type="number" id="bacteriological-total" value="0" readonly class="bacteriological-total" style="background-color: #f0f0f0; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
                                 <label for="bacteriological-positive">Positive</label>
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input">
+                                    <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input bacterio-count">
                                     <span id="urgent-icon" class="urgent-icon" style="display: none;">⚠️</span>
                                     <select id="isolated-organism" name="isolated_organism" class="organism-dropdown" style="display: none;">
                                         <option value="">Select organism</option>
@@ -888,41 +928,27 @@
                             </div>
                             <div class="form-group">
                                 <label for="bacteriological-negative">Negative</label>
-                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field">
+                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field bacterio-count">
                             </div>
                             <div class="form-group">
                                 <label for="bacteriological-pending">Result Pending</label>
-                                <input type="number" id="bacteriological-pending" name="bacteriological_pending" min="0" value="0" class="pending-field">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="test-section">
-                        <h3>Chemical Tests</h3>
-                        <div class="test-inputs">
-                            <div class="form-group">
-                                <label for="chemical-satisfactory">Satisfactory</label>
-                                <input type="number" id="chemical-satisfactory" name="chemical_satisfactory" min="0" value="0" class="positive-field count-input">
-                                <div id="chemical-satisfactory-ideal" class="ideal-range" style="display: none;">Chemical levels within acceptable range</div>
+                                <input type="number" id="bacteriological-pending" name="bacteriological_pending" min="0" value="0" class="pending-field bacterio-count">
                             </div>
                             <div class="form-group">
-                                <label for="chemical-non-satisfactory">Non Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="chemical-non-satisfactory" name="chemical_non_satisfactory" min="0" value="0" class="negative-field count-input">
-                                    <select id="chemical-non-satisfactory-range" name="chemical_non_satisfactory_range" class="range-dropdown">
-                                        <option value="">Parameters</option>
-                                        <option value="Nitrate">Nitrate</option>
-                                        <option value="Sulfate">Sulfate</option>
-                                        <option value="Iron">Iron</option>
-                                        <option value="Manganese">Manganese</option>
-                                        <option value="Lead">Lead</option>
-                                        <option value="Fluoride">Fluoride</option>
-                                        <option value="Arsenic">Arsenic</option>
-                                        <option value="Copper">Copper</option>
-                                    </select>
-                                </div>
-                                <div id="chemical-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
-                                <div id="chemical-non-satisfactory-warning" class="warning-text" style="display: none;">Chemical levels exceed safe limits</div>
+                                <label>
+                                    <input type="checkbox" id="bacteriological-rejected-check" style="width: auto; margin-right: 5px;">
+                                    Rejected
+                                </label>
+                                <input type="number" id="bacteriological-rejected" name="bacteriological_rejected" min="0" value="0" class="bacterio-count" placeholder="Number rejected" style="display: none; margin-top: 5px;">
+                                <textarea id="bacteriological-rejected-reason" name="bacteriological_rejected_reason" placeholder="Reason for rejection..." style="display: none; margin-top: 5px; width: 100%; min-height: 60px;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="bacteriological-broken-check" style="width: auto; margin-right: 5px;">
+                                    Broken
+                                </label>
+                                <input type="number" id="bacteriological-broken" name="bacteriological_broken" min="0" value="0" class="bacterio-count" placeholder="Number broken" style="display: none; margin-top: 5px;">
+                                <textarea id="bacteriological-broken-reason" name="bacteriological_broken_reason" placeholder="Reason for broken samples..." style="display: none; margin-top: 5px; width: 100%; min-height: 60px;"></textarea>
                             </div>
                         </div>
                     </div>
@@ -932,33 +958,7 @@
                         <div class="test-inputs">
                             <div class="form-group">
                                 <label for="ph-satisfactory">Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="ph-satisfactory" name="ph_satisfactory" min="0" value="0" class="positive-field count-input">
-                                    <select id="ph-satisfactory-range" name="ph_satisfactory_range" class="range-dropdown">
-                                        <option value="">Range</option>
-                                        <option value="6.5">6.5</option>
-                                        <option value="6.6">6.6</option>
-                                        <option value="6.7">6.7</option>
-                                        <option value="6.8">6.8</option>
-                                        <option value="6.9">6.9</option>
-                                        <option value="7.0">7.0</option>
-                                        <option value="7.1">7.1</option>
-                                        <option value="7.2">7.2</option>
-                                        <option value="7.3">7.3</option>
-                                        <option value="7.4">7.4</option>
-                                        <option value="7.5">7.5</option>
-                                        <option value="7.6">7.6</option>
-                                        <option value="7.7">7.7</option>
-                                        <option value="7.8">7.8</option>
-                                        <option value="7.9">7.9</option>
-                                        <option value="8.0">8.0</option>
-                                        <option value="8.1">8.1</option>
-                                        <option value="8.2">8.2</option>
-                                        <option value="8.3">8.3</option>
-                                        <option value="8.4">8.4</option>
-                                        <option value="8.5">8.5</option>
-                                    </select>
-                                </div>
+                                <input type="number" id="ph-satisfactory" name="ph_satisfactory" min="0" value="0" class="positive-field count-input">
                                 <div id="ph-satisfactory-ideal" class="ideal-range" style="display: none;">pH within acceptable range (6.5-8.5)</div>
                             </div>
                             <div class="form-group">
@@ -988,55 +988,49 @@
                     </div>
 
                     <div class="test-section">
+                        <h3>Chemical Tests</h3>
+                        <div class="test-inputs">
+                            <div class="form-group">
+                                <label for="chemical-total">Total Tests</label>
+                                <input type="number" id="chemical-total" value="0" readonly class="chemical-total" style="background-color: #f0f0f0; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label for="chemical-satisfactory">Satisfactory</label>
+                                <input type="number" id="chemical-satisfactory" name="chemical_satisfactory" min="0" value="0" class="positive-field count-input chemical-count">
+                                <div id="chemical-satisfactory-ideal" class="ideal-range" style="display: none;">Chemical levels within acceptable range</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chemical-non-satisfactory">Non Satisfactory</label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="chemical-non-satisfactory" name="chemical_non_satisfactory" min="0" value="0" class="negative-field count-input chemical-count">
+                                    <select id="chemical-non-satisfactory-range" name="chemical_non_satisfactory_range" class="range-dropdown" style="flex: 1;">
+                                        <option value="">Parameters</option>
+                                        <option value="Nitrate">Nitrate</option>
+                                        <option value="Nitrite">Nitrite</option>
+                                        <option value="Iron">Iron</option>
+                                        <option value="Manganese">Manganese</option>
+                                        <option value="Lead">Lead</option>
+                                        <option value="Arsenic">Arsenic</option>
+                                    </select>
+                                </div>
+                                <div id="chemical-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <div id="chemical-non-satisfactory-warning" class="warning-text" style="display: none;">Chemical levels outside acceptable range</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-section">
                         <h3>Turbidity Tests (NTU)</h3>
                         <div class="test-inputs">
                             <div class="form-group">
                                 <label for="turbidity-satisfactory">Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="turbidity-satisfactory" name="turbidity_satisfactory" min="0" value="0" class="positive-field count-input">
-                                    <select id="turbidity-satisfactory-range" name="turbidity_satisfactory_range" class="range-dropdown">
-                                        <option value="">Range</option>
-                                        <option value="0.1">0.1</option>
-                                        <option value="0.2">0.2</option>
-                                        <option value="0.3">0.3</option>
-                                        <option value="0.4">0.4</option>
-                                        <option value="0.5">0.5</option>
-                                        <option value="0.6">0.6</option>
-                                        <option value="0.7">0.7</option>
-                                        <option value="0.8">0.8</option>
-                                        <option value="0.9">0.9</option>
-                                        <option value="1.0">1.0</option>
-                                        <option value="1.5">1.5</option>
-                                        <option value="2.0">2.0</option>
-                                        <option value="2.5">2.5</option>
-                                        <option value="3.0">3.0</option>
-                                        <option value="3.5">3.5</option>
-                                        <option value="4.0">4.0</option>
-                                    </select>
-                                </div>
-                                <div id="turbidity-satisfactory-ideal" class="ideal-range" style="display: none;">Turbidity within acceptable range (≤4.0 NTU)</div>
+                                <input type="number" id="turbidity-satisfactory" name="turbidity_satisfactory" min="0" value="0" class="positive-field count-input">
+                                <div id="turbidity-satisfactory-ideal" class="ideal-range" style="display: none;">Turbidity within acceptable range (&lt;5 NTU)</div>
                             </div>
                             <div class="form-group">
                                 <label for="turbidity-non-satisfactory">Non Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="turbidity-non-satisfactory" name="turbidity_non_satisfactory" min="0" value="0" class="negative-field count-input">
-                                    <select id="turbidity-non-satisfactory-range" name="turbidity_non_satisfactory_range" class="range-dropdown">
-                                        <option value="">Parameters</option>
-                                        <option value="Cond">Cond</option>
-                                        <option value="TDS">TDS</option>
-                                        <option value="Alk">Alk</option>
-                                        <option value="Har">Har</option>
-                                        <option value="PO3/4-R">PO₃/₄-R</option>
-                                        <option value="NO3-N">NO₃-N</option>
-                                        <option value="cHLD">cHLD</option>
-                                        <option value="SO4">SO₄</option>
-                                        <option value="pH">pH</option>
-                                        <option value="Sal">Sal</option>
-                                    </select>
-                                </div>
-                                <div id="turbidity-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <input type="number" id="turbidity-non-satisfactory" name="turbidity_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="turbidity-non-satisfactory-warning" class="warning-text" style="display: none;">Turbidity outside acceptable range</div>
-                                <div id="turbidity-non-satisfactory-high" class="high-level" style="display: none;">Turbidity too high (>4.0 NTU)</div>
                             </div>
                         </div>
                     </div>
@@ -1046,53 +1040,13 @@
                         <div class="test-inputs">
                             <div class="form-group">
                                 <label for="temperature-satisfactory">Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="temperature-satisfactory" name="temperature_satisfactory" min="0" value="0" class="positive-field count-input">
-                                    <select id="temperature-satisfactory-range" name="temperature_satisfactory_range" class="range-dropdown">
-                                        <option value="">Range</option>
-                                        <option value="15">15</option>
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
-                                        <option value="22">22</option>
-                                        <option value="23">23</option>
-                                        <option value="24">24</option>
-                                        <option value="25">25</option>
-                                        <option value="26">26</option>
-                                        <option value="27">27</option>
-                                        <option value="28">28</option>
-                                        <option value="29">29</option>
-                                        <option value="30">30</option>
-                                    </select>
-                                </div>
+                                <input type="number" id="temperature-satisfactory" name="temperature_satisfactory" min="0" value="0" class="positive-field count-input">
                                 <div id="temperature-satisfactory-ideal" class="ideal-range" style="display: none;">Temperature within acceptable range (15-30°C)</div>
                             </div>
                             <div class="form-group">
                                 <label for="temperature-non-satisfactory">Non Satisfactory</label>
-                                <div class="input-with-dropdown">
-                                    <input type="number" id="temperature-non-satisfactory" name="temperature_non_satisfactory" min="0" value="0" class="negative-field count-input">
-                                    <select id="temperature-non-satisfactory-range" name="temperature_non_satisfactory_range" class="range-dropdown">
-                                        <option value="">Parameters</option>
-                                        <option value="Cond">Cond</option>
-                                        <option value="TDS">TDS</option>
-                                        <option value="Alk">Alk</option>
-                                        <option value="Har">Har</option>
-                                        <option value="PO3/4-R">PO₃/₄-R</option>
-                                        <option value="NO3-N">NO₃-N</option>
-                                        <option value="cHLD">cHLD</option>
-                                        <option value="SO4">SO₄</option>
-                                        <option value="pH">pH</option>
-                                        <option value="Turb">Turb</option>
-                                        <option value="Sal">Sal</option>
-                                    </select>
-                                </div>
-                                <div id="temperature-selected-parameters" class="selected-parameters" style="margin-top: 5px;"></div>
+                                <input type="number" id="temperature-non-satisfactory" name="temperature_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="temperature-non-satisfactory-warning" class="warning-text" style="display: none;">Temperature outside acceptable range</div>
-                                <div id="temperature-non-satisfactory-low" class="high-level" style="display: none;">Temperature too low (<15°C)</div>
-                                <div id="temperature-non-satisfactory-high" class="high-level" style="display: none;">Temperature too high (>30°C)</div>
                             </div>
                         </div>
                     </div>
@@ -1109,12 +1063,113 @@
 
         <div class="form-container">
             <h2>Recent Submissions</h2>
-            <div style="margin-bottom: 1rem;">
-                <input type="text" id="submission-search" placeholder="🔍 Search by water supply, sampling point, or location..."
-                    style="width: 100%; padding: 12px; border: 2px solid var(--input-border); border-radius: 8px; font-size: 14px; background: var(--input-bg); color: var(--text-color);">
+
+            <!-- Search and Filter Controls -->
+            <div style="background: var(--container-bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ddd;">
+                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; margin-bottom: 1rem; align-items: center;">
+                    <div style="position: relative;">
+                        <input type="text" id="search-input" placeholder="Search by water supply, agency, or sampling point..."
+                               style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+                        <div id="search-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; display: none; z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <button id="clear-search" style="padding: 0.75rem 1rem; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Clear
+                    </button>
+                    <button id="advanced-filters-toggle" style="padding: 0.75rem 1rem; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Filters ▼
+                    </button>
+                </div>
+
+                <!-- Advanced Filters Panel -->
+                <div id="advanced-filters" style="display: none; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Time Period:</label>
+                            <select id="time-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Supply Type:</label>
+                            <select id="type-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Types</option>
+                                <option value="treated">Treated</option>
+                                <option value="untreated">Untreated</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Agency:</label>
+                            <select id="agency-filter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                <option value="all">All Agencies</option>
+                                <option value="NWC">NWC</option>
+                                <option value="MOH">MOH</option>
+                                <option value="WRHA">WRHA</option>
+                                <option value="Other Government Agency">Other Gov</option>
+                            </select>
+                        </div>
+                        <div id="custom-date-range" style="display: none; grid-column: 1 / -1;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">From:</label>
+                                    <input type="date" id="date-from" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">To:</label>
+                                    <input type="date" id="date-to" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button id="apply-filters" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; margin-right: 0.5rem;">
+                            Apply Filters
+                        </button>
+                        <button id="reset-filters" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                            Reset
+                        </button>
+                    </div>
+                </div>
             </div>
+
             <div id="recent-submissions-list">
                 <p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Kit Modal - Compact Design -->
+    <div id="toolkitModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px; max-height: 80vh;">
+            <div class="modal-header">
+                <h2>🧰 Tool Kit - Inspector Resources</h2>
+                <span class="close" onclick="closeToolKit()">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1rem;">
+                <div id="documentsList" style="min-height: 50px;">
+                    <!-- Documents will be loaded here dynamically -->
+                </div>
+
+                <!-- Expandable Document Preview -->
+                <div id="documentPreview" style="display: none; margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 id="previewTitle" style="margin: 0;">Document Preview</h4>
+                        <button onclick="closeDocumentPreview()" style="background: #6c757d; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">
+                            Close Preview
+                        </button>
+                    </div>
+                    <div style="border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                        <iframe id="documentViewer"
+                                style="width: 100%; height: 400px; border: none;">
+                        </iframe>
+                    </div>
+                    <div id="documentActions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                        <!-- Action buttons will be populated dynamically -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1123,7 +1178,7 @@
     <div id="submissionDetailsModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 0;">
         <div class="modal-content" style="max-width: 900px; width: 90%; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); position: relative; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="padding: 1.5rem; border-bottom: 2px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-                <h2 style="margin: 0; font-size: 20px; color: #333;">📋 Inspection Details</h2>
+                <h2 style="margin: 0; font-size: 20px; color: #333;">📋 Sample Report</h2>
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <button onclick="dashboard.printReport()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
                         🖨️ Print
@@ -1131,100 +1186,12 @@
                     <button onclick="dashboard.downloadReport()" style="background: #48bb78; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
                         📥 Download
                     </button>
-                    <span class="close" onclick="closeSubmissionDetails()" style="font-size: 32px; font-weight: bold; color: #666; cursor: pointer; line-height: 1;">&times;</span>
+                    <span class="close" onclick="dashboard.closeSubmissionDetails()" style="font-size: 32px; font-weight: bold; color: #666; cursor: pointer; line-height: 1;">&times;</span>
                 </div>
             </div>
             <div class="modal-body" style="padding: 0; overflow-y: auto; flex: 1;">
                 <div id="submissionDetailsContent" style="padding: 1.5rem;">
-                    <!-- Content populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tool Kit Modal -->
-    <div id="toolkitModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 90vw; max-height: 90vh;">
-            <div class="modal-header">
-                <h2>🧰 Tool Kit - Inspector Resources</h2>
-                <span class="close" onclick="closeToolKit()">&times;</span>
-            </div>
-            <div class="modal-body" style="padding: 1rem;">
-                <div class="toolkit-container">
-                    <div id="documentsList">Loading documents...</div>
-                    <div id="pdfPreview" style="display: none; margin-top: 20px;">
-                        <h3>Document Preview</h3>
-                        <div class="pdf-preview" style="border: 2px solid #ddd; border-radius: 8px; overflow: hidden; margin: 1rem 0;">
-                            <iframe id="pdfViewer" style="width: 100%; height: 600px; border: none;"></iframe>
-                        </div>
-                        <div class="pdf-actions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                            <a id="viewBtn" href="#" target="_blank" class="action-btn" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">👁️ View</a>
-                            <a id="downloadBtn" href="#" download class="action-btn" style="background: #48bb78; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">📥 Download</a>
-                            <button onclick="printCurrentPDF()" class="action-btn" style="background: #ed8936; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">🖨️ Print</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Water-themed Success Modal -->
-    <div id="waterModal" class="water-modal">
-        <div class="water-modal-content">
-            <div class="water-modal-header">
-                <div class="header-particles">
-                    <div class="particle"></div>
-                    <div class="particle"></div>
-                    <div class="particle"></div>
-                </div>
-                <div class="header-scanline"></div>
-                <h2>WATER ANALYSIS COMPLETE</h2>
-                <div class="header-status">SYSTEM STATUS: OPERATIONAL</div>
-            </div>
-            <div class="water-modal-body">
-                <div class="analysis-grid">
-                    <div class="analysis-item">
-                        <div class="analysis-label">INSPECTION STATUS</div>
-                        <div class="analysis-value status-success">SUBMITTED</div>
-                    </div>
-                    <div class="analysis-item">
-                        <div class="analysis-label">DATA INTEGRITY</div>
-                        <div class="analysis-value status-verified">VERIFIED</div>
-                    </div>
-                    <div class="analysis-item">
-                        <div class="analysis-label">TIMESTAMP</div>
-                        <div class="analysis-value" id="analysis-timestamp">--:--:--</div>
-                    </div>
-                    <div class="analysis-item">
-                        <div class="analysis-label">TRANSMISSION</div>
-                        <div class="analysis-value status-success">SUCCESSFUL</div>
-                    </div>
-                </div>
-
-                <div class="water-message" id="waterModalMessage">
-                    INSPECTION DATA SUCCESSFULLY TRANSMITTED TO CENTRAL DATABASE
-                </div>
-
-                <div class="analysis-summary">
-                    <div class="summary-item">
-                        <span class="summary-label">CHLORINE ANALYSIS:</span>
-                        <span class="summary-value" id="chlorine-summary">PROCESSED</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">BACTERIOLOGICAL:</span>
-                        <span class="summary-value" id="bacteria-summary">PROCESSED</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">SUPPLY STATUS:</span>
-                        <span class="summary-value" id="supply-summary">MONITORED</span>
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="water-close-btn tech-button" onclick="closeWaterModalWithFade()" style="box-shadow: 0 0 30px rgba(0, 229, 255, 0.5) !important;">
-                        <span class="button-text">CONTINUE TO DASHBOARD</span>
-                        <div class="button-scan"></div>
-                    </button>
+                    <!-- Content will be populated dynamically -->
                 </div>
             </div>
         </div>
@@ -1236,19 +1203,34 @@
                 this.supplies = [];
                 this.currentSupply = null;
                 this.selectedParameters = [];
-                this.turbiditySelectedParameters = [];
-                this.temperatureSelectedParameters = [];
+                this.chemicalParameters = [];
                 this.allParameters = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'Turb', 'Sal'];
-                this.allParametersWithPH = ['Cond', 'TDS', 'Alk', 'Har', 'PO3/4-R', 'NO3-N', 'cHLD', 'SO4', 'pH', 'Turb', 'Sal'];
+                this.allChemicalParameters = ['Nitrate', 'Nitrite', 'Iron', 'Manganese', 'Lead', 'Arsenic'];
+                this.submissions = JSON.parse(localStorage.getItem('westmoreland_submissions') || '[]');
+                this.allSubmissions = [];
+                this.filteredSubmissions = [];
+                this.searchTimeout = null;
                 this.init();
             }
 
             async init() {
+                await this.loadCurrentUser();
                 await this.loadSupplies();
                 this.populateDropdown();
                 this.setupEvents();
                 this.setToday();
                 this.loadSubmissions();
+            }
+
+            async loadCurrentUser() {
+                try {
+                    const response = await fetch('/api/current-user');
+                    const user = await response.json();
+                    this.currentUser = user;
+                    document.getElementById('primary-inspector').value = user.full_name;
+                } catch (error) {
+                    console.error('Failed to load current user:', error);
+                }
             }
 
             async loadSupplies() {
@@ -1263,8 +1245,14 @@
                 }
             }
 
+            findSupplyId(supplyName) {
+                const supply = this.supplies.find(s => s.name === supplyName);
+                return supply ? supply.id : null;
+            }
+
             populateDropdown() {
                 const select = document.getElementById('supply');
+
                 while (select.children.length > 1) {
                     select.removeChild(select.lastChild);
                 }
@@ -1274,6 +1262,7 @@
                     'PC': 'Parish Council',
                     'PT': 'Private',
                     'MOH': 'Ministry of Health',
+                    'HMC': 'Hanover Municipal Corporation',
                     'Private': 'Private Sector'
                 };
 
@@ -1293,13 +1282,21 @@
                         select.appendChild(group);
                     }
                 });
+
+                const otherGovGroup = document.createElement('optgroup');
+                otherGovGroup.label = 'Other Options';
+                const otherGovOption = document.createElement('option');
+                otherGovOption.value = 'other-governments';
+                otherGovOption.textContent = 'Other Governments';
+                otherGovGroup.appendChild(otherGovOption);
+                select.appendChild(otherGovGroup);
             }
 
             setupEvents() {
                 document.getElementById('supply').addEventListener('change', () => this.selectSupply());
                 document.getElementById('submission-form').addEventListener('submit', (e) => this.submit(e));
                 document.getElementById('darkModeToggle').addEventListener('click', () => this.toggleTheme());
-
+                document.getElementById('toolkitBtn').addEventListener('click', () => this.openToolKit());
                 ['chlorine-positive', 'chlorine-negative'].forEach(id => {
                     document.getElementById(id).addEventListener('input', this.updateChlorineTotal.bind(this));
                 });
@@ -1310,25 +1307,72 @@
 
                 document.getElementById('bacteriological-positive').addEventListener('input', () => this.handleBacteriologicalChange());
 
+                // Bacteriological total counter
+                document.querySelectorAll('.bacterio-count').forEach(input => {
+                    input.addEventListener('input', () => this.updateBacteriologicalTotal());
+                });
+
+                // Chemical total counter
+                document.querySelectorAll('.chemical-count').forEach(input => {
+                    input.addEventListener('input', () => this.updateChemicalTotal());
+                });
+
+                // Rejected/Broken checkboxes
+                document.getElementById('bacteriological-rejected-check').addEventListener('change', (e) => {
+                    const input = document.getElementById('bacteriological-rejected');
+                    const reason = document.getElementById('bacteriological-rejected-reason');
+                    if (e.target.checked) {
+                        input.style.display = 'block';
+                        reason.style.display = 'block';
+                        input.value = '0';
+                    } else {
+                        input.style.display = 'none';
+                        reason.style.display = 'none';
+                        input.value = '0';
+                        reason.value = '';
+                        this.updateBacteriologicalTotal();
+                    }
+                });
+
+                document.getElementById('bacteriological-broken-check').addEventListener('change', (e) => {
+                    const input = document.getElementById('bacteriological-broken');
+                    const reason = document.getElementById('bacteriological-broken-reason');
+                    if (e.target.checked) {
+                        input.style.display = 'block';
+                        reason.style.display = 'block';
+                        input.value = '0';
+                    } else {
+                        input.style.display = 'none';
+                        reason.style.display = 'none';
+                        input.value = '0';
+                        reason.value = '';
+                        this.updateBacteriologicalTotal();
+                    }
+                });
+
                 document.getElementById('ph-non-satisfactory').addEventListener('input', this.handlePhChange.bind(this));
                 document.getElementById('ph-non-satisfactory-range').addEventListener('change', this.handleParameterSelection.bind(this));
-
+                document.getElementById('chemical-non-satisfactory').addEventListener('input', this.handleChemicalChange.bind(this));
+                document.getElementById('chemical-non-satisfactory-range').addEventListener('change', this.handleChemicalParameterSelection.bind(this));
                 document.getElementById('turbidity-non-satisfactory').addEventListener('input', this.handleTurbidityChange.bind(this));
-                document.getElementById('turbidity-non-satisfactory-range').addEventListener('change', this.handleTurbidityParameterSelection.bind(this));
-
                 document.getElementById('temperature-non-satisfactory').addEventListener('input', this.handleTemperatureChange.bind(this));
-                document.getElementById('temperature-non-satisfactory-range').addEventListener('change', this.handleTemperatureParameterSelection.bind(this));
 
-                document.getElementById('toolkitBtn').addEventListener('click', () => this.openToolKit());
+                document.getElementById('search-input').addEventListener('input', (e) => this.handleSearch(e.target.value));
+                document.getElementById('clear-search').addEventListener('click', () => this.clearSearch());
+                document.getElementById('advanced-filters-toggle').addEventListener('click', () => this.toggleFilters());
+                document.getElementById('time-filter').addEventListener('change', (e) => this.handleTimeFilterChange(e.target.value));
+                document.getElementById('apply-filters').addEventListener('click', () => this.applyFilters());
+                document.getElementById('reset-filters').addEventListener('click', () => this.resetFilters());
             }
 
             setToday() {
                 document.getElementById('submission-date').value = new Date().toISOString().split('T')[0];
             }
 
-            selectSupply() {
+            async selectSupply() {
                 const supplyValue = document.getElementById('supply').value;
                 const facilityTypeGroup = document.getElementById('facility-type-group');
+                const samplingPointLoading = document.getElementById('sampling-point-loading');
 
                 if (!supplyValue) {
                     document.getElementById('submission-form-section').classList.add('hidden');
@@ -1337,15 +1381,31 @@
                     return;
                 }
 
-                const id = parseInt(supplyValue);
-                this.currentSupply = this.supplies.find(s => s.id === id);
+                samplingPointLoading.style.display = 'inline-block';
 
-                document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
-                document.getElementById('selected-supply-info').textContent =
-                    `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
+                if (supplyValue === 'other-governments') {
+                    this.currentSupply = {
+                        id: 'other-governments',
+                        name: 'Other Governments',
+                        agency: 'Other Government Agency',
+                        type: 'treated'
+                    };
+                    document.getElementById('selected-supply-name').textContent = 'Other Governments';
+                    document.getElementById('selected-supply-info').textContent = 'Other Government Agency • Treated';
+                    this.hideSamplingPoints();
+                    samplingPointLoading.style.display = 'none';
+                    document.getElementById('submission-form-section').classList.remove('hidden');
+                } else {
+                    const id = parseInt(supplyValue);
+                    this.currentSupply = this.supplies.find(s => s.id === id);
+                    document.getElementById('selected-supply-name').textContent = this.currentSupply.name;
+                    document.getElementById('selected-supply-info').textContent =
+                        `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
 
-                this.showSamplingPoints();
-                this.loadSamplingPoints(id);
+                    await this.loadSamplingPoints(id);
+                    samplingPointLoading.style.display = 'none';
+                    this.showSamplingPoints();
+                }
 
                 if (this.currentSupply.agency === 'MOH') {
                     facilityTypeGroup.classList.remove('hidden');
@@ -1354,20 +1414,15 @@
                     document.getElementById('facility-type').value = '';
                 }
 
-                const chlorineSection = document.getElementById('chlorine-section');
+                const section = document.getElementById('chlorine-section');
                 if (this.currentSupply.type === 'untreated') {
-                    chlorineSection.classList.add('treated-only');
-                    document.getElementById('chlorine-total').value = 0;
-                    document.getElementById('chlorine-positive').value = 0;
-                    document.getElementById('chlorine-negative').value = 0;
-                    document.getElementById('chlorine-positive-range').value = '';
-                    document.getElementById('chlorine-negative-range').value = '';
+                    section.classList.add('treated-only');
                     document.getElementById('chlorine-positive').disabled = true;
                     document.getElementById('chlorine-negative').disabled = true;
                     document.getElementById('chlorine-positive-range').disabled = true;
                     document.getElementById('chlorine-negative-range').disabled = true;
                 } else {
-                    chlorineSection.classList.remove('treated-only');
+                    section.classList.remove('treated-only');
                     document.getElementById('chlorine-positive').disabled = false;
                     document.getElementById('chlorine-negative').disabled = false;
                     document.getElementById('chlorine-positive-range').disabled = false;
@@ -1377,71 +1432,29 @@
                 document.getElementById('submission-form-section').classList.remove('hidden');
             }
 
-            async loadSamplingPoints(supplyId) {
-                try {
-                    const response = await fetch(`/api/sampling-points/${supplyId}`);
-                    if (response.ok) {
-                        const samplingPoints = await response.json();
-                        if (samplingPoints.length > 0) {
-                            this.populateSamplingPointsDropdown(samplingPoints);
-                            this.showSamplingPoints();
-                        } else {
-                            this.hideSamplingPoints();
-                        }
-                    } else {
-                        this.hideSamplingPoints();
-                    }
-                } catch (error) {
-                    console.error('Error loading sampling points:', error);
-                    this.hideSamplingPoints();
-                }
-            }
-
-            populateSamplingPointsDropdown(samplingPoints) {
-                const samplingPointSelect = document.getElementById('sampling-point');
-                samplingPointSelect.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
-
-                samplingPoints.forEach(point => {
-                    const option = document.createElement('option');
-                    option.value = point.id;
-                    option.textContent = point.name;
-                    option.dataset.location = point.location;
-                    option.dataset.description = point.description;
-                    samplingPointSelect.appendChild(option);
-                });
-
-                samplingPointSelect.addEventListener('change', this.handleSamplingPointSelection.bind(this));
-            }
-
-            handleSamplingPointSelection() {
-                const samplingPointSelect = document.getElementById('sampling-point');
-                const locationSpan = document.getElementById('sampling-point-location');
-
-                if (samplingPointSelect.value) {
-                    const selectedOption = samplingPointSelect.options[samplingPointSelect.selectedIndex];
-                    const location = selectedOption.dataset.location || 'Not specified';
-                    locationSpan.textContent = location;
-                } else {
-                    locationSpan.textContent = '';
-                }
-            }
-
-            showSamplingPoints() {
-                document.getElementById('sampling-points-section').classList.remove('hidden');
-            }
-
-            hideSamplingPoints() {
-                document.getElementById('sampling-points-section').classList.add('hidden');
-                document.getElementById('sampling-point').value = '';
-                document.getElementById('sampling-point-location').textContent = '';
-            }
-
             updateChlorineTotal() {
                 if (this.currentSupply?.type === 'untreated') return;
                 const positive = parseInt(document.getElementById('chlorine-positive').value) || 0;
                 const negative = parseInt(document.getElementById('chlorine-negative').value) || 0;
                 const total = positive + negative;
                 document.getElementById('chlorine-total').value = total;
+            }
+
+            updateBacteriologicalTotal() {
+                const positive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+                const negative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
+                const pending = parseInt(document.getElementById('bacteriological-pending').value) || 0;
+                const rejected = parseInt(document.getElementById('bacteriological-rejected').value) || 0;
+                const broken = parseInt(document.getElementById('bacteriological-broken').value) || 0;
+                const total = positive + negative + pending + rejected + broken;
+                document.getElementById('bacteriological-total').value = total;
+            }
+
+            updateChemicalTotal() {
+                const satisfactory = parseInt(document.getElementById('chemical-satisfactory').value) || 0;
+                const nonSatisfactory = parseInt(document.getElementById('chemical-non-satisfactory').value) || 0;
+                const total = satisfactory + nonSatisfactory;
+                document.getElementById('chemical-total').value = total;
             }
 
             handleChlorineRangeChange() {
@@ -1478,7 +1491,7 @@
                     elements.maximum.style.display = 'block';
                 } else if (numericValue >= 2.1 && numericValue <= 2.4) {
                     elements.high.style.display = 'block';
-                } else if (numericValue >= 2.5 && numericValue <= 3.0) {
+                } else if (numericValue >= 2.5 && (numericValue <= 3.0 || rangeValue === '>3.5')) {
                     elements.veryHigh.style.display = 'block';
                 }
             }
@@ -1486,6 +1499,8 @@
             parseRangeValue(rangeStr) {
                 if (rangeStr.includes('<')) {
                     return parseFloat(rangeStr.replace('<', '')) - 0.01;
+                } else if (rangeStr === '>3.5') {
+                    return 4.0;
                 } else if (rangeStr.includes('>')) {
                     return parseFloat(rangeStr.replace('>', '')) + 0.01;
                 } else {
@@ -1512,7 +1527,6 @@
                 const nonSatisfactoryValue = parseInt(document.getElementById('ph-non-satisfactory').value) || 0;
 
                 if (nonSatisfactoryValue <= 0) {
-                    // Clear all parameter selections when value is 0
                     this.selectedParameters = [];
                     this.renderParameterTags();
                     this.updateParameterDropdown();
@@ -1530,23 +1544,55 @@
                     this.updateParameterDropdown();
                 }
 
-                // Reset dropdown to default
                 dropdown.value = '';
+            }
+
+            handleChemicalChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('chemical-non-satisfactory').value) || 0;
+
+                if (nonSatisfactoryValue <= 0) {
+                    this.chemicalParameters = [];
+                    this.renderChemicalParameterTags();
+                    this.updateChemicalParameterDropdown();
+                    this.hideChemicalWarnings();
+                }
+            }
+
+            handleChemicalParameterSelection() {
+                const dropdown = document.getElementById('chemical-non-satisfactory-range');
+                const selectedValue = dropdown.value;
+
+                if (selectedValue && !this.chemicalParameters.includes(selectedValue)) {
+                    this.chemicalParameters.push(selectedValue);
+                    this.renderChemicalParameterTags();
+                    this.updateChemicalParameterDropdown();
+                }
+
+                dropdown.value = '';
+            }
+
+            handleTurbidityChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0;
+                const warning = document.getElementById('turbidity-non-satisfactory-warning');
+                warning.style.display = nonSatisfactoryValue > 0 ? 'block' : 'none';
+            }
+
+            handleTemperatureChange() {
+                const nonSatisfactoryValue = parseInt(document.getElementById('temperature-non-satisfactory').value) || 0;
+                const warning = document.getElementById('temperature-non-satisfactory-warning');
+                warning.style.display = nonSatisfactoryValue > 0 ? 'block' : 'none';
             }
 
             updateParameterDropdown() {
                 const dropdown = document.getElementById('ph-non-satisfactory-range');
                 const availableParameters = this.allParameters.filter(param => !this.selectedParameters.includes(param));
 
-                // Clear current options except the first one
                 dropdown.innerHTML = '<option value="">Parameters</option>';
 
-                // Add available parameters with proper subscripts
                 availableParameters.forEach(param => {
                     const option = document.createElement('option');
                     option.value = param;
 
-                    // Add proper subscripts for display
                     if (param === 'PO3/4-R') {
                         option.textContent = 'PO₃/₄-R';
                     } else if (param === 'NO3-N') {
@@ -1561,10 +1607,23 @@
                 });
             }
 
+            updateChemicalParameterDropdown() {
+                const dropdown = document.getElementById('chemical-non-satisfactory-range');
+                const availableParameters = this.allChemicalParameters.filter(param => !this.chemicalParameters.includes(param));
+
+                dropdown.innerHTML = '<option value="">Parameters</option>';
+
+                availableParameters.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param;
+                    option.textContent = param;
+                    dropdown.appendChild(option);
+                });
+            }
+
             renderParameterTags() {
                 const container = document.getElementById('ph-selected-parameters');
                 container.innerHTML = this.selectedParameters.map(param => {
-                    // Display with proper subscripts
                     let displayParam = param;
                     if (param === 'PO3/4-R') {
                         displayParam = 'PO₃/₄-R';
@@ -1583,869 +1642,729 @@
                 }).join('');
             }
 
-            removeParameter(param) {
-                this.selectedParameters = this.selectedParameters.filter(p => p !== param);
-                this.renderParameterTags();
-                this.updateParameterDropdown();
+            renderChemicalParameterTags() {
+            const container = document.getElementById('chemical-selected-parameters');
+            container.innerHTML = this.chemicalParameters.map(param => `
+                <div class="parameter-tag">
+                    ${param}
+                    <button type="button" class="remove-param" onclick="dashboard.removeChemicalParameter('${param}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        removeParameter(param) {
+            this.selectedParameters = this.selectedParameters.filter(p => p !== param);
+            this.renderParameterTags();
+            this.updateParameterDropdown();
+        }
+
+        removeChemicalParameter(param) {
+            this.chemicalParameters = this.chemicalParameters.filter(p => p !== param);
+            this.renderChemicalParameterTags();
+            this.updateChemicalParameterDropdown();
+        }
+
+        hidePhWarnings() {
+            const elements = [
+                'ph-non-satisfactory-warning',
+                'ph-non-satisfactory-low',
+                'ph-non-satisfactory-high'
+            ];
+            elements.forEach(id => document.getElementById(id).style.display = 'none');
+        }
+
+        hideChemicalWarnings() {
+            const warning = document.getElementById('chemical-non-satisfactory-warning');
+            warning.style.display = 'none';
+        }
+
+        async loadSamplingPoints(supplyId) {
+    try {
+        const response = await fetch(`/api/sampling-points/${supplyId}`);
+        const samplingPoints = await response.json();
+        const select = document.getElementById('sampling-point');
+        select.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
+        samplingPoints.forEach(point => {
+            const option = document.createElement('option');
+            option.value = point.id;
+            option.textContent = point.name;
+            select.appendChild(option);
+        });
+        select.addEventListener('change', () => this.updateSamplingPointLocation());
+    } catch (error) {
+        console.error('Failed to load sampling points:', error);
+        this.showAlert('error', 'Failed to load sampling points.');
+    }
+}
+
+        updateSamplingPointLocation() {
+            const select = document.getElementById('sampling-point');
+            const locationSpan = document.getElementById('sampling-point-location');
+            const selectedOption = select.options[select.selectedIndex];
+            locationSpan.textContent = selectedOption && selectedOption.value ? selectedOption.textContent : 'Not specified';
+        }
+
+        showSamplingPoints() {
+            document.getElementById('sampling-points-section').classList.remove('hidden');
+        }
+
+        hideSamplingPoints() {
+            document.getElementById('sampling-points-section').classList.add('hidden');
+            document.getElementById('sampling-point').value = '';
+            document.getElementById('sampling-point-location').textContent = '';
+        }
+
+        async submit(e) {
+            e.preventDefault();
+            if (!this.currentSupply) {
+                this.showAlert('error', 'Please select a water supply.');
+                return;
             }
 
-            // Turbidity handlers
-            handleTurbidityChange() {
-                const nonSatisfactoryValue = parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0;
+            const formData = {
+                supply_id: this.currentSupply.id,
+                supply_name: this.currentSupply.name,
+                agency: this.currentSupply.agency,
+                type: this.currentSupply.type,
+                facility_type: document.getElementById('facility-type').value || null,
+                sampling_point_id: document.getElementById('sampling-point').value || null,
+                water_source_type: document.getElementById('water-source-type').value || null,
+                visits: parseInt(document.getElementById('visits').value) || 1,
+                submission_date: document.getElementById('submission-date').value,
+                chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
+                chlorine_positive_range: document.getElementById('chlorine-positive-range').value || null,
+                chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
+                chlorine_negative_range: document.getElementById('chlorine-negative-range').value || null,
+                bacteriological_positive: parseInt(document.getElementById('bacteriological-positive').value) || 0,
+                isolated_organism: document.getElementById('isolated-organism').value || null,
+                bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
+                bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
+                bacteriological_rejected: parseInt(document.getElementById('bacteriological-rejected').value) || 0,
+                bacteriological_broken: parseInt(document.getElementById('bacteriological-broken').value) || 0,
+                bacteriological_rejected_reason: document.getElementById('bacteriological-rejected-reason').value || null,
+                bacteriological_broken_reason: document.getElementById('bacteriological-broken-reason').value || null,
+                ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
+                ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
+                ph_non_satisfactory_params: this.selectedParameters,
+                chemical_satisfactory: parseInt(document.getElementById('chemical-satisfactory').value) || 0,
+                chemical_non_satisfactory: parseInt(document.getElementById('chemical-non-satisfactory').value) || 0,
+                chemical_non_satisfactory_params: this.chemicalParameters,
+                turbidity_satisfactory: parseInt(document.getElementById('turbidity-satisfactory').value) || 0,
+                turbidity_non_satisfactory: parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0,
+                temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
+                temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
+                remarks: document.getElementById('remarks').value || null,
+                timestamp: new Date().toISOString()
+            };
 
-                if (nonSatisfactoryValue <= 0) {
-                    this.turbiditySelectedParameters = [];
-                    this.renderTurbidityParameterTags();
-                    this.updateTurbidityParameterDropdown();
-                }
-            }
-
-            handleTurbidityParameterSelection() {
-                const dropdown = document.getElementById('turbidity-non-satisfactory-range');
-                const selectedValue = dropdown.value;
-
-                if (selectedValue && !this.turbiditySelectedParameters.includes(selectedValue)) {
-                    this.turbiditySelectedParameters.push(selectedValue);
-                    this.renderTurbidityParameterTags();
-                    this.updateTurbidityParameterDropdown();
-                }
-
-                dropdown.value = '';
-            }
-
-            updateTurbidityParameterDropdown() {
-                const dropdown = document.getElementById('turbidity-non-satisfactory-range');
-                const availableParameters = this.allParametersWithPH.filter(param => !this.turbiditySelectedParameters.includes(param));
-
-                dropdown.innerHTML = '<option value="">Parameters</option>';
-
-                availableParameters.forEach(param => {
-                    const option = document.createElement('option');
-                    option.value = param;
-
-                    if (param === 'PO3/4-R') {
-                        option.textContent = 'PO₃/₄-R';
-                    } else if (param === 'NO3-N') {
-                        option.textContent = 'NO₃-N';
-                    } else if (param === 'SO4') {
-                        option.textContent = 'SO₄';
-                    } else {
-                        option.textContent = param;
-                    }
-
-                    dropdown.appendChild(option);
+            try {
+                const response = await fetch('/api/submit-inspection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
                 });
-            }
-
-            renderTurbidityParameterTags() {
-                const container = document.getElementById('turbidity-selected-parameters');
-                container.innerHTML = this.turbiditySelectedParameters.map(param => {
-                    let displayParam = param;
-                    if (param === 'PO3/4-R') {
-                        displayParam = 'PO₃/₄-R';
-                    } else if (param === 'NO3-N') {
-                        displayParam = 'NO₃-N';
-                    } else if (param === 'SO4') {
-                        displayParam = 'SO₄';
-                    }
-
-                    return `
-                        <div class="parameter-tag">
-                            ${displayParam}
-                            <button type="button" class="remove-param" onclick="dashboard.removeTurbidityParameter('${param}')">×</button>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            removeTurbidityParameter(param) {
-                this.turbiditySelectedParameters = this.turbiditySelectedParameters.filter(p => p !== param);
-                this.renderTurbidityParameterTags();
-                this.updateTurbidityParameterDropdown();
-            }
-
-            // Temperature handlers
-            handleTemperatureChange() {
-                const nonSatisfactoryValue = parseInt(document.getElementById('temperature-non-satisfactory').value) || 0;
-
-                if (nonSatisfactoryValue <= 0) {
-                    this.temperatureSelectedParameters = [];
-                    this.renderTemperatureParameterTags();
-                    this.updateTemperatureParameterDropdown();
-                }
-            }
-
-            handleTemperatureParameterSelection() {
-                const dropdown = document.getElementById('temperature-non-satisfactory-range');
-                const selectedValue = dropdown.value;
-
-                if (selectedValue && !this.temperatureSelectedParameters.includes(selectedValue)) {
-                    this.temperatureSelectedParameters.push(selectedValue);
-                    this.renderTemperatureParameterTags();
-                    this.updateTemperatureParameterDropdown();
-                }
-
-                dropdown.value = '';
-            }
-
-            updateTemperatureParameterDropdown() {
-                const dropdown = document.getElementById('temperature-non-satisfactory-range');
-                const availableParameters = this.allParametersWithPH.filter(param => param !== 'Turb').filter(param => !this.temperatureSelectedParameters.includes(param));
-
-                dropdown.innerHTML = '<option value="">Parameters</option>';
-
-                availableParameters.forEach(param => {
-                    const option = document.createElement('option');
-                    option.value = param;
-
-                    if (param === 'PO3/4-R') {
-                        option.textContent = 'PO₃/₄-R';
-                    } else if (param === 'NO3-N') {
-                        option.textContent = 'NO₃-N';
-                    } else if (param === 'SO4') {
-                        option.textContent = 'SO₄';
-                    } else {
-                        option.textContent = param;
-                    }
-
-                    dropdown.appendChild(option);
-                });
-            }
-
-            renderTemperatureParameterTags() {
-                const container = document.getElementById('temperature-selected-parameters');
-                container.innerHTML = this.temperatureSelectedParameters.map(param => {
-                    let displayParam = param;
-                    if (param === 'PO3/4-R') {
-                        displayParam = 'PO₃/₄-R';
-                    } else if (param === 'NO3-N') {
-                        displayParam = 'NO₃-N';
-                    } else if (param === 'SO4') {
-                        displayParam = 'SO₄';
-                    }
-
-                    return `
-                        <div class="parameter-tag">
-                            ${displayParam}
-                            <button type="button" class="remove-param" onclick="dashboard.removeTemperatureParameter('${param}')">×</button>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            removeTemperatureParameter(param) {
-                this.temperatureSelectedParameters = this.temperatureSelectedParameters.filter(p => p !== param);
-                this.renderTemperatureParameterTags();
-                this.updateTemperatureParameterDropdown();
-            }
-
-            handlePhRangeChange() {
-                // Legacy function - now handled by handleParameterSelection
-            }
-
-            updatePhStatusForRange(rangeValue) {
-                const elements = {
-                    warning: document.getElementById('ph-non-satisfactory-warning'),
-                    low: document.getElementById('ph-non-satisfactory-low'),
-                    high: document.getElementById('ph-non-satisfactory-high')
-                };
-
-                this.hidePhWarnings();
-
-                if (!rangeValue) return;
-
-                if (rangeValue === '<6.5' || parseFloat(rangeValue) < 6.5) {
-                    elements.low.style.display = 'block';
-                } else if (rangeValue === '>8.5' || parseFloat(rangeValue) > 8.5) {
-                    elements.high.style.display = 'block';
+                if (response.ok) {
+                    this.submissions.push(formData);
+                    localStorage.setItem('westmoreland_submissions', JSON.stringify(this.submissions));
+                    this.showAlert('success', 'Submission successful!');
+                    this.showWaterModal();
+                    this.resetForm();
+                    this.loadSubmissions();
                 } else {
-                    elements.warning.style.display = 'block';
+                    throw new Error('Submission failed');
                 }
+            } catch (error) {
+                console.error('Submission error:', error);
+                this.showAlert('error', 'Failed to submit data.');
+            }
+        }
+
+        resetForm() {
+            document.getElementById('submission-form').reset();
+            document.getElementById('supply').value = '';
+            document.getElementById('facility-type').value = '';
+            document.getElementById('submission-form-section').classList.add('hidden');
+            document.getElementById('facility-type-group').classList.add('hidden');
+            this.hideSamplingPoints();
+            this.currentSupply = null;
+            this.selectedParameters = [];
+            this.chemicalParameters = [];
+            this.renderParameterTags();
+            this.renderChemicalParameterTags();
+            this.updateParameterDropdown();
+            this.updateChemicalParameterDropdown();
+            this.hidePhWarnings();
+            this.hideChemicalWarnings();
+            document.getElementById('chlorine-total').value = 0;
+            document.getElementById('urgent-icon').style.display = 'none';
+            document.getElementById('isolated-organism').style.display = 'none';
+            document.getElementById('isolated-organism').value = '';
+            this.setToday();
+        }
+
+        showAlert(type, message) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 3000);
+        }
+
+        showWaterModal() {
+            const modal = document.getElementById('waterModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                document.getElementById('westmoreland-analysis-timestamp').textContent = new Date().toLocaleTimeString();
+            }, 10);
+        }
+
+        closeWaterModal() {
+            const modal = document.getElementById('waterModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 600);
+        }
+
+        loadSubmissions() {
+            this.allSubmissions = JSON.parse(localStorage.getItem('westmoreland_submissions') || '[]');
+            this.filteredSubmissions = [...this.allSubmissions];
+            this.renderSubmissions();
+        }
+
+        getTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 172800) return 'Yesterday';
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            if (seconds < 2592000) return `${Math.floor(seconds / 604800)} weeks ago`;
+            if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
+            return `${Math.floor(seconds / 31536000)} years ago`;
+        }
+
+        renderSubmissions() {
+            const list = document.getElementById('recent-submissions-list');
+            if (!this.filteredSubmissions.length) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No recent submissions</p>';
+                return;
             }
 
-            hidePhWarnings() {
-                const elements = [
-                    'ph-non-satisfactory-warning',
-                    'ph-non-satisfactory-low',
-                    'ph-non-satisfactory-high'
-                ];
-                elements.forEach(id => {
-                    document.getElementById(id).style.display = 'none';
-                });
-            }
+            list.innerHTML = this.filteredSubmissions.map((s, index) => `
+                <div class="submission-card"
+                     style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                            background:${s.bacteriological_status === 'pending' ? 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.15) 100%)' : 'linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%)'};
+                            border:1px solid ${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'};border-radius:12px;overflow:hidden;
+                            box-shadow:0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1);"
+                     onclick="dashboard.showSubmissionDetails(${index})"
+                     onmouseenter="this.style.transform='translateY(-4px) scale(1.01)';this.style.boxShadow='0 12px 40px ${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.25)'}, inset 0 1px 0 rgba(255,255,255,0.2)';this.style.borderColor='${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.5)' : 'rgba(102,126,234,0.5)'}';"
+                     onmouseleave="this.style.transform='translateY(0) scale(1)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)';this.style.borderColor='${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'}';">
 
-            openToolKit() {
-                document.getElementById('toolkitModal').style.display = 'block';
-                this.loadDocuments();
-            }
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${s.bacteriological_status === 'pending' ? '#fbbf24,#f59e0b,#fbbf24,#f59e0b,#fbbf24' : '#667eea,#764ba2,#f093fb,#4facfe,#667eea'});background-size:200% 100%;animation:holographicShift 3s linear infinite;"></div>
+                    <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:${s.type === 'treated' ? '#4ade80' : '#60a5fa'};box-shadow:0 0 12px ${s.type === 'treated' ? '#4ade80' : '#60a5fa'};animation:pulse 2s ease-in-out infinite;"></div>
 
-            async loadDocuments() {
-                try {
-                    const response = await fetch('/api/documents');
-                    const documents = await response.json();
-                    const documentsList = document.getElementById('documentsList');
-
-                    if (documents.length === 0) {
-                        documentsList.innerHTML = '<p style="text-align: center; color: #666; margin: 20px 0;">No documents available</p>';
-                        return;
-                    }
-
-                    documentsList.innerHTML = documents.map(doc => `
-                        <div class="document-item" style="border: 1px solid #ddd; border-radius: 5px; margin: 10px 0; padding: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-weight: bold;">${doc.original_name}</span>
-                                <button onclick="previewDocument('${doc.filename}', '${doc.original_name}')"
-                                        style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                                    Preview
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                } catch (error) {
-                    console.error('Error loading documents:', error);
-                    document.getElementById('documentsList').innerHTML = '<p style="color: red;">Error loading documents</p>';
-                }
-            }
-
-            async submit(e) {
-                e.preventDefault();
-
-                const data = {
-                    supply_id: this.currentSupply.id,
-                    sampling_point_id: document.getElementById('sampling-point').value || null,
-                    water_source_type: document.getElementById('water-source-type').value || '',
-                    visits: parseInt(document.getElementById('visits').value) || 0,
-                    chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
-                    chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
-                    chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
-                    chlorine_positive_range: document.getElementById('chlorine-positive-range').value || '',
-                    chlorine_negative_range: document.getElementById('chlorine-negative-range').value || '',
-                    bacteriological_positive: parseInt(document.getElementById('bacteriological-positive').value) || 0,
-                    bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
-                    bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
-                    isolated_organism: document.getElementById('isolated-organism').value || '',
-                    chemical_satisfactory: parseInt(document.getElementById('chemical-satisfactory').value) || 0,
-                    chemical_non_satisfactory: parseInt(document.getElementById('chemical-non-satisfactory').value) || 0,
-                    chemical_non_satisfactory_range: document.getElementById('chemical-non-satisfactory-range').value || '',
-                    ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
-                    ph_satisfactory_range: document.getElementById('ph-satisfactory-range').value || '',
-                    ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
-                    ph_non_satisfactory_range: this.selectedParameters.join(', '),
-                    turbidity_satisfactory: parseInt(document.getElementById('turbidity-satisfactory').value) || 0,
-                    turbidity_satisfactory_range: document.getElementById('turbidity-satisfactory-range').value || '',
-                    turbidity_non_satisfactory: parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0,
-                    turbidity_non_satisfactory_range: this.turbiditySelectedParameters.join(', '),
-                    temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
-                    temperature_satisfactory_range: document.getElementById('temperature-satisfactory-range').value || '',
-                    temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
-                    temperature_non_satisfactory_range: this.temperatureSelectedParameters.join(', '),
-                    submission_date: document.getElementById('submission-date').value || '',
-                    remarks: document.getElementById('remarks').value || '',
-                    facility_type: document.getElementById('facility-type').value || ''
-                };
-
-                try {
-                    const response = await fetch('/api/submit-inspection', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        this.showFuturisticWaterModal(`Inspection data for ${this.currentSupply.name} recorded successfully!`);
-                        this.reset();
-                        this.loadSubmissions();
-                    } else {
-                        this.showAlert('error', result.error || 'Submission failed');
-                    }
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    this.showAlert('error', 'Failed to submit inspection. Please try again.');
-                }
-            }
-
-            reset() {
-                document.getElementById('submission-form').reset();
-                document.getElementById('supply').value = '';
-                document.getElementById('facility-type').value = '';
-                document.getElementById('submission-form-section').classList.add('hidden');
-                document.getElementById('facility-type-group').classList.add('hidden');
-                this.selectedParameters = [];
-                this.turbiditySelectedParameters = [];
-                this.temperatureSelectedParameters = [];
-                this.renderParameterTags();
-                this.updateParameterDropdown();
-                this.renderTurbidityParameterTags();
-                this.updateTurbidityParameterDropdown();
-                this.renderTemperatureParameterTags();
-                this.updateTemperatureParameterDropdown();
-                this.hideSamplingPoints();
-                this.setToday();
-            }
-
-            async loadSubmissions() {
-                try {
-                    const response = await fetch('/api/my-submissions');
-                    const submissions = await response.json();
-                    this.displaySubmissions(submissions);
-                } catch (error) {
-                    console.error('Failed to load submissions:', error);
-                    this.displaySubmissions([]);
-                }
-            }
-
-            getTimeAgo(dateString) {
-                const now = new Date();
-                const date = new Date(dateString);
-                const seconds = Math.floor((now - date) / 1000);
-
-                if (seconds < 60) return 'Just now';
-                if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
-                if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-                if (seconds < 172800) return 'Yesterday';
-                if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
-                if (seconds < 2592000) return `${Math.floor(seconds / 604800)} weeks ago`;
-                if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
-                return `${Math.floor(seconds / 31536000)} years ago`;
-            }
-
-            displaySubmissions(submissions = []) {
-                const container = document.getElementById('recent-submissions-list');
-                if (!submissions.length) {
-                    container.innerHTML = '<p style="text-align:center;color:#666;padding:2rem;">No submissions yet</p>';
-                    return;
-                }
-
-                // Store all submissions for search and viewing
-                this.allSubmissions = submissions;
-
-                // Setup search functionality
-                const searchInput = document.getElementById('submission-search');
-                searchInput.oninput = (e) => this.filterSubmissions(e.target.value);
-
-                container.innerHTML = submissions.slice(0, 20).map((s, index) => this.generateSubmissionCard(s, index)).join('');
-
-                // Add CSS animations if not already present
-                if (!document.getElementById('ai-card-animations')) {
-                    const style = document.createElement('style');
-                    style.id = 'ai-card-animations';
-                    style.textContent = `
-                        @keyframes holographicShift {
-                            0% { background-position: 0% 50%; }
-                            100% { background-position: 200% 50%; }
-                        }
-                        @keyframes pulse {
-                            0%, 100% { opacity: 1; transform: scale(1); }
-                            50% { opacity: 0.7; transform: scale(1.1); }
-                        }
-                        @keyframes shimmer {
-                            0% { left: -100%; }
-                            100% { left: 200%; }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-            }
-
-            generateSubmissionCard(s, actualIndex) {
-                return `
-                    <div class="submission-card"
-                         style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                                background:linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
-                                border:1px solid rgba(102,126,234,0.2);border-radius:12px;overflow:hidden;
-                                box-shadow:0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1);"
-                         onclick="dashboard.viewSubmissionDetails(${actualIndex})"
-                         onmouseenter="this.style.transform='translateY(-4px) scale(1.01)';this.style.boxShadow='0 12px 40px rgba(102,126,234,0.25), inset 0 1px 0 rgba(255,255,255,0.2)';this.style.borderColor='rgba(102,126,234,0.5)';"
-                         onmouseleave="this.style.transform='translateY(0) scale(1)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)';this.style.borderColor='rgba(102,126,234,0.2)';">
-
-                        <!-- Holographic Border Effect -->
-                        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#4facfe,#667eea);background-size:200% 100%;animation:holographicShift 3s linear infinite;"></div>
-
-                        <!-- Status Indicator -->
-                        <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:${s.type === 'treated' ? '#4ade80' : '#60a5fa'};box-shadow:0 0 12px ${s.type === 'treated' ? '#4ade80' : '#60a5fa'};animation:pulse 2s ease-in-out infinite;"></div>
-
-                        <div style="padding:1.2rem;">
-                            <!-- Header Section -->
-                            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
-                                <div style="flex:1;">
-                                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
-                                        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(102,126,234,0.4);">
-                                            ${s.type === 'treated' ? '💧' : '🌊'}
-                                        </div>
-                                        <div>
-                                            <div style="font-size:17px;font-weight:700;color:var(--text-color);letter-spacing:-0.02em;line-height:1.3;">${s.supply_name}</div>
-                                            <div style="font-size:11px;color:#667eea;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">ID: INS-${String(s.id || actualIndex).padStart(6, '0')}</div>
-                                        </div>
+                    <div style="padding:1.2rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+                            <div style="flex:1;">
+                                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                                    <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(102,126,234,0.4);">
+                                        ${s.type === 'treated' ? '💧' : '🌊'}
                                     </div>
-                                </div>
-
-                                <!-- Time Badge with AI Glow -->
-                                <div style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));backdrop-filter:blur(10px);border:1px solid rgba(102,126,234,0.3);padding:6px 14px;border-radius:20px;box-shadow:0 2px 10px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.2);">
-                                    <div style="font-size:10px;font-weight:700;color:#667eea;text-transform:uppercase;letter-spacing:0.08em;">${this.getTimeAgo(s.created_at)}</div>
-                                </div>
-                            </div>
-
-                            <!-- Sampling Point Section -->
-                            ${s.sampling_point_name ? `
-                            <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:1px solid rgba(102,126,234,0.15);border-radius:8px;padding:10px 12px;margin-bottom:0.8rem;position:relative;overflow:hidden;">
-                                <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(102,126,234,0.1),transparent);border-radius:50%;"></div>
-                                <div style="display:flex;align-items:center;gap:8px;position:relative;">
-                                    <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">📍</div>
-                                    <div style="flex:1;">
-                                        <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Sampling Point</div>
-                                        <div style="font-size:13px;font-weight:600;color:var(--text-color);">${s.sampling_point_name}</div>
-                                        ${s.sampling_point_location ? `<div style="font-size:11px;color:#999;margin-top:2px;">${s.sampling_point_location}</div>` : ''}
+                                    <div>
+                                        <div style="font-size:17px;font-weight:700;color:var(--text-color);letter-spacing:-0.02em;line-height:1.3;">${s.supply_name}</div>
+                                        <div style="font-size:11px;color:#667eea;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">ID: INS-${String(s.id || index).padStart(6, '0')}</div>
                                     </div>
                                 </div>
                             </div>
-                            ` : ''}
-
-                            <!-- Info Grid -->
-                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem;">
-                                <div style="background:rgba(102,126,234,0.05);border:1px solid rgba(102,126,234,0.1);border-radius:6px;padding:8px;text-align:center;">
-                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Agency</div>
-                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.agency}</div>
-                                </div>
-                                ${s.water_source_type ? `
-                                <div style="background:rgba(77,222,128,0.05);border:1px solid rgba(77,222,128,0.2);border-radius:6px;padding:8px;text-align:center;">
-                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Source</div>
-                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);text-transform:capitalize;">${s.water_source_type}</div>
+                            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                                ${s.bacteriological_status === 'pending' ? `
+                                <div style="background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));border:1px solid rgba(251,191,36,0.5);padding:4px 12px;border-radius:16px;box-shadow:0 2px 8px rgba(251,191,36,0.3);">
+                                    <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">⏳ Pending Results</div>
                                 </div>
                                 ` : ''}
-                                <div style="background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:8px;text-align:center;">
-                                    <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Visits</div>
-                                    <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.visits || 0}</div>
+                                <div style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));backdrop-filter:blur(10px);border:1px solid rgba(102,126,234,0.3);padding:6px 14px;border-radius:20px;box-shadow:0 2px 10px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.2);">
+                                    <div style="font-size:10px;font-weight:700;color:#667eea;text-transform:uppercase;letter-spacing:0.08em;">${this.getTimeAgo(s.created_at || s.timestamp)}</div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Test Summary Bar -->
-                            <div style="background:linear-gradient(90deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border-radius:8px;padding:10px;margin-bottom:1rem;">
-                                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                                    <div style="display:flex;align-items:center;gap:6px;">
-                                        <div style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;"></div>
-                                        <span style="font-size:11px;font-weight:600;color:var(--text-color);">Tests: ${s.chlorine_total || 0} Chlorine, ${s.bacteriological_positive + s.bacteriological_negative + s.bacteriological_pending || 0} Bacterio</span>
-                                    </div>
-                                    <div style="font-size:10px;color:#888;font-weight:600;">${s.type === 'treated' ? 'TREATED SUPPLY' : 'UNTREATED SUPPLY'}</div>
+                        ${s.sampling_point_name ? `
+                        <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:1px solid rgba(102,126,234,0.15);border-radius:8px;padding:10px 12px;margin-bottom:0.8rem;position:relative;overflow:hidden;">
+                            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(102,126,234,0.1),transparent);border-radius:50%;"></div>
+                            <div style="display:flex;align-items:center;gap:8px;position:relative;">
+                                <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">📍</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Sampling Point</div>
+                                    <div style="font-size:13px;font-weight:600;color:var(--text-color);">${s.sampling_point_name}</div>
+                                    ${s.sampling_point_location ? `<div style="font-size:11px;color:#999;margin-top:2px;">${s.sampling_point_location}</div>` : ''}
                                 </div>
                             </div>
+                        </div>
+                        ` : ''}
 
-                            <!-- View Details Button -->
-                            <button onclick="event.stopPropagation(); dashboard.viewSubmissionDetails(${actualIndex});"
-                                    style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;"
-                                    onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5), inset 0 1px 0 rgba(255,255,255,0.3)';"
-                                    onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';">
-                                <span style="position:relative;z-index:1;">View Full Report →</span>
-                                <div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite;"></div>
-                            </button>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem;">
+                            <div style="background:rgba(102,126,234,0.05);border:1px solid rgba(102,126,234,0.1);border-radius:6px;padding:8px;text-align:center;">
+                                <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Agency</div>
+                                <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.agency}</div>
+                            </div>
+                            ${s.water_source_type ? `
+                            <div style="background:rgba(77,222,128,0.05);border:1px solid rgba(77,222,128,0.2);border-radius:6px;padding:8px;text-align:center;">
+                                <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Source</div>
+                                <div style="font-size:13px;font-weight:700;color:var(--text-color);text-transform:capitalize;">${s.water_source_type}</div>
+                            </div>
+                            ` : ''}
+                            <div style="background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:6px;padding:8px;text-align:center;">
+                                <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Visits</div>
+                                <div style="font-size:13px;font-weight:700;color:var(--text-color);">${s.visits || 0}</div>
+                            </div>
+                        </div>
+
+                        <div style="background:linear-gradient(90deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border-radius:8px;padding:10px;margin-bottom:1rem;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <div style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;"></div>
+                                    <span style="font-size:11px;font-weight:600;color:var(--text-color);">Tests: ${s.chlorine_total || 0} Chlorine, ${(s.bacteriological_positive || 0) + (s.bacteriological_negative || 0) + (s.bacteriological_pending || 0)} Bacterio</span>
+                                </div>
+                                <div style="font-size:10px;color:#888;font-weight:600;">${s.type === 'treated' ? 'TREATED SUPPLY' : 'UNTREATED SUPPLY'}</div>
+                            </div>
+                        </div>
+
+                        <button onclick="event.stopPropagation(); dashboard.showSubmissionDetails(${index});"
+                                style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2);position:relative;overflow:hidden;"
+                                onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5), inset 0 1px 0 rgba(255,255,255,0.3)';"
+                                onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';">
+                            <span style="position:relative;z-index:1;">View Full Report →</span>
+                            <div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite;"></div>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add CSS animations if not already present
+            if (!document.getElementById('ai-card-animations')) {
+                const style = document.createElement('style');
+                style.id = 'ai-card-animations';
+                style.textContent = `
+                    @keyframes holographicShift {
+                        0% { background-position: 0% 50%; }
+                        100% { background-position: 200% 50%; }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.7; transform: scale(1.1); }
+                    }
+                    @keyframes shimmer {
+                        0% { left: -100%; }
+                        100% { left: 200%; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        showSubmissionDetails(index) {
+            const submission = this.filteredSubmissions[index];
+            const modal = document.getElementById('submissionDetailsModal');
+            const content = document.getElementById('submissionDetailsContent');
+
+            content.innerHTML = `
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px 12px 0 0; margin: -1rem -1rem 1.5rem -1rem;">
+                        <h2 style="margin: 0 0 1rem 0; font-size: 24px;">Inspection Report #INS-${String(submission.id || index + 1).padStart(6, '0')}</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 14px;">
+                            <div><strong>Water Supply:</strong> ${submission.supply_name}</div>
+                            <div><strong>Agency:</strong> ${submission.agency}</div>
+                            <div><strong>Type:</strong> ${submission.type === 'treated' ? 'Treated' : 'Untreated'}</div>
+                            <div><strong>Submitted:</strong> ${new Date(submission.created_at).toLocaleDateString()}</div>
                         </div>
                     </div>
-                `;
-            }
 
-            filterSubmissions(query) {
-                if (!this.allSubmissions) return;
+                    <!-- Basic Information Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">📋 Basic Information</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            ${submission.facility_type ? `<div><strong>Facility Type:</strong> ${submission.facility_type}</div>` : ''}
+                            ${submission.sampling_point_name ? `<div><strong>Sampling Point:</strong> ${submission.sampling_point_name}</div>` : ''}
+                            ${submission.water_source_type ? `<div><strong>Water Source Type:</strong> ${submission.water_source_type}</div>` : ''}
+                            <div><strong>Visits:</strong> ${submission.visits || 0}</div>
+                            ${submission.submission_date ? `<div><strong>Inspection Date:</strong> ${submission.submission_date}</div>` : ''}
+                        </div>
+                    </div>
 
-                const filtered = this.allSubmissions.filter(s => {
-                    const searchText = query.toLowerCase();
-                    return s.supply_name.toLowerCase().includes(searchText) ||
-                           (s.sampling_point_name && s.sampling_point_name.toLowerCase().includes(searchText)) ||
-                           (s.sampling_point_location && s.sampling_point_location.toLowerCase().includes(searchText)) ||
-                           (s.water_source_type && s.water_source_type.toLowerCase().includes(searchText)) ||
-                           (s.agency && s.agency.toLowerCase().includes(searchText));
-                });
+                    <!-- Chlorine Tests Section -->
+                    ${submission.type === 'treated' ? `
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #e3f2fd; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 0.5rem;">🧪 Chlorine Residual Tests (mg/L)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Total Tests</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #1976d2;">${submission.chlorine_total || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.chlorine_positive || 0}</div>
+                                ${submission.chlorine_positive_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${submission.chlorine_positive_range} mg/L</div>` : ''}
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.chlorine_negative || 0}</div>
+                                ${submission.chlorine_negative_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${submission.chlorine_negative_range} mg/L</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
 
-                const container = document.getElementById('recent-submissions-list');
-                if (filtered.length === 0) {
-                    container.innerHTML = '<p style="text-align:center;color:#666;padding:2rem;">No submissions match your search</p>';
+                    <!-- Bacteriological Tests Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">🦠 Bacteriological Tests</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.bacteriological_positive || 0}</div>
+                                ${submission.isolated_organism ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Organism: ${submission.isolated_organism}</div>` : ''}
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.bacteriological_negative || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Result Pending</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${submission.bacteriological_pending || 0}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- pH Tests Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #e8f5e9; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 0.5rem;">⚗️ pH Tests</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.ph_satisfactory || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.ph_non_satisfactory || 0}</div>
+                                ${submission.ph_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${submission.ph_non_satisfactory_range}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chemical Tests Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #ede7f6; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #5e35b1; border-bottom: 2px solid #5e35b1; padding-bottom: 0.5rem;">🧬 Chemical Tests</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.chemical_satisfactory || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.chemical_non_satisfactory || 0}</div>
+                                ${submission.chemical_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${submission.chemical_non_satisfactory_range}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Turbidity Tests Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #f3e5f5; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 0.5rem;">🌫️ Turbidity Tests (NTU)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.turbidity_satisfactory || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.turbidity_non_satisfactory || 0}</div>
+                                ${submission.turbidity_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${submission.turbidity_non_satisfactory_range} NTU</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Temperature Tests Section -->
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #fce4ec; padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #c2185b; border-bottom: 2px solid #c2185b; padding-bottom: 0.5rem;">🌡️ Temperature Tests (°C)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.temperature_satisfactory || 0}</div>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 6px;">
+                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.temperature_non_satisfactory || 0}</div>
+                                ${submission.temperature_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${submission.temperature_non_satisfactory_range}°C</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remarks Section -->
+                    ${submission.remarks ? `
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: #fff8e1; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <h3 style="margin-top: 0; color: #f57c00; border-bottom: 2px solid #f57c00; padding-bottom: 0.5rem;">📝 Remarks</h3>
+                        <p style="margin: 0; line-height: 1.6;">${submission.remarks}</p>
+                    </div>
+                    ` : ''}
+
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
+                        <strong>Submission Time:</strong> ${new Date(submission.created_at).toLocaleString()}
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        closeSubmissionDetails() {
+            const modal = document.getElementById('submissionDetailsModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 600);
+        }
+
+        printReport() {
+            const content = document.getElementById('submissionDetailsContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Inspection Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .test-section { margin-bottom: 20px; page-break-inside: avoid; }
+                        @media print {
+                            body { margin: 0; }
+                            .test-section { page-break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        }
+
+        downloadReport() {
+            const content = document.getElementById('submissionDetailsContent').innerHTML;
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Inspection Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .test-section { margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Inspection_Report_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        handleSearch(query) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                const suggestions = document.getElementById('search-suggestions');
+                suggestions.innerHTML = '';
+                suggestions.style.display = 'none';
+
+                if (query.length < 2) {
+                    this.filteredSubmissions = [...this.allSubmissions];
+                    this.renderSubmissions();
                     return;
                 }
 
-                container.innerHTML = filtered.slice(0, 20).map(s => this.generateSubmissionCard(s, this.allSubmissions.indexOf(s))).join('');
-            }
+                const lowerQuery = query.toLowerCase();
+                const matches = this.allSubmissions.filter(sub =>
+                    sub.supply_name.toLowerCase().includes(lowerQuery) ||
+                    sub.agency.toLowerCase().includes(lowerQuery) ||
+                    (sub.sampling_point_id && sub.sampling_point_id.toLowerCase().includes(lowerQuery))
+                );
 
-            viewSubmissionDetails(index) {
-                const s = this.allSubmissions[index];
-                const modal = document.getElementById('submissionDetailsModal');
-                const content = document.getElementById('submissionDetailsContent');
-
-                content.innerHTML = `
-                    <div style="max-width: 1200px; margin: 0 auto;">
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px 12px 0 0; margin: -1rem -1rem 1.5rem -1rem;">
-                            <h2 style="margin: 0 0 1rem 0; font-size: 24px;">Inspection Report #INS-${String(s.id || index + 1).padStart(6, '0')}</h2>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 14px;">
-                                <div><strong>Water Supply:</strong> ${s.supply_name}</div>
-                                <div><strong>Agency:</strong> ${s.agency}</div>
-                                <div><strong>Type:</strong> ${s.type === 'treated' ? 'Treated' : 'Untreated'}</div>
-                                <div><strong>Submitted:</strong> ${new Date(s.created_at).toLocaleDateString()}</div>
-                            </div>
-                        </div>
-
-                        <!-- Basic Information Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">📋 Basic Information</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                                ${s.facility_type ? `<div><strong>Facility Type:</strong> ${s.facility_type}</div>` : ''}
-                                ${s.sampling_point_name ? `<div><strong>Sampling Point:</strong> ${s.sampling_point_name}</div>` : ''}
-                                ${s.water_source_type ? `<div><strong>Water Source Type:</strong> ${s.water_source_type}</div>` : ''}
-                                <div><strong>Visits:</strong> ${s.visits || 0}</div>
-                                ${s.submission_date ? `<div><strong>Inspection Date:</strong> ${s.submission_date}</div>` : ''}
-                            </div>
-                        </div>
-
-                        <!-- Chlorine Tests Section -->
-                        ${s.type === 'treated' ? `
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #e3f2fd; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 0.5rem;">🧪 Chlorine Residual Tests (mg/L)</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Total Tests</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #1976d2;">${s.chlorine_total || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.chlorine_positive || 0}</div>
-                                    ${s.chlorine_positive_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.chlorine_positive_range} mg/L</div>` : ''}
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.chlorine_negative || 0}</div>
-                                    ${s.chlorine_negative_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.chlorine_negative_range} mg/L</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        <!-- Bacteriological Tests Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">🦠 Bacteriological Tests</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.bacteriological_positive || 0}</div>
-                                    ${s.isolated_organism ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Organism: ${s.isolated_organism}</div>` : ''}
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Negative</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.bacteriological_negative || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Result Pending</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${s.bacteriological_pending || 0}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- pH Tests Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #e8f5e9; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 0.5rem;">⚗️ pH Tests</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.ph_satisfactory || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.ph_non_satisfactory || 0}</div>
-                                    ${s.ph_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${s.ph_non_satisfactory_range}</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Chemical Tests Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #ede7f6; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #5e35b1; border-bottom: 2px solid #5e35b1; padding-bottom: 0.5rem;">🧬 Chemical Tests</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.chemical_satisfactory || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.chemical_non_satisfactory || 0}</div>
-                                    ${s.chemical_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${s.chemical_non_satisfactory_range}</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Turbidity Tests Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #f3e5f5; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 0.5rem;">🌫️ Turbidity Tests (NTU)</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.turbidity_satisfactory || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.turbidity_non_satisfactory || 0}</div>
-                                    ${s.turbidity_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.turbidity_non_satisfactory_range} NTU</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Temperature Tests Section -->
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fce4ec; padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top: 0; color: #c2185b; border-bottom: 2px solid #c2185b; padding-bottom: 0.5rem;">🌡️ Temperature Tests (°C)</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${s.temperature_satisfactory || 0}</div>
-                                </div>
-                                <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #c62828;">${s.temperature_non_satisfactory || 0}</div>
-                                    ${s.temperature_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Range: ${s.temperature_non_satisfactory_range}°C</div>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Remarks Section -->
-                        ${s.remarks ? `
-                        <div class="test-section" style="margin-bottom: 1.5rem; background: #fff8e1; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
-                            <h3 style="margin-top: 0; color: #f57c00; border-bottom: 2px solid #f57c00; padding-bottom: 0.5rem;">📝 Remarks</h3>
-                            <p style="margin: 0; line-height: 1.6;">${s.remarks}</p>
-                        </div>
-                        ` : ''}
-
-                        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
-                            <strong>Submission Time:</strong> ${new Date(s.created_at).toLocaleString()}
-                        </div>
+                suggestions.innerHTML = matches.slice(0, 5).map(sub => `
+                    <div style="padding: 0.5rem; cursor: pointer;" onclick="dashboard.selectSuggestion('${sub.supply_name}')">
+                        ${sub.supply_name} (${sub.agency})
                     </div>
-                `;
+                `).join('');
+                suggestions.style.display = matches.length ? 'block' : 'none';
 
-                modal.style.display = 'flex';
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        modal.classList.add('show');
-                    });
-                });
-            }
+                this.filteredSubmissions = matches;
+                this.renderSubmissions();
+            }, 300);
+        }
 
-            showFuturisticWaterModal(message) {
-                const waterModal = document.getElementById('waterModal');
-                const waterModalMessage = document.getElementById('waterModalMessage');
+        selectSuggestion(supplyName) {
+            document.getElementById('search-input').value = supplyName;
+            document.getElementById('search-suggestions').style.display = 'none';
+            this.filteredSubmissions = this.allSubmissions.filter(sub => sub.supply_name === supplyName);
+            this.renderSubmissions();
+        }
 
-                // Set timestamp
-                const now = new Date();
-                const timestamp = now.toLocaleTimeString('en-US', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                document.getElementById('analysis-timestamp').textContent = timestamp;
+        clearSearch() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-suggestions').style.display = 'none';
+            this.filteredSubmissions = [...this.allSubmissions];
+            this.renderSubmissions();
+        }
 
-                // Get form data for analysis summary
-                const chlorinePositive = parseInt(document.getElementById('chlorine-positive').value) || 0;
-                const chlorineNegative = parseInt(document.getElementById('chlorine-negative').value) || 0;
-                const bacteriaPositive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
-                const bacteriaNegative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
+        toggleFilters() {
+            const filters = document.getElementById('advanced-filters');
+            const toggleBtn = document.getElementById('advanced-filters-toggle');
+            filters.style.display = filters.style.display === 'none' ? 'block' : 'none';
+            toggleBtn.textContent = filters.style.display === 'none' ? 'Filters ▼' : 'Filters ▲';
+        }
 
-                // Update chlorine analysis summary
-                const chlorineTotal = chlorinePositive + chlorineNegative;
-                let chlorineSummary = 'NO DATA';
-                if (chlorineTotal > 0) {
-                    if (this.currentSupply && this.currentSupply.type === 'treated') {
-                        chlorineSummary = `${chlorineTotal} SAMPLES ANALYZED`;
-                    } else {
-                        chlorineSummary = 'N/A - UNTREATED SUPPLY';
+        handleTimeFilterChange(value) {
+            const customRange = document.getElementById('custom-date-range');
+            customRange.style.display = value === 'custom' ? 'block' : 'none';
+        }
+
+        applyFilters() {
+            const timeFilter = document.getElementById('time-filter').value;
+            const typeFilter = document.getElementById('type-filter').value;
+            const agencyFilter = document.getElementById('agency-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+
+            this.filteredSubmissions = this.allSubmissions.filter(sub => {
+                let passes = true;
+
+                if (typeFilter !== 'all') {
+                    passes = passes && sub.type === typeFilter;
+                }
+
+                if (agencyFilter !== 'all') {
+                    passes = passes && sub.agency === agencyFilter;
+                }
+
+                if (timeFilter !== 'all') {
+                    const subDate = new Date(sub.submission_date);
+                    const now = new Date();
+                    if (timeFilter === 'today') {
+                        passes = passes && subDate.toDateString() === now.toDateString();
+                    } else if (timeFilter === 'week') {
+                        const weekAgo = new Date(now.setDate(now.getDate() - 7));
+                        passes = passes && subDate >= weekAgo;
+                    } else if (timeFilter === 'month') {
+                        const monthAgo = new Date(now.setFullYear(now.getFullYear(), now.getMonth() - 1, now.getDate()));
+                        passes = passes && subDate >= monthAgo;
+                    } else if (timeFilter === 'custom' && dateFrom && dateTo) {
+                        const from = new Date(dateFrom);
+                        const to = new Date(dateTo);
+                        passes = passes && subDate >= from && subDate <= to;
                     }
                 }
-                document.getElementById('chlorine-summary').textContent = chlorineSummary;
 
-                // Update bacteria analysis summary
-                const bacteriaTotal = bacteriaPositive + bacteriaNegative;
-                let bacteriaSummary = 'NO DATA';
-                if (bacteriaTotal > 0) {
-                    if (bacteriaPositive > 0) {
-                        bacteriaSummary = `${bacteriaTotal} SAMPLES - ${bacteriaPositive} POSITIVE DETECTED`;
-                    } else {
-                        bacteriaSummary = `${bacteriaTotal} SAMPLES - ALL NEGATIVE`;
-                    }
-                }
-                document.getElementById('bacteria-summary').textContent = bacteriaSummary;
+                return passes;
+            });
 
-                // Update supply status
-                const supplyName = this.currentSupply ? this.currentSupply.name : 'UNKNOWN';
-                document.getElementById('supply-summary').textContent = `${supplyName} - ACTIVE`;
-
-                // Set main message
-                waterModalMessage.textContent = 'INSPECTION DATA SUCCESSFULLY TRANSMITTED TO CENTRAL DATABASE';
-
-                // Show modal with futuristic zoom-in fade animation
-                waterModal.style.display = 'flex';
-                // Small delay to ensure display change is processed
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        waterModal.classList.add('show');
-                    });
-                });
-            }
-
-            showAlert(type, message) {
-                if (type === 'success') {
-                    // Use water modal for success messages with futuristic data
-                    this.showFuturisticWaterModal(message);
-                } else {
-                    // Use regular alert for error messages
-                    const alertContainer = document.getElementById('alert-container');
-                    const alertClass = 'alert-error';
-
-                    alertContainer.innerHTML = `
-                        <div class="alert ${alertClass}">
-                            ${message}
-                        </div>
-                    `;
-
-                    // Auto-hide alert after 5 seconds
-                    setTimeout(() => {
-                        alertContainer.innerHTML = '';
-                    }, 5000);
-
-                    // Scroll to top to show alert
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }
-
-            toggleTheme() {
-                const current = document.documentElement.getAttribute('data-theme') || 'light';
-                const next = current === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', next);
-                document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-                localStorage.setItem('theme', next);
-            }
-
-            printReport() {
-                const content = document.getElementById('submissionDetailsContent').innerHTML;
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Inspection Report</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            .test-section { margin-bottom: 20px; page-break-inside: avoid; }
-                            @media print {
-                                body { margin: 0; }
-                                .test-section { page-break-inside: avoid; }
-                            }
-                        </style>
-                    </head>
-                    <body>${content}</body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.focus();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 250);
-            }
-
-            downloadReport() {
-                const content = document.getElementById('submissionDetailsContent').innerHTML;
-                const blob = new Blob([`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Inspection Report</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            .test-section { margin-bottom: 20px; }
-                        </style>
-                    </head>
-                    <body>${content}</body>
-                    </html>
-                `], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Inspection_Report_${new Date().toISOString().split('T')[0]}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
+            this.renderSubmissions();
+            this.toggleFilters();
         }
 
-        function incrementVisits() {
-            const input = document.getElementById('visits');
-            input.value = parseInt(input.value) + 1;
+        resetFilters() {
+            document.getElementById('time-filter').value = 'all';
+            document.getElementById('type-filter').value = 'all';
+            document.getElementById('agency-filter').value = 'all';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            document.getElementById('custom-date-range').style.display = 'none';
+            this.filteredSubmissions = [...this.allSubmissions];
+            this.renderSubmissions();
         }
 
-        function closeToolKit() {
-            document.getElementById('toolkitModal').style.display = 'none';
+        toggleTheme() {
+            const body = document.body;
+            const toggleBtn = document.getElementById('darkModeToggle');
+            body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark';
+            toggleBtn.textContent = body.dataset.theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
         }
 
-        function closeSubmissionDetails() {
-            const modal = document.getElementById('submissionDetailsModal');
+        openToolKit() {
+            const modal = document.getElementById('toolkitModal');
+            const documentsList = document.getElementById('documentsList');
+            const documents = [
+                { name: 'Water Quality Guidelines', url: 'https://www.wrha.gov.jm/guidelines.pdf', type: 'pdf' },
+                { name: 'Inspection Manual', url: 'https://www.wrha.gov.jm/manual.pdf', type: 'pdf' },
+                { name: 'Reporting Template', url: 'https://www.wrha.gov.jm/template.docx', type: 'docx' }
+            ];
+
+            documentsList.innerHTML = documents.map(doc => `
+                <div style="margin-bottom: 1rem;">
+                    <span>${doc.name}</span>
+                    <div style="margin-top: 0.5rem;">
+                        <button class="view-btn" onclick="dashboard.viewDocument('${doc.url}', '${doc.name}', '${doc.type}')">View</button>
+                        <a href="${doc.url}" download class="download-btn">Download</a>
+                        <button class="print-btn" onclick="dashboard.printDocument('${doc.url}')">Print</button>
+                    </div>
+                </div>
+            `).join('');
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        viewDocument(url, name, type) {
+            const preview = document.getElementById('documentPreview');
+            const viewer = document.getElementById('documentViewer');
+            const title = document.getElementById('previewTitle');
+            const actions = document.getElementById('documentActions');
+
+            title.textContent = name;
+            viewer.src = url;
+            actions.innerHTML = `
+                <a href="${url}" download class="download-btn">Download</a>
+                <button class="print-btn" onclick="dashboard.printDocument('${url}')">Print</button>
+            `;
+            preview.style.display = 'block';
+        }
+
+        printDocument(url) {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            iframe.onload = () => {
+                iframe.contentWindow.print();
+                setTimeout(() => document.body.removeChild(iframe), 1000);
+            };
+        }
+
+        closeToolKit() {
+            const modal = document.getElementById('toolkitModal');
             modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-
-        function previewDocument(filename, originalName) {
-            const pdfUrl = `/static/documents/${filename}`;
-            document.getElementById('pdfViewer').src = pdfUrl;
-            document.getElementById('viewBtn').href = pdfUrl;
-            document.getElementById('downloadBtn').href = pdfUrl;
-            document.getElementById('downloadBtn').download = originalName;
-            document.getElementById('pdfPreview').style.display = 'block';
-        }
-
-        function printCurrentPDF() {
-            window.open(document.getElementById('viewBtn').href, '_blank');
-        }
-
-        window.onclick = function(event) {
-            const toolkitModal = document.getElementById('toolkitModal');
-            const submissionModal = document.getElementById('submissionDetailsModal');
-
-            if (event.target === toolkitModal) {
-                closeToolKit();
-            }
-            if (event.target === submissionModal) {
-                closeSubmissionDetails();
-            }
-        }
-
-        function closeWaterModal() {
-            const modal = document.getElementById('waterModal');
-            modal.style.display = 'none';
-        }
-
-        function closeWaterModalWithFade() {
-            const modal = document.getElementById('waterModal');
-            const container = document.querySelector('.container');
-
-            // Fade out modal
-            modal.classList.remove('show');
-
             setTimeout(() => {
                 modal.style.display = 'none';
-
-                // Fade in dashboard
-                if (container) {
-                    container.style.opacity = '0.3';
-                    container.style.transition = 'opacity 0.8s ease';
-                    setTimeout(() => {
-                        container.style.opacity = '1';
-                    }, 100);
-                }
-            }, 400);
+                document.getElementById('documentPreview').style.display = 'none';
+            }, 600);
         }
+    }
 
-        let dashboard;
+    const dashboard = new WestmorelandDashboard();
+    window.dashboardInstance = dashboard;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const theme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-            document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-            dashboard = new WestmorelandDashboard();
-        });
+    function closeWestmorelandWaterModalWithFade() {
+        dashboard.closeWaterModal();
+    }
+
+    function incrementVisits() {
+        const visitsInput = document.getElementById('visits');
+        visitsInput.value = (parseInt(visitsInput.value) || 0) + 1;
+    }
     </script>
-</body>
-</html>
