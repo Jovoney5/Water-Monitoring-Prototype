@@ -1,0 +1,25 @@
+Werkzeug appears to be used in a production deployment. Consider switching to a production web server instead.
+[STARTUP] Using SQLite database
+Database initialized successfully using SQLite
+Database migration completed successfully
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.50.242:5004
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+Werkzeug appears to be used in a production deployment. Consider switching to a production web server instead.
+ * Debugger is active!
+ * Debugger PIN: 131-371-793
+ * Detected change in '/Users/jovoneybrown/PycharmProjects/Water Monitoring Prototype/migrate_database.py', reloading
+[STARTUP] Using SQLite database
+Database initialized successfully using SQLite
+Database migration completed successfully
+ * Restarting with stat
+Werkzeug appears to be used in a production deployment. Consider switching to a production web server instead.
+ * Debugger is active!
+ * Debugger PIN: 131-371-793
+/usr/local/Cellar/python@3.12/3.12.10_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

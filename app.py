@@ -145,7 +145,16 @@ def init_db():
                     isolated_organism VARCHAR(255),
                     ph_satisfactory INTEGER DEFAULT 0,
                     ph_non_satisfactory INTEGER DEFAULT 0,
-                    ph_non_satisfactory_range VARCHAR(50),
+                    ph_non_satisfactory_params TEXT,
+                    bacteriological_positive_status VARCHAR(50),
+                    bacteriological_negative_status VARCHAR(50),
+                    chemical_satisfactory INTEGER DEFAULT 0,
+                    chemical_non_satisfactory INTEGER DEFAULT 0,
+                    chemical_non_satisfactory_params TEXT,
+                    turbidity_satisfactory INTEGER DEFAULT 0,
+                    turbidity_non_satisfactory INTEGER DEFAULT 0,
+                    temperature_satisfactory INTEGER DEFAULT 0,
+                    temperature_non_satisfactory INTEGER DEFAULT 0,
                     remarks TEXT,
                     facility_type VARCHAR(100),
                     water_source_type VARCHAR(100),
@@ -302,7 +311,16 @@ def init_db():
                     isolated_organism TEXT,
                     ph_satisfactory INTEGER DEFAULT 0,
                     ph_non_satisfactory INTEGER DEFAULT 0,
-                    ph_non_satisfactory_range TEXT,
+                    ph_non_satisfactory_params TEXT,
+                    bacteriological_positive_status TEXT,
+                    bacteriological_negative_status TEXT,
+                    chemical_satisfactory INTEGER DEFAULT 0,
+                    chemical_non_satisfactory INTEGER DEFAULT 0,
+                    chemical_non_satisfactory_params TEXT,
+                    turbidity_satisfactory INTEGER DEFAULT 0,
+                    turbidity_non_satisfactory INTEGER DEFAULT 0,
+                    temperature_satisfactory INTEGER DEFAULT 0,
+                    temperature_non_satisfactory INTEGER DEFAULT 0,
                     remarks TEXT,
                     facility_type TEXT,
                     water_source_type TEXT,
@@ -639,22 +657,35 @@ def _populate_initial_data(conn, cursor):
 
     # Trelawny - NWC Supplies (match exact database names from current database)
     trelawny_nwc_supplies = {
-        # Based on actual database contents
-        'New Martha Brae Plant #1': ['Plant'],
-        'New Martha Brae Plant #2': ['Plant'],
-        'Old Martha Brae': ['Stand pipe @ Coopers Pen'],
-        'Wakefield #1': ['Plant'],
-        'Wakefield #3': ['Plant'],
-        'Wakefield #4': ['Plant'],
-        'Sherwood Content': ['Plant'],  # NWC version (there's also an MOH health centre version)
-        'Clark\'s Town': ['Tap @ Mn. Rd. Kinloss'],
-        'Duanvale': ['Tap adj. Comm. Centre'],
-        'Barnstaple': ['Plant'],
-        'Dornoch': ['Stand pipe in Calabar'],
-        'Ettingdon': ['Tap @ Brian\'s Slaughterplace'],
-        'Ulster Spring/Freeman\'s Hall': ['Tap opp. Old Library'],
-        'Troy': ['Tap @ Troy Square'],  # NWC version
-        'Wilson\'s Run': ['Tap @ Base of Hill']
+        'Rio Bueno': ['Tap @ Market', 'Standpipe @ Main Road', 'Tap @ Community Centre'],
+        'Duncans': ['Plant', 'Tap @ Square', 'Standpipe @ Hill'],
+        'Falmouth': ['Tap @ Hospital', 'Standpipe @ Market', 'Plant'],
+        'Wakefield': ['Plant #1', 'Plant #2', 'Tap @ Storage Tank'],
+        'Bounty Hall': ['Plant', 'Tap @ Main Road', 'Standpipe @ Square'],
+        'Springvale': ['Tap @ Community Centre', 'Plant', 'Standpipe @ Church'],
+        'Albert Town': ['Plant', 'Tap @ Square', 'Standpipe @ School'],
+        'Silver Sands': ['Plant', 'Tap @ Resort', 'Standpipe @ Beach'],
+        'Lorrimers': ['Plant', 'Tap @ Main Road', 'Standpipe @ Square'],
+        'Bengal': ['Plant', 'Tap @ Community Centre', 'Standpipe @ Market'],
+        'Martha Brae': ['Plant #1', 'Plant #2', 'Standpipe @ Coopers Pen'],
+        'Clarks Town': ['Plant', 'Tap @ Main Road Kinloss', 'Standpipe @ Square'],
+        'Wait-a-Bit': ['Plant', 'Tap @ Health Centre', 'Standpipe @ Market'],
+        'Deeside': ['Plant', 'Tap @ Community Centre', 'Standpipe @ Main Road'],
+        'Sherwood Content': ['Plant', 'Tap @ Square', 'Standpipe @ School'],
+        'Salem': ['Plant', 'Tap @ Main Road', 'Standpipe @ Church'],
+        'Refuge': ['Plant', 'Tap @ Community Centre', 'Standpipe @ Market'],
+        'Ulster Spring': ['Plant', 'Tap @ Health Centre', 'Standpipe @ Square'],
+        'Good Hope': ['Plant', 'Tap @ Main Road', 'Standpipe @ Resort'],
+        'Bunkers Hill': ['Plant', 'Tap @ Community Centre', 'Standpipe @ Hill'],
+        'Kettering': ['Plant', 'Tap @ Main Road', 'Standpipe @ Market'],
+        'Troy': ['Plant', 'Tap @ Troy Square', 'Standpipe @ School'],
+        'Granville': ['Plant', 'Tap @ Community Centre', 'Standpipe @ Main Road'],
+        'Rock': ['Plant', 'Tap @ Health Centre', 'Standpipe @ Market'],
+        'Garlands': ['Plant', 'Tap @ Main Road', 'Standpipe @ Square'],
+        'Harmony Cove Resort': ['Plant', 'Tap @ Kitchen', 'Tap @ Bar', 'Tap @ Pool'],
+        'Grand Palladium Resort': ['Plant', 'Tap @ Kitchen', 'Tap @ Bar', 'Tap @ Pool'],
+        'Trelawny Beach Hotel': ['Plant', 'Tap @ Kitchen', 'Tap @ Bar', 'Tap @ Pool'],
+        'Burwood Beach Resort': ['Plant', 'Tap @ Kitchen', 'Tap @ Bar', 'Tap @ Pool']
     }
 
     for supply_name, sample_points in trelawny_nwc_supplies.items():
@@ -833,7 +864,6 @@ def add_sample_data():
                 '',  # isolated_organism
                 random.randint(3, 8),   # ph_satisfactory
                 random.randint(0, 2),   # ph_non_satisfactory
-                '',  # ph_non_satisfactory_range
                 'Sample inspection data',  # remarks
                 '',  # facility_type
                 ''   # water_source_type
@@ -845,8 +875,8 @@ def add_sample_data():
          chlorine_total, chlorine_positive, chlorine_negative, chlorine_positive_range,
          chlorine_negative_range, bacteriological_positive, bacteriological_negative,
          bacteriological_pending, isolated_organism, ph_satisfactory, ph_non_satisfactory,
-         ph_non_satisfactory_range, remarks, facility_type, water_source_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         remarks, facility_type, water_source_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', sample_data)
 
     conn.commit()
@@ -2019,6 +2049,7 @@ def get_parish_color(parish):
     }
     return colors.get(parish, '#6c757d')  # Default gray
 
+
 @app.route('/api/submit-inspection', methods=['POST'])
 def submit_inspection():
     if 'user_id' not in session:
@@ -2026,57 +2057,123 @@ def submit_inspection():
 
     data = request.json
     conn = get_db_connection()
-    cursor = conn.cursor()
 
     try:
-        # Insert new inspection submission
         # Determine bacteriological status
-        bacteriological_total = (data.get('bacteriological_positive', 0) + data.get('bacteriological_negative', 0) +
-                                 data.get('bacteriological_pending', 0) + data.get('bacteriological_rejected', 0) +
-                                 data.get('bacteriological_broken', 0))
-        bacteriological_results_entered = data.get('bacteriological_positive', 0) + data.get('bacteriological_negative', 0)
-        bacteriological_status = 'complete' if bacteriological_results_entered > 0 else 'pending'
+        # Status is 'pending' if: there are pending samples OR all values are 0 (no results entered yet)
+        # Status is 'complete' only if: there are results (positive or negative > 0) and no pending samples
+        bacteriological_positive = data.get('bacteriological_positive', 0)
+        bacteriological_negative = data.get('bacteriological_negative', 0)
+        bacteriological_pending = data.get('bacteriological_pending', 0)
+        bacteriological_results_entered = bacteriological_positive + bacteriological_negative
 
-        cursor.execute('''
-            INSERT INTO inspection_submissions
-            (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
-             chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
-             bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
-             bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
-             isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_range,
-             remarks, facility_type, water_source_type)
-            VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            data['supply_id'], session['user_id'], data.get('sampling_point_id'),
-            data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
-            data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
-            data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
-            data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
-            data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
-            data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
-            bacteriological_status,
-            data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
-            data.get('ph_non_satisfactory', 0), data.get('ph_non_satisfactory_range', ''),
-            data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
-        ))
+        bacteriological_status = 'pending' if (bacteriological_pending > 0 or bacteriological_results_entered == 0) else 'complete'
 
-        submission_id = cursor.lastrowid
+        # Prepare the insertion based on database type
+        if USE_POSTGRESQL:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO inspection_submissions
+                (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
+                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
+                 bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
+                 bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
+                 bacteriological_positive_status, bacteriological_negative_status,
+                 isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_params,
+                 chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
+                 turbidity_satisfactory, turbidity_non_satisfactory,
+                 temperature_satisfactory, temperature_non_satisfactory,
+                 remarks, facility_type, water_source_type)
+                VALUES (%s, %s, %s, CURRENT_DATE, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            ''', (
+                data['supply_id'], session['user_id'], data.get('sampling_point_id'),
+                data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
+                data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
+                data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
+                data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
+                data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
+                data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
+                bacteriological_status,
+                data.get('bacteriological_positive_status', ''), data.get('bacteriological_negative_status', ''),
+                data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
+                data.get('ph_non_satisfactory', 0), json.dumps(data.get('ph_non_satisfactory_params', [])),
+                data.get('chemical_satisfactory', 0), data.get('chemical_non_satisfactory', 0),
+                json.dumps(data.get('chemical_non_satisfactory_params', [])),
+                data.get('turbidity_satisfactory', 0), data.get('turbidity_non_satisfactory', 0),
+                data.get('temperature_satisfactory', 0), data.get('temperature_non_satisfactory', 0),
+                data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
+            ))
+            submission_id = cursor.fetchone()[0]
 
-        # Add inspector signature for initial submission
-        cursor.execute('''
-            INSERT INTO inspector_signatures (submission_id, inspector_id, action_type, notes)
-            VALUES (?, ?, ?, ?)
-        ''', (submission_id, session['user_id'], 'Initial Submission', 'Created inspection report'))
+            # Add inspector signature
+            cursor.execute('''
+                INSERT INTO inspector_signatures (submission_id, inspector_id, action_type, notes)
+                VALUES (%s, %s, %s, %s)
+            ''', (submission_id, session['user_id'], 'Initial Submission', 'Created inspection report'))
 
-        # Get the submission with supply info
-        submission_data = cursor.execute('''
-            SELECT s.*, ws.name as supply_name, ws.type, ws.agency,
-                   u.full_name as inspector_name
-            FROM inspection_submissions s
-            JOIN water_supplies ws ON s.supply_id = ws.id
-            JOIN users u ON s.inspector_id = u.id
-            WHERE s.id = ?
-        ''', (submission_id,)).fetchone()
+            # Get the submission with supply info
+            cursor.execute('''
+                SELECT s.*, ws.name as supply_name, ws.type, ws.agency,
+                       u.full_name as inspector_name
+                FROM inspection_submissions s
+                JOIN water_supplies ws ON s.supply_id = ws.id
+                JOIN users u ON s.inspector_id = u.id
+                WHERE s.id = %s
+            ''', (submission_id,))
+            submission_data = cursor.fetchone()
+
+        else:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO inspection_submissions
+                (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
+                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
+                 bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
+                 bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
+                 bacteriological_positive_status, bacteriological_negative_status,
+                 isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_params,
+                 chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
+                 turbidity_satisfactory, turbidity_non_satisfactory,
+                 temperature_satisfactory, temperature_non_satisfactory,
+                 remarks, facility_type, water_source_type)
+                VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                data['supply_id'], session['user_id'], data.get('sampling_point_id'),
+                data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
+                data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
+                data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
+                data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
+                data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
+                data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
+                bacteriological_status,
+                data.get('bacteriological_positive_status', ''), data.get('bacteriological_negative_status', ''),
+                data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
+                data.get('ph_non_satisfactory', 0), json.dumps(data.get('ph_non_satisfactory_params', [])),
+                data.get('chemical_satisfactory', 0), data.get('chemical_non_satisfactory', 0),
+                json.dumps(data.get('chemical_non_satisfactory_params', [])),
+                data.get('turbidity_satisfactory', 0), data.get('turbidity_non_satisfactory', 0),
+                data.get('temperature_satisfactory', 0), data.get('temperature_non_satisfactory', 0),
+                data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
+            ))
+
+            submission_id = cursor.lastrowid
+
+            # Add inspector signature
+            cursor.execute('''
+                INSERT INTO inspector_signatures (submission_id, inspector_id, action_type, notes)
+                VALUES (?, ?, ?, ?)
+            ''', (submission_id, session['user_id'], 'Initial Submission', 'Created inspection report'))
+
+            # Get the submission with supply info
+            submission_data = cursor.execute('''
+                SELECT s.*, ws.name as supply_name, ws.type, ws.agency,
+                       u.full_name as inspector_name
+                FROM inspection_submissions s
+                JOIN water_supplies ws ON s.supply_id = ws.id
+                JOIN users u ON s.inspector_id = u.id
+                WHERE s.id = ?
+            ''', (submission_id,)).fetchone()
 
         conn.commit()
         conn.close()
@@ -2089,6 +2186,9 @@ def submit_inspection():
     except Exception as e:
         conn.rollback()
         conn.close()
+        print(f"[ERROR] Submission failed: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/my-submissions')
@@ -2208,6 +2308,181 @@ def download_submission(submission_id):
     response.headers['Content-Disposition'] = f'attachment; filename=submission_{submission_id}.html'
 
     return response
+
+@app.route('/api/update-sample/<int:submission_id>', methods=['POST'])
+def update_sample_results(submission_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    try:
+        data = request.get_json()
+        positive_add = int(data.get('bacteriological_positive_add', 0))
+        negative_add = int(data.get('bacteriological_negative_add', 0))
+
+        conn = get_db_connection()
+
+        # Get current values
+        if USE_POSTGRESQL:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT bacteriological_positive, bacteriological_negative, bacteriological_pending, inspector_id
+                FROM inspection_submissions
+                WHERE id = %s
+            ''', (submission_id,))
+            result = cursor.fetchone()
+        else:
+            result = conn.execute('''
+                SELECT bacteriological_positive, bacteriological_negative, bacteriological_pending, inspector_id
+                FROM inspection_submissions
+                WHERE id = ?
+            ''', (submission_id,)).fetchone()
+
+        if not result:
+            conn.close()
+            return jsonify({'error': 'Submission not found'}), 404
+
+        current_positive = result[0] or 0
+        current_negative = result[1] or 0
+        current_pending = result[2] or 0
+        inspector_id = result[3]
+
+        # Verify the user is the inspector who created this submission
+        if inspector_id != session['user_id']:
+            conn.close()
+            return jsonify({'error': 'Unauthorized - you can only update your own submissions'}), 403
+
+        # Validate that we're not adding more than pending
+        if positive_add + negative_add > current_pending:
+            conn.close()
+            return jsonify({'error': 'Total results exceed pending count'}), 400
+
+        # Calculate new values
+        new_positive = current_positive + positive_add
+        new_negative = current_negative + negative_add
+        new_pending = current_pending - (positive_add + negative_add)
+
+        # Update the database
+        if USE_POSTGRESQL:
+            cursor.execute('''
+                UPDATE inspection_submissions
+                SET bacteriological_positive = %s,
+                    bacteriological_negative = %s,
+                    bacteriological_pending = %s
+                WHERE id = %s
+            ''', (new_positive, new_negative, new_pending, submission_id))
+            conn.commit()
+            cursor.close()
+        else:
+            conn.execute('''
+                UPDATE inspection_submissions
+                SET bacteriological_positive = ?,
+                    bacteriological_negative = ?,
+                    bacteriological_pending = ?
+                WHERE id = ?
+            ''', (new_positive, new_negative, new_pending, submission_id))
+            conn.commit()
+
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Sample results updated successfully',
+            'new_values': {
+                'bacteriological_positive': new_positive,
+                'bacteriological_negative': new_negative,
+                'bacteriological_pending': new_pending
+            }
+        })
+
+    except Exception as e:
+        print(f"Error updating sample results: {e}")
+        return jsonify({'error': f'Failed to update sample results: {str(e)}'}), 500
+
+@app.route('/api/update-bacteriological', methods=['POST'])
+def update_bacteriological():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    try:
+        data = request.get_json()
+        submission_id = data.get('id')
+        new_positive = int(data.get('bacteriological_positive', 0))
+        new_negative = int(data.get('bacteriological_negative', 0))
+        new_pending = int(data.get('bacteriological_pending', 0))
+        organism = data.get('isolated_organism', None)
+        bacteriological_status = data.get('bacteriological_status', 'pending')
+
+        conn = get_db_connection()
+
+        # Get current values and verify ownership
+        if USE_POSTGRESQL:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT inspector_id
+                FROM inspection_submissions
+                WHERE id = %s
+            ''', (submission_id,))
+            result = cursor.fetchone()
+        else:
+            result = conn.execute('''
+                SELECT inspector_id
+                FROM inspection_submissions
+                WHERE id = ?
+            ''', (submission_id,)).fetchone()
+
+        if not result:
+            conn.close()
+            return jsonify({'error': 'Submission not found'}), 404
+
+        inspector_id = result[0]
+
+        # Verify the user is the inspector who created this submission
+        if inspector_id != session['user_id']:
+            conn.close()
+            return jsonify({'error': 'Unauthorized - you can only update your own submissions'}), 403
+
+        # Update the database
+        if USE_POSTGRESQL:
+            cursor.execute('''
+                UPDATE inspection_submissions
+                SET bacteriological_positive = %s,
+                    bacteriological_negative = %s,
+                    bacteriological_pending = %s,
+                    isolated_organism = %s,
+                    bacteriological_status = %s
+                WHERE id = %s
+            ''', (new_positive, new_negative, new_pending, organism, bacteriological_status, submission_id))
+            conn.commit()
+            cursor.close()
+        else:
+            conn.execute('''
+                UPDATE inspection_submissions
+                SET bacteriological_positive = ?,
+                    bacteriological_negative = ?,
+                    bacteriological_pending = ?,
+                    isolated_organism = ?,
+                    bacteriological_status = ?
+                WHERE id = ?
+            ''', (new_positive, new_negative, new_pending, organism, bacteriological_status, submission_id))
+            conn.commit()
+
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Bacteriological results updated successfully',
+            'new_values': {
+                'bacteriological_positive': new_positive,
+                'bacteriological_negative': new_negative,
+                'bacteriological_pending': new_pending,
+                'isolated_organism': organism,
+                'bacteriological_status': bacteriological_status
+            }
+        })
+
+    except Exception as e:
+        print(f"Error updating bacteriological results: {e}")
+        return jsonify({'error': f'Failed to update bacteriological results: {str(e)}'}), 500
 
 def generate_submission_html(submission):
     # Format the submission date nicely
@@ -3121,6 +3396,59 @@ def migrate_database():
     finally:
         conn.close()
 
+def migrate_bacteriological_columns():
+    """Add bacteriological_rejected, bacteriological_broken, and bacteriological_status columns"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        if USE_POSTGRESQL:
+            # Check if columns exist
+            cursor.execute('''
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'inspection_submissions' AND column_name = 'bacteriological_rejected'
+            ''')
+            if not cursor.fetchone():
+                print("Adding bacteriological rejected/broken columns to PostgreSQL database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_rejected INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_broken INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_rejected_reason TEXT')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_broken_reason TEXT')
+
+            # Check for bacteriological_status column
+            cursor.execute('''
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'inspection_submissions' AND column_name = 'bacteriological_status'
+            ''')
+            if not cursor.fetchone():
+                print("Adding bacteriological_status column to PostgreSQL database...")
+                cursor.execute("ALTER TABLE inspection_submissions ADD COLUMN bacteriological_status VARCHAR(20) DEFAULT 'pending'")
+        else:
+            # SQLite migration
+            cursor.execute('PRAGMA table_info(inspection_submissions)')
+            columns = [column[1] for column in cursor.fetchall()]
+
+            if 'bacteriological_rejected' not in columns:
+                print("Adding bacteriological rejected/broken columns to SQLite database...")
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_rejected INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_broken INTEGER DEFAULT 0')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_rejected_reason TEXT')
+                cursor.execute('ALTER TABLE inspection_submissions ADD COLUMN bacteriological_broken_reason TEXT')
+
+            if 'bacteriological_status' not in columns:
+                print("Adding bacteriological_status column to SQLite database...")
+                cursor.execute("ALTER TABLE inspection_submissions ADD COLUMN bacteriological_status TEXT DEFAULT 'pending'")
+
+        conn.commit()
+        print("Bacteriological columns migration completed successfully")
+    except Exception as e:
+        print(f"Bacteriological migration error: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5004))
@@ -3128,6 +3456,7 @@ if __name__ == '__main__':
 
     # Run database migration first
     migrate_database()
+    migrate_bacteriological_columns()
 
     # Add sample data for testing
     add_sample_data()

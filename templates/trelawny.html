@@ -129,6 +129,17 @@
             margin-bottom: 1rem;
         }
 
+        @keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        opacity: 1;
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(251, 191, 36, 1);
+        opacity: 0.8;
+    }
+}
+
         .test-inputs {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -914,6 +925,11 @@
                                 <label for="bacteriological-positive">Positive</label>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <input type="number" id="bacteriological-positive" name="bacteriological_positive" min="0" value="0" class="positive-field count-input bacterio-count">
+                                    <select id="bacteriological-positive-status" name="bacteriological_positive_status" class="range-dropdown" style="flex: 1;">
+                                        <option value="">Status</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="pending">Pending</option>
+                                    </select>
                                     <span id="urgent-icon" class="urgent-icon" style="display: none;">⚠️</span>
                                     <select id="isolated-organism" name="isolated_organism" class="organism-dropdown" style="display: none;">
                                         <option value="">Select organism</option>
@@ -928,7 +944,14 @@
                             </div>
                             <div class="form-group">
                                 <label for="bacteriological-negative">Negative</label>
-                                <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field bacterio-count">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="bacteriological-negative" name="bacteriological_negative" min="0" value="0" class="negative-field bacterio-count">
+                                    <select id="bacteriological-negative-status" name="bacteriological_negative_status" class="range-dropdown" style="flex: 1;">
+                                        <option value="">Status</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="pending">Pending</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="bacteriological-pending">Result Pending</label>
@@ -1066,6 +1089,15 @@
 
             <!-- Search and Filter Controls -->
             <div style="background: var(--container-bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ddd;">
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <label style="font-weight: 600; color: var(--text-color);">Filter by Date:</label>
+                        <button onclick="dashboard.filterByDate('today')" class="filter-btn" style="padding: 8px 16px; border-radius: 6px; border: 1px solid #667eea; background: white; color: #667eea; cursor: pointer; font-weight: 600; transition: all 0.3s;">Today</button>
+                        <button onclick="dashboard.filterByDate('week')" class="filter-btn" style="padding: 8px 16px; border-radius: 6px; border: 1px solid #667eea; background: white; color: #667eea; cursor: pointer; font-weight: 600; transition: all 0.3s;">Last 7 Days</button>
+                        <button onclick="dashboard.filterByDate('month')" class="filter-btn" style="padding: 8px 16px; border-radius: 6px; border: 1px solid #667eea; background: white; color: #667eea; cursor: pointer; font-weight: 600; transition: all 0.3s;">Last 30 Days</button>
+                        <button onclick="dashboard.filterByDate('all')" class="filter-btn active" style="padding: 8px 16px; border-radius: 6px; border: 1px solid #667eea; background: #667eea; color: white; cursor: pointer; font-weight: 600; transition: all 0.3s;">All</button>
+                    </div>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; margin-bottom: 1rem; align-items: center;">
                     <div style="position: relative;">
                         <input type="text" id="search-input" placeholder="Search by water supply, agency, or sampling point..."
@@ -1192,6 +1224,83 @@
             <div class="modal-body" style="padding: 0; overflow-y: auto; flex: 1;">
                 <div id="submissionDetailsContent" style="padding: 1.5rem;">
                     <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Sample Modal -->
+    <div id="updateSampleModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; align-items: center; justify-content: center;">
+        <div class="modal-content" style="max-width: 600px; width: 90%; margin: auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative; animation: slideDown 0.3s ease-out;">
+            <div class="modal-header" style="padding: 2rem; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin: 0 0 0.5rem 0; font-size: 24px; font-weight: 700;">⚡ Update Sample Results</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">Update pending bacteriological test results</p>
+                </div>
+                <span class="close" onclick="dashboard.closeUpdateSampleModal()" style="font-size: 32px; font-weight: bold; color: white; cursor: pointer; line-height: 1; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <div id="updateSampleContent">
+                    <form id="updateSampleForm" onsubmit="dashboard.submitSampleUpdate(event)">
+                        <input type="hidden" id="update-submission-id">
+
+                        <div style="background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.1)); border: 2px solid rgba(251,191,36,0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #fbbf24, #f59e0b); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);">
+                                    🧬
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #78350f; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Current Pending Samples</div>
+                                    <div id="pending-count-display" style="font-size: 32px; font-weight: 700; color: #f59e0b;">0</div>
+                                </div>
+                            </div>
+                            <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+                                Enter the results for your pending bacteriological samples. You can only update the positive and negative counts.
+                            </p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                            <div>
+                                <label style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: #c62828; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    🔴 Positive Results
+                                </label>
+                                <input type="number" id="update-bacteriological-positive" min="0" value="0" required
+                                       style="width: 100%; padding: 1rem; border: 2px solid #ef4444; border-radius: 10px; font-size: 18px; font-weight: 700; text-align: center; transition: all 0.3s; background: rgba(239, 68, 68, 0.05);"
+                                       onfocus="this.style.borderColor='#dc2626'; this.style.boxShadow='0 0 0 4px rgba(239, 68, 68, 0.1)'"
+                                       onblur="this.style.borderColor='#ef4444'; this.style.boxShadow='none'">
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: #2e7d32; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    🟢 Negative Results
+                                </label>
+                                <input type="number" id="update-bacteriological-negative" min="0" value="0" required
+                                       style="width: 100%; padding: 1rem; border: 2px solid #22c55e; border-radius: 10px; font-size: 18px; font-weight: 700; text-align: center; transition: all 0.3s; background: rgba(34, 197, 94, 0.05);"
+                                       onfocus="this.style.borderColor='#16a34a'; this.style.boxShadow='0 0 0 4px rgba(34, 197, 94, 0.1)'"
+                                       onblur="this.style.borderColor='#22c55e'; this.style.boxShadow='none'">
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(251,191,36,0.05); border-left: 4px solid #fbbf24; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                            <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.6;">
+                                ℹ️ <strong>Note:</strong> The sum of positive and negative results should equal your pending count. Any remaining samples will stay as pending.
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" onclick="dashboard.closeUpdateSampleModal()"
+                                    style="flex: 1; background: #6c757d; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s;"
+                                    onmouseover="this.style.background='#5a6268'"
+                                    onmouseout="this.style.background='#6c757d'">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    style="flex: 2; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4); transition: all 0.3s;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(251, 191, 36, 0.6)'"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(251, 191, 36, 0.4)'">
+                                ✅ Update Results
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -1402,9 +1511,13 @@
                     document.getElementById('selected-supply-info').textContent =
                         `${this.currentSupply.agency} • ${this.currentSupply.type.charAt(0).toUpperCase() + this.currentSupply.type.slice(1)}`;
 
-                    await this.loadSamplingPoints(id);
+                    const hasSamplingPoints = await this.loadSamplingPoints(id);
                     samplingPointLoading.style.display = 'none';
-                    this.showSamplingPoints();
+                    if (hasSamplingPoints) {
+                        this.showSamplingPoints();
+                    } else {
+                        this.hideSamplingPoints();
+                    }
                 }
 
                 if (this.currentSupply.agency === 'MOH') {
@@ -1684,16 +1797,22 @@
         const samplingPoints = await response.json();
         const select = document.getElementById('sampling-point');
         select.innerHTML = '<option value="">Select a sampling point (optional)...</option>';
-        samplingPoints.forEach(point => {
-            const option = document.createElement('option');
-            option.value = point.id;
-            option.textContent = point.name;
-            select.appendChild(option);
-        });
-        select.addEventListener('change', () => this.updateSamplingPointLocation());
+
+        if (samplingPoints && samplingPoints.length > 0) {
+            samplingPoints.forEach(point => {
+                const option = document.createElement('option');
+                option.value = point.id;
+                option.textContent = point.name;
+                select.appendChild(option);
+            });
+            select.addEventListener('change', () => this.updateSamplingPointLocation());
+            return true; // Has sampling points
+        }
+        return false; // No sampling points
     } catch (error) {
         console.error('Failed to load sampling points:', error);
         this.showAlert('error', 'Failed to load sampling points.');
+        return false;
     }
 }
 
@@ -1721,8 +1840,25 @@
                 return;
             }
 
+            // Validate supply_id is a valid integer
+            let supplyId = this.currentSupply.id;
+            if (supplyId === 'other-governments' || isNaN(parseInt(supplyId))) {
+                this.showAlert('error', 'Cannot submit for "Other Governments" - please select a specific water supply.');
+                return;
+            }
+            supplyId = parseInt(supplyId);
+
+            const bacterioPending = parseInt(document.getElementById('bacteriological-pending').value) || 0;
+            const bacterioPositive = parseInt(document.getElementById('bacteriological-positive').value) || 0;
+            const bacterioNegative = parseInt(document.getElementById('bacteriological-negative').value) || 0;
+
+            // Calculate bacteriological status
+            // Status is 'pending' if: there are pending samples OR all values are 0 (no results entered yet)
+            // Status is 'complete' only if: there are results (positive or negative > 0) and no pending samples
+            const bacteriologicalStatus = (bacterioPending > 0 || (bacterioPositive === 0 && bacterioNegative === 0)) ? 'pending' : 'complete';
+
             const formData = {
-                supply_id: this.currentSupply.id,
+                supply_id: supplyId,
                 supply_name: this.currentSupply.name,
                 agency: this.currentSupply.agency,
                 type: this.currentSupply.type,
@@ -1735,10 +1871,13 @@
                 chlorine_positive_range: document.getElementById('chlorine-positive-range').value || null,
                 chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
                 chlorine_negative_range: document.getElementById('chlorine-negative-range').value || null,
-                bacteriological_positive: parseInt(document.getElementById('bacteriological-positive').value) || 0,
+                bacteriological_positive: bacterioPositive,
                 isolated_organism: document.getElementById('isolated-organism').value || null,
-                bacteriological_negative: parseInt(document.getElementById('bacteriological-negative').value) || 0,
-                bacteriological_pending: parseInt(document.getElementById('bacteriological-pending').value) || 0,
+                bacteriological_negative: bacterioNegative,
+                bacteriological_pending: bacterioPending,
+                bacteriological_status: bacteriologicalStatus,
+                bacteriological_positive_status: document.getElementById('bacteriological-positive-status').value || null,
+                bacteriological_negative_status: document.getElementById('bacteriological-negative-status').value || null,
                 bacteriological_rejected: parseInt(document.getElementById('bacteriological-rejected').value) || 0,
                 bacteriological_broken: parseInt(document.getElementById('bacteriological-broken').value) || 0,
                 bacteriological_rejected_reason: document.getElementById('bacteriological-rejected-reason').value || null,
@@ -1754,7 +1893,8 @@
                 temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
                 temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
                 remarks: document.getElementById('remarks').value || null,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                created_at: new Date().toISOString()
             };
 
             try {
@@ -1825,6 +1965,23 @@
 
         loadSubmissions() {
             this.allSubmissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+
+            // Migrate old submissions to add bacteriological_status if missing
+            this.allSubmissions = this.allSubmissions.map(sub => {
+                if (!sub.bacteriological_status) {
+                    const bacterioPositive = sub.bacteriological_positive || 0;
+                    const bacterioNegative = sub.bacteriological_negative || 0;
+                    const bacterioPending = sub.bacteriological_pending || 0;
+
+                    // Apply same logic: pending if there are pending samples OR all values are 0
+                    sub.bacteriological_status = (bacterioPending > 0 || (bacterioPositive === 0 && bacterioNegative === 0)) ? 'pending' : 'complete';
+                }
+                return sub;
+            });
+
+            // Save migrated data back to localStorage
+            localStorage.setItem('trelawny_submissions', JSON.stringify(this.allSubmissions));
+
             this.filteredSubmissions = [...this.allSubmissions];
             this.renderSubmissions();
         }
@@ -1853,6 +2010,12 @@
 
             list.innerHTML = this.filteredSubmissions.map((s, index) => `
                 <div class="submission-card"
+                ${(s.bacteriological_pending && s.bacteriological_pending > 0) ? `
+<div style="position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(251,191,36,0.95);padding:6px 12px;border-radius:20px;border:2px solid #fbbf24;box-shadow:0 4px 12px rgba(251,191,36,0.4);animation:glowPulse 2s ease-in-out infinite;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fbbf24;"></div>
+    <span style="font-size:10px;font-weight:700;color:#78350f;text-transform:uppercase;letter-spacing:0.05em;">Pending Results</span>
+</div>
+` : ''}
                      style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                             background:${s.bacteriological_status === 'pending' ? 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.15) 100%)' : 'linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%)'};
                             border:1px solid ${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'};border-radius:12px;overflow:hidden;
@@ -1862,7 +2025,13 @@
                      onmouseleave="this.style.transform='translateY(0) scale(1)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)';this.style.borderColor='${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'}';">
 
                     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${s.bacteriological_status === 'pending' ? '#fbbf24,#f59e0b,#fbbf24,#f59e0b,#fbbf24' : '#667eea,#764ba2,#f093fb,#4facfe,#667eea'});background-size:200% 100%;animation:holographicShift 3s linear infinite;"></div>
-                    <div style="position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:${s.type === 'treated' ? '#4ade80' : '#60a5fa'};box-shadow:0 0 12px ${s.type === 'treated' ? '#4ade80' : '#60a5fa'};animation:pulse 2s ease-in-out infinite;"></div>
+                    ${(s.bacteriological_pending && s.bacteriological_pending > 0) ? `
+                    <div style="position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(251,191,36,0.95);padding:6px 12px;border-radius:20px;border:2px solid #fbbf24;box-shadow:0 4px 12px rgba(251,191,36,0.4);">
+                        <div style="width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fbbf24;animation:pulse 2s ease-in-out infinite;"></div>
+                        <span style="font-size:10px;font-weight:700;color:#78350f;text-transform:uppercase;letter-spacing:0.05em;">Awaiting Bacteria Sample</span>
+                    </div>
+                    ` : ''}
+                    <div style="position:absolute;top:12px;right:12px;width:${s.bacteriological_pending > 0 ? '14px' : '10px'};height:${s.bacteriological_pending > 0 ? '14px' : '10px'};border-radius:50%;background:${s.bacteriological_pending > 0 ? '#fbbf24' : (s.type === 'treated' ? '#4ade80' : '#60a5fa')};box-shadow:0 0 12px ${s.bacteriological_pending > 0 ? '#fbbf24' : (s.type === 'treated' ? '#4ade80' : '#60a5fa')};animation:${s.bacteriological_pending > 0 ? 'glowPulse' : 'pulse'} 2s ease-in-out infinite;"></div>
 
                     <div style="padding:1.2rem;">
                         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
@@ -1880,7 +2049,12 @@
                             <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
                                 ${s.bacteriological_status === 'pending' ? `
                                 <div style="background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));border:1px solid rgba(251,191,36,0.5);padding:4px 12px;border-radius:16px;box-shadow:0 2px 8px rgba(251,191,36,0.3);">
-                                    <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">⏳ Pending Results</div>
+                                    <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">⏳ Awaiting Results</div>
+                                </div>
+                                ` : s.bacteriological_status === 'complete' ? `
+                                <div style="background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(22,163,74,0.2));border:1px solid rgba(34,197,94,0.5);padding:4px 12px;border-radius:16px;box-shadow:0 2px 8px rgba(34,197,94,0.3);display:flex;align-items:center;gap:4px;">
+                                    <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;"></div>
+                                    <div style="font-size:9px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.08em;">Complete</div>
                                 </div>
                                 ` : ''}
                                 <div style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));backdrop-filter:blur(10px);border:1px solid rgba(102,126,234,0.3);padding:6px 14px;border-radius:20px;box-shadow:0 2px 10px rgba(102,126,234,0.2), inset 0 1px 0 rgba(255,255,255,0.2);">
@@ -1976,7 +2150,7 @@
                             <div><strong>Water Supply:</strong> ${submission.supply_name}</div>
                             <div><strong>Agency:</strong> ${submission.agency}</div>
                             <div><strong>Type:</strong> ${submission.type === 'treated' ? 'Treated' : 'Untreated'}</div>
-                            <div><strong>Submitted:</strong> ${new Date(submission.created_at).toLocaleDateString()}</div>
+                            <div><strong>Submitted:</strong> ${submission.created_at ? new Date(submission.created_at).toLocaleDateString() + ' ' + new Date(submission.created_at).toLocaleTimeString() : 'N/A'}</div>
                         </div>
                     </div>
 
@@ -2016,8 +2190,46 @@
                     ` : ''}
 
                     <!-- Bacteriological Tests Section -->
-                    <div class="test-section" style="margin-bottom: 1.5rem; background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">🦠 Bacteriological Tests</h3>
+                    <div class="test-section" style="margin-bottom: 1.5rem; background: ${submission.bacteriological_status === 'pending' ? 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))' : '#fff3e0'}; padding: 1.5rem; border-radius: 8px; border: ${submission.bacteriological_status === 'pending' ? '2px solid rgba(251,191,36,0.4)' : '1px solid #ffe0b2'};">
+                        <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                            <span>🦠 Bacteriological Tests</span>
+                            ${submission.bacteriological_status === 'pending' ? `<span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em;">⏳ AWAITING RESULTS</span>` : ''}
+                        </h3>
+
+                        ${submission.bacteriological_status === 'pending' ? `
+                        <!-- Editable Form -->
+                        <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 2px dashed #fbbf24; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Positive Samples</label>
+                                    <input type="number" id="inline-bacterio-positive-${index}" value="${submission.bacteriological_positive || 0}" min="0"
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: 600; color: #c62828;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Negative Samples</label>
+                                    <input type="number" id="inline-bacterio-negative-${index}" value="${submission.bacteriological_negative || 0}" min="0"
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: 600; color: #2e7d32;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Pending Results</label>
+                                    <input type="number" value="${submission.bacteriological_pending || 0}" readonly
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #fbbf24; border-radius: 6px; font-size: 16px; font-weight: 600; color: #f57c00; background: #fffbf0;">
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Isolated Organism (if positive)</label>
+                                <input type="text" id="inline-isolated-organism-${index}" value="${submission.isolated_organism || ''}" placeholder="E.g., E. coli, Salmonella, etc."
+                                       style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <button onclick="dashboard.saveInlineBacterioResults(${index})"
+                                    style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102,126,234,0.4);"
+                                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.6)';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4)';">
+                                💾 Save Bacteriological Results
+                            </button>
+                        </div>
+                        ` : `
+                        <!-- Read-only Display -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                             <div style="background: white; padding: 1rem; border-radius: 6px;">
                                 <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
@@ -2033,6 +2245,7 @@
                                 <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${submission.bacteriological_pending || 0}</div>
                             </div>
                         </div>
+                        `}
                     </div>
 
                     <!-- pH Tests Section -->
@@ -2108,10 +2321,13 @@
                     ` : ''}
 
                     <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
-                        <strong>Submission Time:</strong> ${new Date(submission.created_at).toLocaleString()}
+                        <strong>Submission Time:</strong> ${submission.created_at ? new Date(submission.created_at).toLocaleString() : 'N/A'}
                     </div>
                 </div>
             `;
+
+            // Store the submission for editing
+            this.currentSubmission = submission;
 
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 10);
@@ -2121,6 +2337,133 @@
             const modal = document.getElementById('submissionDetailsModal');
             modal.classList.remove('show');
             setTimeout(() => modal.style.display = 'none', 600);
+        }
+
+        async saveInlineBacterioResults(index) {
+            const submission = this.filteredSubmissions[index];
+            if (!submission) return;
+
+            const positiveValue = parseInt(document.getElementById(`inline-bacterio-positive-${index}`).value) || 0;
+            const negativeValue = parseInt(document.getElementById(`inline-bacterio-negative-${index}`).value) || 0;
+            const organism = document.getElementById(`inline-isolated-organism-${index}`).value.trim();
+            const pendingValue = submission.bacteriological_pending || 0;
+
+            // Calculate bacteriological status
+            const bacteriologicalStatus = (pendingValue > 0 || (positiveValue === 0 && negativeValue === 0)) ? 'pending' : 'complete';
+
+            // Update the submission
+            const updateData = {
+                id: submission.id,
+                bacteriological_positive: positiveValue,
+                bacteriological_negative: negativeValue,
+                bacteriological_pending: pendingValue,
+                isolated_organism: organism || null,
+                bacteriological_status: bacteriologicalStatus
+            };
+
+            try {
+                const response = await fetch('/api/update-bacteriological', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!response.ok) throw new Error('Failed to update');
+
+                // Show success message
+                alert('✅ Bacteriological results updated successfully!');
+
+                // Update localStorage
+                submission.bacteriological_positive = positiveValue;
+                submission.bacteriological_negative = negativeValue;
+                submission.isolated_organism = organism || null;
+                submission.bacteriological_status = bacteriologicalStatus;
+
+                // Save to localStorage
+                const storageKey = 'trelawny_submissions';
+                const allSubs = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const subIndex = allSubs.findIndex(s => s.id === submission.id || (s.supply_name === submission.supply_name && s.timestamp === submission.timestamp));
+                if (subIndex !== -1) {
+                    allSubs[subIndex] = submission;
+                    localStorage.setItem(storageKey, JSON.stringify(allSubs));
+                }
+
+                // Refresh the display
+                this.loadSubmissions();
+
+                // Reopen the modal with updated data
+                setTimeout(() => this.showSubmissionDetails(index), 100);
+            } catch (error) {
+                console.error('Error updating results:', error);
+                alert('❌ Failed to update results. Please try again.');
+            }
+        }
+
+        showUpdateSampleModal(index) {
+            const submission = this.filteredSubmissions[index];
+            const modal = document.getElementById('updateSampleModal');
+
+            // Populate the form with current data
+            document.getElementById('update-submission-id').value = submission.id;
+            document.getElementById('pending-count-display').textContent = submission.bacteriological_pending || 0;
+            document.getElementById('update-bacteriological-positive').value = 0;
+            document.getElementById('update-bacteriological-negative').value = 0;
+            document.getElementById('update-bacteriological-positive').max = submission.bacteriological_pending || 0;
+            document.getElementById('update-bacteriological-negative').max = submission.bacteriological_pending || 0;
+
+            // Store the submission for later use
+            this.currentUpdateSubmission = submission;
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        closeUpdateSampleModal() {
+            const modal = document.getElementById('updateSampleModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        async submitSampleUpdate(event) {
+            event.preventDefault();
+
+            const submissionId = document.getElementById('update-submission-id').value;
+            const newPositive = parseInt(document.getElementById('update-bacteriological-positive').value) || 0;
+            const newNegative = parseInt(document.getElementById('update-bacteriological-negative').value) || 0;
+            const currentPending = this.currentUpdateSubmission.bacteriological_pending || 0;
+
+            // Validation
+            if (newPositive + newNegative > currentPending) {
+                this.showAlert('error', `Total results (${newPositive + newNegative}) cannot exceed pending count (${currentPending})`);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/update-sample/${submissionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bacteriological_positive_add: newPositive,
+                        bacteriological_negative_add: newNegative
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    this.showAlert('success', 'Sample results updated successfully!');
+                    this.closeUpdateSampleModal();
+                    this.closeSubmissionDetails();
+                    await this.loadSubmissions();
+                } else {
+                    this.showAlert('error', result.error || 'Failed to update sample results');
+                }
+            } catch (error) {
+                console.error('Error updating sample:', error);
+                this.showAlert('error', 'Failed to update sample results');
+            }
         }
 
         printReport() {
@@ -2220,6 +2563,34 @@
             document.getElementById('search-input').value = '';
             document.getElementById('search-suggestions').style.display = 'none';
             this.filteredSubmissions = [...this.allSubmissions];
+            this.renderSubmissions();
+        }
+
+        filterByDate(range) {
+            const now = new Date();
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.style.background = 'white';
+                btn.style.color = '#667eea';
+            });
+            event.target.style.background = '#667eea';
+            event.target.style.color = 'white';
+
+            if (range === 'all') {
+                this.filteredSubmissions = [...this.allSubmissions];
+            } else {
+                this.filteredSubmissions = this.allSubmissions.filter(s => {
+                    const submissionDate = new Date(s.created_at || s.submission_date);
+                    const diffTime = Math.abs(now - submissionDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (range === 'today') return diffDays <= 1;
+                    if (range === 'week') return diffDays <= 7;
+                    if (range === 'month') return diffDays <= 30;
+                    return true;
+                });
+            }
+
             this.renderSubmissions();
         }
 
