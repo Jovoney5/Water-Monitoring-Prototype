@@ -2010,13 +2010,7 @@
 
             list.innerHTML = this.filteredSubmissions.map((s, index) => `
                 <div class="submission-card"
-                ${(s.bacteriological_pending && s.bacteriological_pending > 0) ? `
-<div style="position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(251,191,36,0.95);padding:6px 12px;border-radius:20px;border:2px solid #fbbf24;box-shadow:0 4px 12px rgba(251,191,36,0.4);animation:glowPulse 2s ease-in-out infinite;">
-    <div style="width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fbbf24;"></div>
-    <span style="font-size:10px;font-weight:700;color:#78350f;text-transform:uppercase;letter-spacing:0.05em;">Pending Results</span>
-</div>
-` : ''}
-                     style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                style="position:relative;padding:0;margin-bottom:1.2rem;cursor:pointer;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                             background:${s.bacteriological_status === 'pending' ? 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.15) 100%)' : 'linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%)'};
                             border:1px solid ${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'};border-radius:12px;overflow:hidden;
                             box-shadow:0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1);"
