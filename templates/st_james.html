@@ -1044,6 +1044,10 @@
                                 <input type="number" id="turbidity-non-satisfactory" name="turbidity_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="turbidity-non-satisfactory-warning" class="warning-text" style="display: none;">Turbidity outside acceptable range</div>
                             </div>
+                            <div class="form-group">
+                                <label for="turbidity-non-satisfactory-range">Range (NTU)</label>
+                                <input type="text" id="turbidity-non-satisfactory-range" name="turbidity_non_satisfactory_range" placeholder="e.g., 5.2-8.5">
+                            </div>
                         </div>
                     </div>
 
@@ -1059,6 +1063,10 @@
                                 <label for="temperature-non-satisfactory">Non Satisfactory</label>
                                 <input type="number" id="temperature-non-satisfactory" name="temperature_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="temperature-non-satisfactory-warning" class="warning-text" style="display: none;">Temperature outside acceptable range</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature-non-satisfactory-range">Range (°C)</label>
+                                <input type="text" id="temperature-non-satisfactory-range" name="temperature_non_satisfactory_range" placeholder="e.g., 31-35">
                             </div>
                         </div>
                     </div>
@@ -1812,10 +1820,12 @@
                 water_source_type: document.getElementById('water-source-type').value || null,
                 visits: parseInt(document.getElementById('visits').value) || 1,
                 submission_date: document.getElementById('submission-date').value,
+                chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
                 chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
                 chlorine_positive_range: document.getElementById('chlorine-positive-range').value || null,
                 chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
                 chlorine_negative_range: document.getElementById('chlorine-negative-range').value || null,
+                bacteriological_total: parseInt(document.getElementById('bacteriological-total').value) || 0,
                 bacteriological_positive: bacterioPositive,
                 isolated_organism: document.getElementById('isolated-organism').value || null,
                 bacteriological_negative: bacterioNegative,
@@ -1830,13 +1840,16 @@
                 ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
                 ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
                 ph_non_satisfactory_params: this.selectedParameters,
+                chemical_total: parseInt(document.getElementById('chemical-total').value) || 0,
                 chemical_satisfactory: parseInt(document.getElementById('chemical-satisfactory').value) || 0,
                 chemical_non_satisfactory: parseInt(document.getElementById('chemical-non-satisfactory').value) || 0,
                 chemical_non_satisfactory_params: this.chemicalParameters,
                 turbidity_satisfactory: parseInt(document.getElementById('turbidity-satisfactory').value) || 0,
                 turbidity_non_satisfactory: parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0,
+                turbidity_non_satisfactory_range: document.getElementById('turbidity-non-satisfactory-range')?.value || null,
                 temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
                 temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
+                temperature_non_satisfactory_range: document.getElementById('temperature-non-satisfactory-range')?.value || null,
                 remarks: document.getElementById('remarks').value || null,
                 timestamp: new Date().toISOString(),
                 created_at: new Date().toISOString()
@@ -2128,7 +2141,44 @@
 
                     <!-- Bacteriological Tests Section -->
                     <div class="test-section" style="margin-bottom: 1.5rem; background: #fff3e0; padding: 1.5rem; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">🦠 Bacteriological Tests</h3>
+                        <h3 style="margin-top: 0; color: #e65100; border-bottom: 2px solid #e65100; padding-bottom: 0.5rem;">
+                            🦠 Bacteriological Tests
+                            ${submission.bacteriological_status === 'pending' ? '<span style="background: #fbbf24; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-left: 12px; font-weight: 700;">⏳ PENDING RESULTS</span>' : ''}
+                        </h3>
+                        ${submission.bacteriological_status === 'pending' ? `
+                        <!-- Editable Form -->
+                        <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 2px dashed #fbbf24; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Positive Samples</label>
+                                    <input type="number" id="inline-bacterio-positive-${index}" value="${submission.bacteriological_positive || 0}" min="0"
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: 600; color: #c62828;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Negative Samples</label>
+                                    <input type="number" id="inline-bacterio-negative-${index}" value="${submission.bacteriological_negative || 0}" min="0"
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: 600; color: #2e7d32;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Pending Results</label>
+                                    <input type="number" value="${submission.bacteriological_pending || 0}" readonly
+                                           style="width: 100%; padding: 0.75rem; border: 2px solid #fbbf24; border-radius: 6px; font-size: 16px; font-weight: 600; color: #f57c00; background: #fffbf0;">
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Isolated Organism (if positive)</label>
+                                <input type="text" id="inline-isolated-organism-${index}" value="${submission.isolated_organism || ''}" placeholder="E.g., E. coli, Salmonella, etc."
+                                       style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <button onclick="dashboard.saveInlineBacterioResults(${index})"
+                                    style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102,126,234,0.4);"
+                                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.6)';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4)';">
+                                💾 Save Bacteriological Results
+                            </button>
+                        </div>
+                        ` : `
+                        <!-- Read-only Display -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                             <div style="background: white; padding: 1rem; border-radius: 6px;">
                                 <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Positive</div>
@@ -2144,6 +2194,7 @@
                                 <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${submission.bacteriological_pending || 0}</div>
                             </div>
                         </div>
+                        `}
                     </div>
 
                     <!-- pH Tests Section -->

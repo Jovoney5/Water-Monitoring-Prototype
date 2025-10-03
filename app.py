@@ -134,6 +134,7 @@ def init_db():
                     chlorine_negative INTEGER DEFAULT 0,
                     chlorine_positive_range VARCHAR(50),
                     chlorine_negative_range VARCHAR(50),
+                    bacteriological_total INTEGER DEFAULT 0,
                     bacteriological_positive INTEGER DEFAULT 0,
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
@@ -148,13 +149,16 @@ def init_db():
                     ph_non_satisfactory_params TEXT,
                     bacteriological_positive_status VARCHAR(50),
                     bacteriological_negative_status VARCHAR(50),
+                    chemical_total INTEGER DEFAULT 0,
                     chemical_satisfactory INTEGER DEFAULT 0,
                     chemical_non_satisfactory INTEGER DEFAULT 0,
                     chemical_non_satisfactory_params TEXT,
                     turbidity_satisfactory INTEGER DEFAULT 0,
                     turbidity_non_satisfactory INTEGER DEFAULT 0,
+                    turbidity_non_satisfactory_range VARCHAR(50),
                     temperature_satisfactory INTEGER DEFAULT 0,
                     temperature_non_satisfactory INTEGER DEFAULT 0,
+                    temperature_non_satisfactory_range VARCHAR(50),
                     remarks TEXT,
                     facility_type VARCHAR(100),
                     water_source_type VARCHAR(100),
@@ -300,6 +304,7 @@ def init_db():
                     chlorine_negative INTEGER DEFAULT 0,
                     chlorine_positive_range TEXT,
                     chlorine_negative_range TEXT,
+                    bacteriological_total INTEGER DEFAULT 0,
                     bacteriological_positive INTEGER DEFAULT 0,
                     bacteriological_negative INTEGER DEFAULT 0,
                     bacteriological_pending INTEGER DEFAULT 0,
@@ -314,13 +319,16 @@ def init_db():
                     ph_non_satisfactory_params TEXT,
                     bacteriological_positive_status TEXT,
                     bacteriological_negative_status TEXT,
+                    chemical_total INTEGER DEFAULT 0,
                     chemical_satisfactory INTEGER DEFAULT 0,
                     chemical_non_satisfactory INTEGER DEFAULT 0,
                     chemical_non_satisfactory_params TEXT,
                     turbidity_satisfactory INTEGER DEFAULT 0,
                     turbidity_non_satisfactory INTEGER DEFAULT 0,
+                    turbidity_non_satisfactory_range TEXT,
                     temperature_satisfactory INTEGER DEFAULT 0,
                     temperature_non_satisfactory INTEGER DEFAULT 0,
+                    temperature_non_satisfactory_range TEXT,
                     remarks TEXT,
                     facility_type TEXT,
                     water_source_type TEXT,
@@ -2075,33 +2083,34 @@ def submit_inspection():
             cursor.execute('''
                 INSERT INTO inspection_submissions
                 (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
-                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
-                 bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
-                 bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
-                 bacteriological_positive_status, bacteriological_negative_status,
+                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_total,
+                 bacteriological_positive, bacteriological_negative, bacteriological_pending, bacteriological_rejected,
+                 bacteriological_broken, bacteriological_rejected_reason, bacteriological_broken_reason,
+                 bacteriological_status, bacteriological_positive_status, bacteriological_negative_status,
                  isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_params,
-                 chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
-                 turbidity_satisfactory, turbidity_non_satisfactory,
-                 temperature_satisfactory, temperature_non_satisfactory,
+                 chemical_total, chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
+                 turbidity_satisfactory, turbidity_non_satisfactory, turbidity_non_satisfactory_range,
+                 temperature_satisfactory, temperature_non_satisfactory, temperature_non_satisfactory_range,
                  remarks, facility_type, water_source_type)
-                VALUES (%s, %s, %s, CURRENT_DATE, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, CURRENT_DATE, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             ''', (
                 data['supply_id'], session['user_id'], data.get('sampling_point_id'),
                 data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
                 data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
-                data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
-                data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
-                data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
-                data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
-                bacteriological_status,
+                data.get('chlorine_negative_range', ''), data.get('bacteriological_total', 0),
+                data.get('bacteriological_positive', 0), data.get('bacteriological_negative', 0),
+                data.get('bacteriological_pending', 0), data.get('bacteriological_rejected', 0),
+                data.get('bacteriological_broken', 0), data.get('bacteriological_rejected_reason', ''),
+                data.get('bacteriological_broken_reason', ''), bacteriological_status,
                 data.get('bacteriological_positive_status', ''), data.get('bacteriological_negative_status', ''),
                 data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
                 data.get('ph_non_satisfactory', 0), json.dumps(data.get('ph_non_satisfactory_params', [])),
-                data.get('chemical_satisfactory', 0), data.get('chemical_non_satisfactory', 0),
-                json.dumps(data.get('chemical_non_satisfactory_params', [])),
+                data.get('chemical_total', 0), data.get('chemical_satisfactory', 0),
+                data.get('chemical_non_satisfactory', 0), json.dumps(data.get('chemical_non_satisfactory_params', [])),
                 data.get('turbidity_satisfactory', 0), data.get('turbidity_non_satisfactory', 0),
-                data.get('temperature_satisfactory', 0), data.get('temperature_non_satisfactory', 0),
+                data.get('turbidity_non_satisfactory_range', ''), data.get('temperature_satisfactory', 0),
+                data.get('temperature_non_satisfactory', 0), data.get('temperature_non_satisfactory_range', ''),
                 data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
             ))
             submission_id = cursor.fetchone()[0]
@@ -2128,32 +2137,33 @@ def submit_inspection():
             cursor.execute('''
                 INSERT INTO inspection_submissions
                 (supply_id, inspector_id, sampling_point_id, submission_date, visits, chlorine_total, chlorine_positive,
-                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_positive,
-                 bacteriological_negative, bacteriological_pending, bacteriological_rejected, bacteriological_broken,
-                 bacteriological_rejected_reason, bacteriological_broken_reason, bacteriological_status,
-                 bacteriological_positive_status, bacteriological_negative_status,
+                 chlorine_negative, chlorine_positive_range, chlorine_negative_range, bacteriological_total,
+                 bacteriological_positive, bacteriological_negative, bacteriological_pending, bacteriological_rejected,
+                 bacteriological_broken, bacteriological_rejected_reason, bacteriological_broken_reason,
+                 bacteriological_status, bacteriological_positive_status, bacteriological_negative_status,
                  isolated_organism, ph_satisfactory, ph_non_satisfactory, ph_non_satisfactory_params,
-                 chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
-                 turbidity_satisfactory, turbidity_non_satisfactory,
-                 temperature_satisfactory, temperature_non_satisfactory,
+                 chemical_total, chemical_satisfactory, chemical_non_satisfactory, chemical_non_satisfactory_params,
+                 turbidity_satisfactory, turbidity_non_satisfactory, turbidity_non_satisfactory_range,
+                 temperature_satisfactory, temperature_non_satisfactory, temperature_non_satisfactory_range,
                  remarks, facility_type, water_source_type)
-                VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, date('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 data['supply_id'], session['user_id'], data.get('sampling_point_id'),
                 data.get('visits', 0), data.get('chlorine_total', 0), data.get('chlorine_positive', 0),
                 data.get('chlorine_negative', 0), data.get('chlorine_positive_range', ''),
-                data.get('chlorine_negative_range', ''), data.get('bacteriological_positive', 0),
-                data.get('bacteriological_negative', 0), data.get('bacteriological_pending', 0),
-                data.get('bacteriological_rejected', 0), data.get('bacteriological_broken', 0),
-                data.get('bacteriological_rejected_reason', ''), data.get('bacteriological_broken_reason', ''),
-                bacteriological_status,
+                data.get('chlorine_negative_range', ''), data.get('bacteriological_total', 0),
+                data.get('bacteriological_positive', 0), data.get('bacteriological_negative', 0),
+                data.get('bacteriological_pending', 0), data.get('bacteriological_rejected', 0),
+                data.get('bacteriological_broken', 0), data.get('bacteriological_rejected_reason', ''),
+                data.get('bacteriological_broken_reason', ''), bacteriological_status,
                 data.get('bacteriological_positive_status', ''), data.get('bacteriological_negative_status', ''),
                 data.get('isolated_organism', ''), data.get('ph_satisfactory', 0),
                 data.get('ph_non_satisfactory', 0), json.dumps(data.get('ph_non_satisfactory_params', [])),
-                data.get('chemical_satisfactory', 0), data.get('chemical_non_satisfactory', 0),
-                json.dumps(data.get('chemical_non_satisfactory_params', [])),
+                data.get('chemical_total', 0), data.get('chemical_satisfactory', 0),
+                data.get('chemical_non_satisfactory', 0), json.dumps(data.get('chemical_non_satisfactory_params', [])),
                 data.get('turbidity_satisfactory', 0), data.get('turbidity_non_satisfactory', 0),
-                data.get('temperature_satisfactory', 0), data.get('temperature_non_satisfactory', 0),
+                data.get('turbidity_non_satisfactory_range', ''), data.get('temperature_satisfactory', 0),
+                data.get('temperature_non_satisfactory', 0), data.get('temperature_non_satisfactory_range', ''),
                 data.get('remarks', ''), data.get('facility_type', ''), data.get('water_source_type', '')
             ))
 
@@ -2410,7 +2420,11 @@ def update_bacteriological():
         new_negative = int(data.get('bacteriological_negative', 0))
         new_pending = int(data.get('bacteriological_pending', 0))
         organism = data.get('isolated_organism', None)
-        bacteriological_status = data.get('bacteriological_status', 'pending')
+
+        # Auto-calculate bacteriological_status based on pending count
+        # Status is 'pending' if: there are pending samples OR all values are 0
+        # Status is 'complete' only if: there are results and no pending samples
+        bacteriological_status = 'pending' if (new_pending > 0 or (new_positive == 0 and new_negative == 0)) else 'complete'
 
         conn = get_db_connection()
 

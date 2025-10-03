@@ -1055,6 +1055,10 @@
                                 <input type="number" id="turbidity-non-satisfactory" name="turbidity_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="turbidity-non-satisfactory-warning" class="warning-text" style="display: none;">Turbidity outside acceptable range</div>
                             </div>
+                            <div class="form-group">
+                                <label for="turbidity-non-satisfactory-range">Range (NTU)</label>
+                                <input type="text" id="turbidity-non-satisfactory-range" name="turbidity_non_satisfactory_range" placeholder="e.g., 5.2-8.5">
+                            </div>
                         </div>
                     </div>
 
@@ -1070,6 +1074,10 @@
                                 <label for="temperature-non-satisfactory">Non Satisfactory</label>
                                 <input type="number" id="temperature-non-satisfactory" name="temperature_non_satisfactory" min="0" value="0" class="negative-field count-input">
                                 <div id="temperature-non-satisfactory-warning" class="warning-text" style="display: none;">Temperature outside acceptable range</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature-non-satisfactory-range">Range (°C)</label>
+                                <input type="text" id="temperature-non-satisfactory-range" name="temperature_non_satisfactory_range" placeholder="e.g., 31-35">
                             </div>
                         </div>
                     </div>
@@ -1867,10 +1875,12 @@
                 water_source_type: document.getElementById('water-source-type').value || null,
                 visits: parseInt(document.getElementById('visits').value) || 1,
                 submission_date: document.getElementById('submission-date').value,
+                chlorine_total: parseInt(document.getElementById('chlorine-total').value) || 0,
                 chlorine_positive: parseInt(document.getElementById('chlorine-positive').value) || 0,
                 chlorine_positive_range: document.getElementById('chlorine-positive-range').value || null,
                 chlorine_negative: parseInt(document.getElementById('chlorine-negative').value) || 0,
                 chlorine_negative_range: document.getElementById('chlorine-negative-range').value || null,
+                bacteriological_total: parseInt(document.getElementById('bacteriological-total').value) || 0,
                 bacteriological_positive: bacterioPositive,
                 isolated_organism: document.getElementById('isolated-organism').value || null,
                 bacteriological_negative: bacterioNegative,
@@ -1885,13 +1895,16 @@
                 ph_satisfactory: parseInt(document.getElementById('ph-satisfactory').value) || 0,
                 ph_non_satisfactory: parseInt(document.getElementById('ph-non-satisfactory').value) || 0,
                 ph_non_satisfactory_params: this.selectedParameters,
+                chemical_total: parseInt(document.getElementById('chemical-total').value) || 0,
                 chemical_satisfactory: parseInt(document.getElementById('chemical-satisfactory').value) || 0,
                 chemical_non_satisfactory: parseInt(document.getElementById('chemical-non-satisfactory').value) || 0,
                 chemical_non_satisfactory_params: this.chemicalParameters,
                 turbidity_satisfactory: parseInt(document.getElementById('turbidity-satisfactory').value) || 0,
                 turbidity_non_satisfactory: parseInt(document.getElementById('turbidity-non-satisfactory').value) || 0,
+                turbidity_non_satisfactory_range: document.getElementById('turbidity-non-satisfactory-range')?.value || null,
                 temperature_satisfactory: parseInt(document.getElementById('temperature-satisfactory').value) || 0,
                 temperature_non_satisfactory: parseInt(document.getElementById('temperature-non-satisfactory').value) || 0,
+                temperature_non_satisfactory_range: document.getElementById('temperature-non-satisfactory-range')?.value || null,
                 remarks: document.getElementById('remarks').value || null,
                 timestamp: new Date().toISOString(),
                 created_at: new Date().toISOString()
@@ -1963,24 +1976,37 @@
             setTimeout(() => modal.style.display = 'none', 600);
         }
 
-        loadSubmissions() {
-            this.allSubmissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+        async loadSubmissions() {
+            try {
+                // Load from API instead of localStorage
+                const response = await fetch('/api/my-submissions');
+                if (response.ok) {
+                    const submissions = await response.json();
 
-            // Migrate old submissions to add bacteriological_status if missing
-            this.allSubmissions = this.allSubmissions.map(sub => {
-                if (!sub.bacteriological_status) {
-                    const bacterioPositive = sub.bacteriological_positive || 0;
-                    const bacterioNegative = sub.bacteriological_negative || 0;
-                    const bacterioPending = sub.bacteriological_pending || 0;
+                    // Filter for Trelawny parish only
+                    this.allSubmissions = submissions.filter(s => s.parish === 'Trelawny');
 
-                    // Apply same logic: pending if there are pending samples OR all values are 0
-                    sub.bacteriological_status = (bacterioPending > 0 || (bacterioPositive === 0 && bacterioNegative === 0)) ? 'pending' : 'complete';
+                    // Migrate old submissions to add bacteriological_status if missing
+                    this.allSubmissions = this.allSubmissions.map(sub => {
+                        if (!sub.bacteriological_status) {
+                            const bacterioPositive = sub.bacteriological_positive || 0;
+                            const bacterioNegative = sub.bacteriological_negative || 0;
+                            const bacterioPending = sub.bacteriological_pending || 0;
+
+                            // Apply same logic: pending if there are pending samples OR all values are 0
+                            sub.bacteriological_status = (bacterioPending > 0 || (bacterioPositive === 0 && bacterioNegative === 0)) ? 'pending' : 'complete';
+                        }
+                        return sub;
+                    });
+                } else {
+                    // Fallback to localStorage if API fails
+                    this.allSubmissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
                 }
-                return sub;
-            });
-
-            // Save migrated data back to localStorage
-            localStorage.setItem('trelawny_submissions', JSON.stringify(this.allSubmissions));
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                // Fallback to localStorage
+                this.allSubmissions = JSON.parse(localStorage.getItem('trelawny_submissions') || '[]');
+            }
 
             this.filteredSubmissions = [...this.allSubmissions];
             this.renderSubmissions();
@@ -2019,12 +2045,6 @@
                      onmouseleave="this.style.transform='translateY(0) scale(1)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)';this.style.borderColor='${s.bacteriological_status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(102,126,234,0.2)'}';">
 
                     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${s.bacteriological_status === 'pending' ? '#fbbf24,#f59e0b,#fbbf24,#f59e0b,#fbbf24' : '#667eea,#764ba2,#f093fb,#4facfe,#667eea'});background-size:200% 100%;animation:holographicShift 3s linear infinite;"></div>
-                    ${(s.bacteriological_pending && s.bacteriological_pending > 0) ? `
-                    <div style="position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(251,191,36,0.95);padding:6px 12px;border-radius:20px;border:2px solid #fbbf24;box-shadow:0 4px 12px rgba(251,191,36,0.4);">
-                        <div style="width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fbbf24;animation:pulse 2s ease-in-out infinite;"></div>
-                        <span style="font-size:10px;font-weight:700;color:#78350f;text-transform:uppercase;letter-spacing:0.05em;">Awaiting Bacteria Sample</span>
-                    </div>
-                    ` : ''}
                     <div style="position:absolute;top:12px;right:12px;width:${s.bacteriological_pending > 0 ? '14px' : '10px'};height:${s.bacteriological_pending > 0 ? '14px' : '10px'};border-radius:50%;background:${s.bacteriological_pending > 0 ? '#fbbf24' : (s.type === 'treated' ? '#4ade80' : '#60a5fa')};box-shadow:0 0 12px ${s.bacteriological_pending > 0 ? '#fbbf24' : (s.type === 'treated' ? '#4ade80' : '#60a5fa')};animation:${s.bacteriological_pending > 0 ? 'glowPulse' : 'pulse'} 2s ease-in-out infinite;"></div>
 
                     <div style="padding:1.2rem;">
@@ -2244,35 +2264,35 @@
 
                     <!-- pH Tests Section -->
                     <div class="test-section" style="margin-bottom: 1.5rem; background: #e8f5e9; padding: 1.5rem; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 0.5rem;">⚗️ pH Tests</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.ph_satisfactory || 0}</div>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.ph_non_satisfactory || 0}</div>
-                                ${submission.ph_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${submission.ph_non_satisfactory_range}</div>` : ''}
-                            </div>
-                        </div>
-                    </div>
+    <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 0.5rem;">⚗️ pH Tests</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="background: white; padding: 1rem; border-radius: 6px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+            <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.ph_satisfactory || 0}</div>
+        </div>
+        <div style="background: white; padding: 1rem; border-radius: 6px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+            <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.ph_non_satisfactory || 0}</div>
+            ${submission.ph_non_satisfactory_params && submission.ph_non_satisfactory_params.length > 0 ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${Array.isArray(submission.ph_non_satisfactory_params) ? submission.ph_non_satisfactory_params.join(', ') : submission.ph_non_satisfactory_params}</div>` : ''}
+        </div>
+    </div>
+</div>
 
                     <!-- Chemical Tests Section -->
                     <div class="test-section" style="margin-bottom: 1.5rem; background: #ede7f6; padding: 1.5rem; border-radius: 8px;">
-                        <h3 style="margin-top: 0; color: #5e35b1; border-bottom: 2px solid #5e35b1; padding-bottom: 0.5rem;">🧬 Chemical Tests</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
-                                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.chemical_satisfactory || 0}</div>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 6px;">
-                                <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
-                                <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.chemical_non_satisfactory || 0}</div>
-                                ${submission.chemical_non_satisfactory_range ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${submission.chemical_non_satisfactory_range}</div>` : ''}
-                            </div>
-                        </div>
-                    </div>
+    <h3 style="margin-top: 0; color: #5e35b1; border-bottom: 2px solid #5e35b1; padding-bottom: 0.5rem;">🧬 Chemical Tests</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="background: white; padding: 1rem; border-radius: 6px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Satisfactory</div>
+            <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${submission.chemical_satisfactory || 0}</div>
+        </div>
+        <div style="background: white; padding: 1rem; border-radius: 6px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 0.5rem;">Non-Satisfactory</div>
+            <div style="font-size: 24px; font-weight: bold; color: #c62828;">${submission.chemical_non_satisfactory || 0}</div>
+            ${submission.chemical_non_satisfactory_params && submission.chemical_non_satisfactory_params.length > 0 ? `<div style="font-size: 12px; color: #666; margin-top: 0.25rem;">Parameters: ${Array.isArray(submission.chemical_non_satisfactory_params) ? submission.chemical_non_satisfactory_params.join(', ') : submission.chemical_non_satisfactory_params}</div>` : ''}
+        </div>
+    </div>
+</div>
 
                     <!-- Turbidity Tests Section -->
                     <div class="test-section" style="margin-bottom: 1.5rem; background: #f3e5f5; padding: 1.5rem; border-radius: 8px;">
@@ -2340,7 +2360,15 @@
             const positiveValue = parseInt(document.getElementById(`inline-bacterio-positive-${index}`).value) || 0;
             const negativeValue = parseInt(document.getElementById(`inline-bacterio-negative-${index}`).value) || 0;
             const organism = document.getElementById(`inline-isolated-organism-${index}`).value.trim();
-            const pendingValue = submission.bacteriological_pending || 0;
+
+            // Calculate new pending value
+            const oldPending = submission.bacteriological_pending || 0;
+            const oldPositive = submission.bacteriological_positive || 0;
+            const oldNegative = submission.bacteriological_negative || 0;
+
+            // New pending = old pending - (new results entered)
+            const newResultsEntered = (positiveValue - oldPositive) + (negativeValue - oldNegative);
+            const pendingValue = Math.max(0, oldPending - newResultsEntered);
 
             // Calculate bacteriological status
             const bacteriologicalStatus = (pendingValue > 0 || (positiveValue === 0 && negativeValue === 0)) ? 'pending' : 'complete';
@@ -2382,16 +2410,24 @@
                     localStorage.setItem(storageKey, JSON.stringify(allSubs));
                 }
 
-                // Refresh the display
-                this.loadSubmissions();
+                // Refresh the display and wait for it to complete
+        await this.loadSubmissions();
 
-                // Reopen the modal with updated data
-                setTimeout(() => this.showSubmissionDetails(index), 100);
-            } catch (error) {
-                console.error('Error updating results:', error);
-                alert('❌ Failed to update results. Please try again.');
-            }
+        // Find the updated submission in the refreshed list
+        const updatedIndex = this.filteredSubmissions.findIndex(s => s.id === submission.id);
+
+        // Close the current details modal first
+        this.closeSubmissionDetails();
+
+        // Reopen with the updated data
+        if (updatedIndex !== -1) {
+            setTimeout(() => this.showSubmissionDetails(updatedIndex), 300);
         }
+    } catch (error) {
+        console.error('Error updating results:', error);
+        alert('❌ Failed to update results. Please try again.');
+    }
+}
 
         showUpdateSampleModal(index) {
             const submission = this.filteredSubmissions[index];
